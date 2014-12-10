@@ -5,13 +5,13 @@ from flask import Flask, render_template
 app = Flask(__name__)
 
 # sample information, for now.
-data = { 'repositories': ['fsharp-finger-trees',
-                          'glc-client',
-                          'dotemacs',
-                          'sovereign',
-                          'pcgen-rules',
-                          'ergodox-firmware',
-                          'rust'],
+data = { 'repositories': [('fsharp-finger-trees', ['master', 'monoids', 'v1.0']),
+                          ('glc-client', []),
+                          ('dotemacs', []),
+                          ('sovereign', []),
+                          ('pcgen-rules', []),
+                          ('ergodox-firmware', []),
+                          ('rust', [])],
          'tags': [('F#', 2),
                   ('Data Structures', 3),
                   ('Completed', 1),
@@ -45,7 +45,6 @@ def view_repository(name):
                'git_sha1': '523b75f3',
                'current_selection': 'fsharp-finger-trees',
                'expanded_selection': 'master',
-               'branches': ['master', 'monoids', 'v1.0'],
                'selection': 'repositories' }
     kwargs.update(data)
     return render_template('view_repository.html', **kwargs)
