@@ -1,11 +1,20 @@
-<a href="" {% if selection == 'repositories' %}class="active"{% endif %}>Repositories</a>
-<a href="" {% if selection == 'tags' %}class="active"{% endif %}>Tags</a>
+<ul class="button-group">
+  <li>
+    <a href="" class="button tiny {% if selection == 'repositories' %}disabled{% endif %}">
+      Repositories
+    </a>
+  </li>
+  <li>
+    <a href="" class="button tiny {% if selection == 'tags' %}disabled{% endif %}">
+      Tags
+    </a>
+  </li>
+<ul>
 
-<ul class="{{ selection }}">
+<ul class="side-nav no-bullet" role="navigation" title="{{ selection }}">
   {% for repository, branches in repositories %}
-    <li>
-      <a href="{{ url_for('view_repository', name=repository) }}"
-         {% if repository == current_selection %}class="active"{% endif %}>
+    <li {% if repository == current_selection %}class="active"{% endif %}>
+      <a href="{{ url_for('view_repository', name=repository) }}">
         {{ repository }}
       </a>
       <ul class="expanded">
