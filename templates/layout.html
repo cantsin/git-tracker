@@ -1,7 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html class="no-js" lang="en">
   <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>git-tracker</title>
+    <!-- css -->
+    <link rel="stylesheet" href="/css/normalize.css" />
+    <link rel="stylesheet" href="/css/foundation.css" />
+    <link rel="stylesheet" href="/css/font-awesome.css" />
+    <link rel="stylesheet" href="/css/git-tracker.css" />
     <!-- js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ramda/0.8.0/ramda.min.js"></script>
     <script src="https://google.github.io/traceur-compiler/bin/traceur.js"></script>
@@ -9,12 +16,8 @@
     <script>
       traceur.options.experimental = true;
     </script>
+    <script src="/js/vendor/modernizr.js"></script>
     <script src="http://localhost:8081/skewer"></script>
-    <script src="js/vendor/modernizr.js"></script>
-    <!-- css -->
-    <link rel="stylesheet" href="/css/foundation.css"></link>
-    <link rel="stylesheet" href="/css/font-awesome.css">
-    <link rel="stylesheet" href="/css/git-tracker.css"></link>
   </head>
   <body>
     {% include "header.html" %}
@@ -24,5 +27,14 @@
       </div>
       <div class="small-9 columns">{% block body %}{% endblock %}</div>
     </div>
+    <!-- js, redux -->
+    <script src="/js/vendor/jquery.js"></script>
+    <script src="/js/foundation/foundation.js"></script>
+    <script src="/js/foundation/foundation.reveal.js"></script>
+    <script src="/js/foundation/foundation.dropdown.js"></script>
+    <script src="/js/foundation/foundation.interchange.js"></script>
+    <script>
+      $(document).foundation();
+    </script>
   </body>
 </html>
