@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>git-tracker</title>
+    <!-- js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ramda/0.8.0/ramda.min.js"></script>
+    <script src="https://google.github.io/traceur-compiler/bin/traceur.js"></script>
+    <script src="https://google.github.io/traceur-compiler/src/bootstrap.js"></script>
+    <script>
+      traceur.options.experimental = true;
+    </script>
+    <script src="http://localhost:8081/skewer"></script>
+    <script src="js/vendor/modernizr.js"></script>
+    <!-- css -->
+    <link rel="stylesheet" href="/css/foundation.css"></link>
+    <link rel="stylesheet" href="/css/font-awesome.css">
+  </head>
+  <body>
+    {% include "header.html" %}
+    <div class="row">
+      <div class="small-4 columns">
+        {% include "sidebar.html" %}
+      </div>
+      <div class="small-8 columns">{% block body %}{% endblock %}</div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,11 @@
+<div class="row">
+  <div class="small-4 columns">
+    <img src="{{ avatar_image }}" class="avatar" />
+  </div>
+  <div class="small-8 columns header">
+    <i class="fa fa-git-square"></i>
+    <div class="project-name">{{ name }}</div>
+    <div class="git-info">{{ git_identifier }}/{{ git_sha1 }}</div>
+    <a href="{{ url_for('logout') }}">Log out</a>
+  </div>
+</div>

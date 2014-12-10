@@ -1,0 +1,21 @@
+<a href="" {% if selection == 'repositories' %}class="active"{% endif %}>Repositories</a>
+<a href="" {% if selection == 'tags' %}class="active"{% endif %}>Tags</a>
+
+<ul class="{{ selection }}">
+  {% for repository in repositories %}
+    <li>
+      {% if repository == current_selection %}
+        <a href="{{ url_for('view_repository', name=repository) }}" class="active">{{ repository }}</a>
+        <ul class="expanded">
+          {% for branch in branches %}
+            <li>{{ branch }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <a href="{{ url_for('view_repository', name=repository) }}">{{ repository }}</a>
+      {% endif %}
+    </li>
+  {% endfor %}
+</ul>
+
+repos/tags foo bar
