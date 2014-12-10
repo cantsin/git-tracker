@@ -28,7 +28,7 @@ data = { 'repositories': [('fsharp-finger-trees', ['master', 'monoids', 'v1.0'])
 
 @app.errorhandler(404)
 def page_not_found(error):
-    return render_template('404.html'), 404
+    return render_template('404.html', error=error), 404
 
 @app.route('/')
 def index():
@@ -40,6 +40,9 @@ def logout():
 
 @app.route('/repository/<name>')
 def view_repository(name):
+    repository_list = map(lambda x: x[0], data['repositories'])
+    if not name in repository_list:
+        return page_not_found("No such repository found.")
     kwargs = { 'name': name,
                'git_identifier': 'master',
                'git_sha1': '523b75f3',

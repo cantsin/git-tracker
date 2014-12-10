@@ -1,12 +1,19 @@
 <div class="row">
-  <div class="small-4 columns">
+  <div class="small-3 columns">
     <img src="{{ avatar_image }}" class="avatar" />
   </div>
-  <div class="small-8 columns header">
-    <i class="fa fa-git-square"></i>
-    <h1>
-      {{ name }} <small>{{ git_identifier }}/{{ git_sha1 }}</small>
-    </h1>
-    <a href="{{ url_for('logout') }}" class="logout button tiny radius">Log out</a>
+  <div class="small-9 columns header">
+    <div class="row">
+      <div class="small-10 columns header">
+        <h2>
+          <i class="fa fa-git-square"></i>
+          {{ name }} <small>{{ git_identifier }}/{{ git_sha1 }}</small>
+        </h2>
+      </div>
+
+      <div class="small-2 columns header">
+        <a href="{{ url_for('logout') }}" class="logout button tiny radius">Log out</a>
+      </div>
+    </div>
   </div>
 </div>
