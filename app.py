@@ -46,6 +46,7 @@ def view_repository(name):
     kwargs = { 'name': name,
                'git_identifier': 'master',
                'git_sha1': '523b75f3',
+               'repository_tags': ['Completed', 'F#', 'Public', 'Github', 'Code'],
                'current_selection': 'fsharp-finger-trees',
                'expanded_selection': 'master',
                'selection': 'repositories' }

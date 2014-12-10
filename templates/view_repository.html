@@ -1,10 +1,23 @@
 {% extends "layout.html" %}
 
 {% block body %}
-View Repository {{ name }}
-
-<div class="panel">
- <h5>This is a regular panel.</h5>
- <p>It has an easy to override visual style, and is appropriately subdued.</p>
+<div class="row">
+  <div class="columns small-4">
+    <div class="panel">
+      <h5>Applied Tags</h5>
+      <ul class="side-nav no-bullet">
+        {% for tag in repository_tags %}
+        <li>
+          <a href="{{ url_for('view_tag', name=tag) }}">
+            {{ tag }}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="columns small-8">
+    View Repository {{ name }}
+  </div>
 </div>
 {% endblock %}
