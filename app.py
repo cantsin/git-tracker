@@ -54,6 +54,8 @@ def view_repository(name):
 
 @app.route('/tag/<name>')
 def view_tag(name):
+    kwargs = { 'name': name }
+    kwargs.update(data)
     return render_template('view_tag.html')
 
 @app.route('/all')
