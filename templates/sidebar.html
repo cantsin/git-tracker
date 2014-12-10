@@ -1,41 +1,40 @@
-
-<ul class="button-group">
-  <li>
-    <a href="" class="button tiny {% if selection == 'repositories' %}disabled{% endif %}">
-      Repositories
-    </a>
-  </li>
-  <li>
-    <a href="" class="button tiny {% if selection == 'tags' %}disabled{% endif %}">
-      Tags
-    </a>
-  </li>
-<ul>
-
-<ul class="side-nav no-bullet" role="navigation" title="repositories">
-  {% for repository, branches in repositories %}
-    <li {% if repository == current_selection %}class="active"{% endif %}>
-      <a href="{{ url_for('view_repository', name=repository) }}">
-        {{ repository }}
-      </a>
-      <ul class="expanded">
-        {% for branch in branches %}
+<dl class="tabs" data-tab>
+  <dd class="active">
+    <a href="#repositories">Repositories</a>
+  </dd>
+  <dd>
+    <a href="#tags">Tags</a>
+  </dd>
+</dl>
+<div class="tabs-content">
+  <div class="content active" id="repositories">
+    <ul class="side-nav no-bullet">
+      {% for repository, branches in repositories %}
+      <li {% if repository == current_selection %}class="active"{% endif %}>
+        <a href="{{ url_for('view_repository', name=repository) }}">
+          {{ repository }}
+        </a>
+        <ul class="expanded">
+          {% for branch in branches %}
           <li>
             {{ branch }}
           </li>
-        {% endfor %}
-      </ul>
-    </li>
-  {% endfor %}
-</ul>
-
-<ul class="side-nav no-bullet" role="navigation" title="tags">
-  {% for tag, count in tags %}
-    <li {% if tag == current_selection %}class="active"{% endif %}>
-      <a href="{{ url_for('view_tag', name=tag) }}">
-        {{ tag }}
-        <span class="label radius secondary">{{ count }}</span>
-      </a>
-    </li>
-  {% endfor %}
-</ul>
+          {% endfor %}
+        </ul>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="content" id="tags">
+    <ul class="side-nav no-bullet">
+      {% for tag, count in tags %}
+      <li {% if tag == current_selection %}class="active"{% endif %}>
+        <a href="{{ url_for('view_tag', name=tag) }}">
+          {{ tag }}
+          <span class="label radius secondary">{{ count }}</span>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
