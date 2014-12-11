@@ -20,7 +20,21 @@
     <script src="http://localhost:8081/skewer"></script>
   </head>
   <body>
-    {% include "header.html" %}
+    <div class="row">
+      <div class="small-3 columns">
+        <img src="{{ avatar_image }}" class="avatar" />
+      </div>
+      <div class="small-9 columns header">
+        <div class="row">
+          <div class="small-10 columns header">
+            <h2>{% block header %}{% endblock %}</h2>
+          </div>
+          <div class="small-2 columns header">
+            <a href="{{ url_for('logout') }}" class="logout button tiny radius">Log out</a>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="row">
       <div class="small-3 columns">
         {% include "sidebar.html" %}
