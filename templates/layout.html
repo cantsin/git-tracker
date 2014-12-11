@@ -20,11 +20,11 @@
     <script src="http://localhost:8081/skewer"></script>
   </head>
   <body>
-    <div class="row">
-      <div class="small-3 columns">
+    <div class="row" id="header">
+      <div class="small-2 columns sidebar">
         <img src="{{ avatar_image }}" class="avatar" />
       </div>
-      <div class="small-9 columns header">
+      <div class="small-10 columns header">
         <div class="row">
           <div class="small-10 columns header">
             <h2>{% block header %}{% endblock %}</h2>
@@ -36,10 +36,10 @@
       </div>
     </div>
     <div class="row">
-      <div class="small-3 columns">
+      <div class="small-2 columns sidebar">
         {% include "sidebar.html" %}
       </div>
-      <div class="small-9 columns">{% block body %}{% endblock %}</div>
+      <div class="small-10 columns">{% block body %}{% endblock %}</div>
     </div>
     <!-- js, redux -->
     <script src="/js/vendor/jquery.js"></script>
