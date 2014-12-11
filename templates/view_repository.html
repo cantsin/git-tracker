@@ -2,22 +2,23 @@
 
 {% block body %}
 <div class="row">
-  <div class="columns small-4">
-    <div class="panel">
+  <div class="columns small-9">
+    View Repository {{ name }}
+  </div>
+  <div class="columns small-3">
+    <div id="applied-tags" class="panel radius">
       <h5>Applied Tags</h5>
       <ul class="side-nav no-bullet">
         {% for tag in repository_tags %}
         <li>
           <a href="{{ url_for('view_tag', name=tag) }}">
-            {{ tag }}
+            <span class="label radius secondary">{{ tag }}</span> &#x2715;
           </a>
         </li>
         {% endfor %}
       </ul>
+      <a href="" class="button tiny radius">Add more tags</a>
     </div>
-  </div>
-  <div class="columns small-8">
-    View Repository {{ name }}
   </div>
 </div>
 {% endblock %}

@@ -1,6 +1,17 @@
 img.avatar {
-    width: 128px;
-    height: 128px;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto;
+    display: block;
+}
+.side-nav li a:not(.button) {
+    padding: 0px;
+}
+#applied-tags, .logout, .tabs {
+    margin-top: 1em;
+}
+.tabs, .tabs-content {
+    //display: block;
 }
 .hasChildren:before{
    content: "+";
@@ -10,5 +21,5 @@ img.avatar {
    content: "-";
 }
 .tabs dd > a, .tabs .tab-title > a {
-    padding: 1em;
+    padding: 0.5em;
 }
