@@ -15,13 +15,12 @@
     <link rel="stylesheet" href="/css/foundation.css"></link>
   </head>
   <body>
-    <div class="row">
-      <div class="small-4 columns">logo</div>
-      <div class="small-8 columns">header</div>
-    </div>
-    <div class="row">
-      <div class="small-4 columns">repos/tags</div>
-      <div class="small-8 columns">Hello World</div>
+    <div class="row" id="header">
+      <div class="small-10 columns sidebar">
+      </div>
+      <div class="small-2 columns header">
+        <a href="{{ url_for('login') }}" class="logout button tiny radius">Log in</a>
+      </div>
     </div>
   </body>
 </html>

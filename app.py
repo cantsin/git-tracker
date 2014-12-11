@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for
 from unicodedata import normalize
 
 import re
@@ -51,9 +51,13 @@ def page_not_found(error):
 def index():
     return render_template('index.html')
 
+@app.route('/login')
+def login():
+    return redirect(url_for('all'))
+
 @app.route('/logout')
 def logout():
-    pass
+    return redirect(url_for('index'))
 
 @app.route('/repository/<name>')
 def view_repository(name):
@@ -81,7 +85,9 @@ def view_tag(name):
 
 @app.route('/all')
 def all():
-    return render_template('all.html')
+    kwargs = { 'selection': 'repositories' }
+    kwargs.update(data)
+    return render_template('all.html', **kwargs)
 
 @app.route('/<path:path>')
 def static_proxy(path):
