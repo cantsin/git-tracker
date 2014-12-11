@@ -73,7 +73,9 @@ def view_repository(name):
 @app.route('/tag/<name>')
 def view_tag(name):
     kwargs = { 'name': name,
-               'number': 7 }
+               'number': 7,
+               'current_selection': 'Data Structures',
+               'selection': 'tags' }
     kwargs.update(data)
     return render_template('view_tag.html', **kwargs)
 

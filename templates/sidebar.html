@@ -1,13 +1,13 @@
 <dl class="tabs" data-tab="">
-  <dd class="active">
+  <dd class="{% if selection == 'repositories' %}active{% endif %}">
     <a href="#repositories">Repositories</a>
   </dd>
-  <dd>
+  <dd class="{% if selection == 'tags' %}active{% endif %}">
     <a href="#tags">Tags</a>
   </dd>
 </dl>
 <div class="tabs-content">
-  <div class="content active" id="repositories">
+  <div class="content{% if selection == 'repositories' %} active{% endif %}" id="repositories">
     <ul class="side-nav no-bullet">
       {% for repository, branches in repositories %}
       <li {% if repository == current_selection %}class="active"{% endif %}>
@@ -25,7 +25,7 @@
       {% endfor %}
     </ul>
   </div>
-  <div class="content" id="tags">
+  <div class="content{% if selection == 'tags' %} active{% endif %}" id="tags">
     <ul class="side-nav no-bullet">
       {% for tag, count in tags %}
       <li {% if tag == current_selection %}class="active"{% endif %}>
