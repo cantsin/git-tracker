@@ -1,8 +1,25 @@
 #!/usr/bin/env python
 
 from flask import Flask, render_template
+from unicodedata import normalize
+
+import re
 
 app = Flask(__name__)
+
+_punct_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
+
+@app.template_filter()
+def slugify(text, delim=b'-'):
+    """Generates an slightly worse ASCII-only slug."""
+    result = []
+    for word in _punct_re.split(text.lower()):
+        word = normalize('NFKD', word).encode('ascii', 'ignore')
+        if word:
+            result.append(word)
+    return delim.join(result).decode("utf-8", "strict")
+
+app.jinja_env.filters['slugify'] = slugify
 
 # sample information, for now.
 data = { 'repositories': [('fsharp-finger-trees', ['master', 'monoids', 'v1.0']),
@@ -57,7 +74,7 @@ def view_repository(name):
 def view_tag(name):
     kwargs = { 'name': name }
     kwargs.update(data)
-    return render_template('view_tag.html')
+    return render_template('view_tag.html', **kwargs)
 
 @app.route('/all')
 def all():

@@ -29,7 +29,7 @@
     <ul class="side-nav no-bullet">
       {% for tag, count in tags %}
       <li {% if tag == current_selection %}class="active"{% endif %}>
-        <a href="{{ url_for('view_tag', name=tag) }}">
+        <a href="{{ url_for('view_tag', name=tag|slugify) }}">
           {{ tag }}
           <span class="label radius secondary">{{ count }}</span>
         </a>
