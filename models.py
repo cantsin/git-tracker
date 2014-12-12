@@ -13,9 +13,9 @@ class User(db.Model):
     password = db.Column(db.String(255), nullable=False)
     ssh_key = db.Column(db.Text(), nullable=False)
     avatar_image = db.Column(db.String(255))
+    is_active = db.Column(db.Boolean(), nullable=False, default=True)
     created_at = db.Column(db.DateTime(), nullable=False)
     updated_at = db.Column(db.DateTime(), nullable=False)
-    is_active = db.Column(db.Boolean(), nullable=False, default=True)
 
     def __init__(self, email, password, ssh_key):
         self.email = email
@@ -27,13 +27,22 @@ class User(db.Model):
     def __repr__(self):
         return '<User %r>' % self.email
 
+tags = db.Table('tags',
+    db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')),
+    db.Column('repository_id', db.Integer, db.ForeignKey('repository.id'))
+)
+
 class Repository(db.Model):
     LOCAL = "local"
     GITHUB = "github"
     BITBUCKET = "bitbucket"
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    user = db.relationship('User', backref=db.backref('repositories', lazy='dynamic'))
+    user = db.relationship('User',
+                           backref=db.backref('repositories', lazy='dynamic'))
+    tags = db.relationship('Tag',
+                           secondary=tags,
+                           backref=db.backref('repositories', lazy='dynamic'))
     name = db.Column(db.String(255), nullable=False)
     kind = db.Column(db.String(255), nullable=False) # GITHUB, BITBUCKET, or LOCAL
     location = db.Column(db.String(255), nullable=False)
@@ -54,14 +63,15 @@ class Repository(db.Model):
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    user = db.relationship('User', backref=db.backref('tags', lazy='dynamic'))
+    user = db.relationship('User',
+                           backref=db.backref('tags', lazy='dynamic'))
     name = db.Column(db.String(255), nullable=False)
     slug = db.Column(db.String(255), nullable=False)
     count = db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.DateTime(), nullable=False)
     updated_at = db.Column(db.DateTime(), nullable=False)
 
-    def __init__(self, name, user):
+    def __init__(self, user, name):
         self.user_id = user.id
         self.name = name
         self.slug = slugify(name)

@@ -1,4 +1,5 @@
 from models import *
+from random import choice, randint
 
 # destructive!
 db.drop_all()
@@ -23,7 +24,7 @@ tags = [('F#', 2),
         ('All', 42)]
 
 for name, count in tags:
-    t = Tag(name, u)
+    t = Tag(u, name)
     t.count = count
     db.session.add(t)
     db.session.commit()
@@ -38,5 +39,7 @@ repositories = [('fsharp-finger-trees', ['master', 'monoids', 'v1.0']),
 
 for repository, branches in repositories:
     r = Repository(u, repository, 'git@github.com:cantsin/' + repository, Repository.GITHUB)
+    for _ in range(randint(0,5)):
+        r.tags.append(choice(Tag.query.all()))
     db.session.add(r)
     db.session.commit()
