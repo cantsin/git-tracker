@@ -1,25 +1,11 @@
 #!/usr/bin/env python
 
 from flask import Flask, render_template, redirect, url_for
-from unicodedata import normalize
+from flask.ext.sqlalchemy import SQLAlchemy
+from util import slugify
 
-import re
-
-app = Flask(__name__)
-
-_punct_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
-
-@app.template_filter()
-def slugify(text, delim=b'-'):
-    """Generates an slightly worse ASCII-only slug."""
-    result = []
-    for word in _punct_re.split(text.lower()):
-        word = normalize('NFKD', word).encode('ascii', 'ignore')
-        if word:
-            result.append(word)
-    return delim.join(result).decode("utf-8", "strict")
-
-app.jinja_env.filters['slugify'] = slugify
+app = Flask("git-tracker")
+app.jinja_env.filters['slugify'] = app.template_filter(slugify)
 
 # sample information, for now.
 data = { 'repositories': [('fsharp-finger-trees', ['master', 'monoids', 'v1.0']),
