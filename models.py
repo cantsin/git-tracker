@@ -1,0 +1,73 @@
+from flask import Flask
+from flask.ext.sqlalchemy import SQLAlchemy
+from datetime import datetime
+from util import slugify
+
+app = Flask("git-tracker")
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
+db = SQLAlchemy(app)
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255), nullable=False, unique=True)
+    password = db.Column(db.String(255), nullable=False)
+    ssh_key = db.Column(db.Text(), nullable=False)
+    avatar_image = db.Column(db.String(255))
+    created_at = db.Column(db.DateTime(), nullable=False)
+    updated_at = db.Column(db.DateTime(), nullable=False)
+    is_active = db.Column(db.Boolean(), nullable=False, default=True)
+
+    def __init__(self, email, password, ssh_key):
+        self.email = email
+        self.password = password
+        self.ssh_key = ssh_key
+        self.created_at = datetime.now()
+        self.updated_at = datetime.now()
+
+    def __repr__(self):
+        return '<User %r>' % self.email
+
+class Repository(db.Model):
+    LOCAL = "local"
+    GITHUB = "github"
+    BITBUCKET = "bitbucket"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship('User', backref=db.backref('repositories', lazy='dynamic'))
+    name = db.Column(db.String(255), nullable=False)
+    kind = db.Column(db.String(255), nullable=False) # GITHUB, BITBUCKET, or LOCAL
+    location = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.DateTime(), nullable=False)
+    updated_at = db.Column(db.DateTime(), nullable=False)
+
+    def __init__(self, user, name, location, kind):
+        self.user_id = user.id
+        self.name = name
+        self.location = location
+        self.kind = kind
+        self.created_at = datetime.now()
+        self.updated_at = datetime.now()
+
+    def __repr__(self):
+        return '<Repository %r (%r)>' % (self.name, self.kind)
+
+class Tag(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship('User', backref=db.backref('tags', lazy='dynamic'))
+    name = db.Column(db.String(255), nullable=False)
+    slug = db.Column(db.String(255), nullable=False)
+    count = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime(), nullable=False)
+    updated_at = db.Column(db.DateTime(), nullable=False)
+
+    def __init__(self, name, user):
+        self.user_id = user.id
+        self.name = name
+        self.slug = slugify(name)
+        self.count = 0
+        self.created_at = datetime.now()
+        self.updated_at = datetime.now()
+
+    def __repr__(self):
+        return '<Tag %r>' % self.name
