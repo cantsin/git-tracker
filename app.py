@@ -5,7 +5,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from util import slugify
 
 app = Flask("git-tracker")
-app.jinja_env.filters['slugify'] = app.template_filter(slugify)
+app.jinja_env.filters['slugify'] = slugify
 
 # sample information, for now.
 data = { 'repositories': [('fsharp-finger-trees', ['master', 'monoids', 'v1.0']),
