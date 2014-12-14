@@ -9,10 +9,10 @@
 <div class="tabs-content">
   <div class="content{% if selection == 'repositories' %} active{% endif %}" id="repositories">
     <ul class="side-nav no-bullet">
-      {% for repository, branches in repositories %}
-      <li {% if repository == current_selection.name %}class="active"{% endif %}>
-        <a href="{{ url_for('view_repository', name=repository) }}">
-          {{ repository }}
+      {% for repository in user.repositories %}
+      <li {% if repository.name == current_selection %}class="active"{% endif %}>
+        <a href="{{ url_for('view_repository', name=repository.name) }}">
+          {{ repository.name }}
         </a>
         <ul class="expanded">
           {% for branch in branches %}
@@ -27,11 +27,11 @@
   </div>
   <div class="content{% if selection == 'tags' %} active{% endif %}" id="tags">
     <ul class="side-nav no-bullet">
-      {% for tag, count in tags %}
-      <li {% if tag == current_selection.name %}class="active"{% endif %}>
-        <a href="{{ url_for('view_tag', slug=tag|slugify) }}">
-          {{ tag }}
-          <span class="label radius secondary">{{ count }}</span>
+      {% for tag in user.tags %}
+      <li {% if tag.name == current_selection %}class="active"{% endif %}>
+        <a href="{{ url_for('view_tag', slug=tag.slug) }}">
+          {{ tag.name }}
+          <span class="label radius secondary">{{ tag.repositories.count() }}</span>
         </a>
       </li>
       {% endfor %}

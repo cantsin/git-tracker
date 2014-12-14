@@ -2,13 +2,13 @@
 
 {% block header %}
 <i class="fa fa-tag"></i>
-{{ name }} <span class="label radius secondary">{{ number }}</span>
+{{ tag.name }} <span class="label radius secondary">{{ tag.repositories.count() }}</span>
 {% endblock %}
 
 {% block body %}
 <div class="row">
   <div class="columns small-9">
-    View Tag {{ name }}
+    View Tag {{ tag.name }}
   </div>
   <div class="columns small-3">
   </div>

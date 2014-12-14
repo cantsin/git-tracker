@@ -1,26 +1,34 @@
 {% extends "layout.html" %}
 
 {% block header %}
-<i class="fa fa-git-square"></i>
-{{ name }} <small>{{ git_identifier }}/{{ git_sha1 }}</small>
+{% if repository.kind == "GITHUB" %}
+  <i class="fa fa-git-square"></i>
+{% elif repository.kind == "BITBUCKET" %}
+  <i class="fa fa-bitbucket-square"></i>
+{% else %}
+  <i class="fa fa-github-square"></i>
+{% endif %}
+{{ repository.name }} <small>{{ git_identifier }}/{{ git_sha1 }}</small>
 {% endblock %}
 
 {% block body %}
 <div class="row">
   <div class="columns small-9">
-    <p>View Repository {{ name }}</p>
+    <p>View Repository {{ repository.name }}</p>
     <p>Heat map and tree maps here</p>
   </div>
   <div class="columns small-3">
     <div id="applied-tags" class="panel radius">
       <h5>Applied Tags</h5>
       <ul class="side-nav no-bullet">
-        {% for tag in repository_tags %}
+        {% for tag in repository.tags %}
         <li>
           <a href="{{ url_for('view_tag', slug=tag.slug) }}">
             <span class="label radius secondary">{{ tag.name }}</span> &#x2715;
           </a>
         </li>
+        {% else %}
+        None.
         {% endfor %}
       </ul>
       <a href="" class="button tiny radius">Apply more tags</a>
