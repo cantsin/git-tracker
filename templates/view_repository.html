@@ -17,8 +17,8 @@
       <ul class="side-nav no-bullet">
         {% for tag in repository_tags %}
         <li>
-          <a href="{{ url_for('view_tag', name=tag) }}">
-            <span class="label radius secondary">{{ tag }}</span> &#x2715;
+          <a href="{{ url_for('view_tag', slug=tag.slug) }}">
+            <span class="label radius secondary">{{ tag.name }}</span> &#x2715;
           </a>
         </li>
         {% endfor %}

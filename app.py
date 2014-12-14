@@ -3,6 +3,7 @@
 from flask import Flask, render_template, redirect, url_for
 from flask.ext.sqlalchemy import SQLAlchemy
 from util import slugify
+from models import User, Repository, Tag
 
 app = Flask("git-tracker")
 app.jinja_env.filters['slugify'] = slugify
@@ -47,24 +48,23 @@ def logout():
 
 @app.route('/repository/<name>')
 def view_repository(name):
-    repository_list = map(lambda x: x[0], data['repositories'])
-    if not name in repository_list:
-        return page_not_found("No such repository found.")
+    repository = Repository.query.filter_by(name=name).first_or_404()
     kwargs = { 'name': name,
+               'repository_tags': repository.tags,
+               'current_selection': repository,
                'git_identifier': 'master',
                'git_sha1': '523b75f3',
-               'repository_tags': ['Completed', 'F#', 'Public', 'Github', 'Code'],
-               'current_selection': 'fsharp-finger-trees',
                'expanded_selection': 'master',
                'selection': 'repositories' }
     kwargs.update(data)
     return render_template('view_repository.html', **kwargs)
 
-@app.route('/tag/<name>')
-def view_tag(name):
-    kwargs = { 'name': name,
-               'number': 7,
-               'current_selection': 'Data Structures',
+@app.route('/tag/<slug>')
+def view_tag(slug):
+    tag = Tag.query.filter_by(slug=slug).first_or_404()
+    kwargs = { 'name': tag.name,
+               'number': tag.repositories.count(),
+               'current_selection': tag,
                'selection': 'tags' }
     kwargs.update(data)
     return render_template('view_tag.html', **kwargs)
