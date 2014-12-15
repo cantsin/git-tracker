@@ -12,15 +12,8 @@
       {% for repository in user.repositories %}
       <li {% if repository.name == current_selection %}class="active"{% endif %}>
         <a href="{{ url_for('view_repository', name=repository.name) }}">
-          {{ repository.name }}
+          {{ repository.get_name() }}
         </a>
-        <ul class="expanded">
-          {% for branch in branches %}
-          <li>
-            {{ branch }}
-          </li>
-          {% endfor %}
-        </ul>
       </li>
       {% endfor %}
     </ul>

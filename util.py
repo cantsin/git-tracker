@@ -45,6 +45,7 @@ def clone_bare_repository(user, git_repo):
     repo = Repository(user, name, git_repo, kind)
     db.session.add(repo)
     db.session.commit()
+    return repo
 
 if __name__ == "__main__":
     repos = [('git://github.com/rails/rails.git', 'git', 'rails.git'),

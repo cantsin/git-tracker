@@ -58,6 +58,9 @@ class Repository(db.Model):
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
 
+    def get_name(self):
+        return self.name[:-4] # strip .git suffix
+
     def __repr__(self):
         return '<Repository %r (%r)>' % (self.name, self.kind)
 

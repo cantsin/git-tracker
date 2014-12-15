@@ -4,6 +4,7 @@ from flask import Flask, render_template, redirect, url_for
 from flask.ext.sqlalchemy import SQLAlchemy
 from util import slugify
 from models import User, Repository, Tag
+import pygit2
 
 app = Flask("git-tracker")
 app.jinja_env.filters['slugify'] = slugify
@@ -28,12 +29,19 @@ def logout():
 def view_repository(name):
     repository = Repository.query.filter_by(name=name).first_or_404()
     user = User.query.first() # placeholder until we have login
+
+    ondisk = pygit2.Repository('repositories/' + repository.name)
+    branches = ondisk.listall_branches(pygit2.GIT_BRANCH_REMOTE)
+    main_branch = ondisk.lookup_branch('master')
+    sha1 = str(main_branch.get_object().id)
+
     kwargs = { 'user': user,
                'repository': repository,
+               'branches': branches,
                'current_selection': repository.name,
-               'git_identifier': 'master',
-               'git_sha1': '523b75f3',
-               'expanded_selection': 'master',
+               'expanded_selection': main_branch.shorthand,
+               'git_identifier': main_branch.shorthand,
+               'git_sha1': sha1[:6],
                'selection': 'repositories' }
     return render_template('view_repository.html', **kwargs)
 

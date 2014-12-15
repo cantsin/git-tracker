@@ -8,14 +8,21 @@
 {% else %}
   <i class="fa fa-github-square"></i>
 {% endif %}
-{{ repository.name }} <small>{{ git_identifier }}/{{ git_sha1 }}</small>
+{{ repository.get_name() }} <small>{{ git_identifier }}/{{ git_sha1 }}</small>
 {% endblock %}
 
 {% block body %}
 <div class="row">
   <div class="columns small-9">
-    <p>View Repository {{ repository.name }}</p>
+    <p>View Repository {{ repository.get_name() }}</p>
     <p>Heat map and tree maps here</p>
+    <p>
+      <ul>
+      {% for branch in branches %}
+        <li>{{ branch }}</li>
+      {% endfor %}
+      </ul>
+    </p>
   </div>
   <div class="columns small-3">
     <div id="applied-tags" class="panel radius">

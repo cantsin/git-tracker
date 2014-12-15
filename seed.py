@@ -1,5 +1,6 @@
 from models import *
 from random import choice, randint
+from util import clone_bare_repository
 
 # destructive!
 db.drop_all()
@@ -29,16 +30,17 @@ for name, count in tags:
     db.session.add(t)
     db.session.commit()
 
-repositories = [('fsharp-finger-trees', ['master', 'monoids', 'v1.0']),
-                ('glc-client', ['master']),
-                ('dotemacs', ['master']),
-                ('sovereign', ['master']),
-                ('pcgen-rules', ['master']),
-                ('ergodox-firmware', ['master']),
-                ('rust', ['master'])]
+repositories = ['fsharp-finger-trees',
+                'glc-client',
+                'dotemacs',
+                'sovereign',
+                'pcgen-rules',
+                'ergodox-firmware',
+                'rust']
 
-for repository, branches in repositories:
-    r = Repository(u, repository, 'git@github.com:cantsin/' + repository, Repository.GITHUB)
+for repository in repositories:
+    repo_path = 'git@github.com:cantsin/' + repository
+    r = clone_bare_repository(u, repo_path)
     for _ in range(randint(0,5)):
         r.tags.append(choice(Tag.query.all()))
     db.session.add(r)
