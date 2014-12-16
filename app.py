@@ -4,7 +4,11 @@ from flask import Flask, render_template, redirect, url_for
 from flask.ext.sqlalchemy import SQLAlchemy
 from util import slugify
 from models import User, Repository, Tag
+
+from datetime import datetime
+from operator import itemgetter
 import pygit2
+import re
 
 app = Flask("git-tracker")
 app.jinja_env.filters['slugify'] = slugify
@@ -31,7 +35,19 @@ def view_repository(name):
     user = User.query.first() # placeholder until we have login
 
     ondisk = pygit2.Repository('repositories/' + repository.name)
-    branches = ondisk.listall_branches(pygit2.GIT_BRANCH_REMOTE)
+    branch_info = ondisk.listall_branches(pygit2.GIT_BRANCH_REMOTE)
+
+    # ugh.
+    tag_regex = re.compile('^refs/tags')
+    tag_info = filter(lambda r: tag_regex.match(r), ondisk.listall_references())
+
+    get_commit_time = lambda b: datetime.fromtimestamp(ondisk.revparse_single(b).commit_time)
+    branches = list(zip(branch_info, map(get_commit_time, branch_info)))
+    branches.sort(key=itemgetter(1))
+
+    tags = list(zip(branch_info, map(get_commit_time, branch_info)))
+    tags.sort(key=itemgetter(1))
+
     main_branch = ondisk.lookup_branch('master')
     sha1 = str(main_branch.get_object().id)
 
@@ -39,7 +55,6 @@ def view_repository(name):
                'repository': repository,
                'branches': branches,
                'current_selection': repository.name,
-               'expanded_selection': main_branch.shorthand,
                'git_identifier': main_branch.shorthand,
                'git_sha1': sha1[:6],
                'selection': 'repositories' }
