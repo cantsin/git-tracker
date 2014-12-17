@@ -5,6 +5,9 @@ MarkupSafe==0.23
 SQLAlchemy==0.9.8
 Werkzeug==0.9.6
 cffi==0.8.6
+humanize==0.5.1
 itsdangerous==0.24
 pycparser==2.10
 pygit2==0.21.4
+pytz==2014.10
+speaklater==1.3

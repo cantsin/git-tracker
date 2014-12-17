@@ -1,5 +1,6 @@
 from unicodedata import normalize
 
+import humanize
 import re
 
 _punct_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
@@ -12,6 +13,9 @@ def slugify(text, delim=b'-'):
         if word:
             result.append(word)
     return delim.join(result).decode("utf-8", "strict")
+
+def naturaltime(datetime):
+    return humanize.naturaltime(datetime)
 
 def git_url_parse(git_repo):
     """Retrieve git user repository name from the git uri."""

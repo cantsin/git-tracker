@@ -18,8 +18,8 @@
     <p>Heat map and tree maps here</p>
     <p>
       <ul>
-      {% for branch in branches %}
-        <li>{{ branch }}</li>
+      {% for branch, date in branches %}
+        <li>{{ branch }}, {{ date|naturaltime }}</li>
       {% endfor %}
       </ul>
     </p>

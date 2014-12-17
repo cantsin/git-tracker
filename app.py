@@ -2,7 +2,7 @@
 
 from flask import Flask, render_template, redirect, url_for
 from flask.ext.sqlalchemy import SQLAlchemy
-from util import slugify
+from util import slugify, naturaltime
 from models import User, Repository, Tag
 
 from datetime import datetime
@@ -12,6 +12,7 @@ import re
 
 app = Flask("git-tracker")
 app.jinja_env.filters['slugify'] = slugify
+app.jinja_env.filters['naturaltime'] = naturaltime
 
 @app.errorhandler(404)
 def page_not_found(error):
