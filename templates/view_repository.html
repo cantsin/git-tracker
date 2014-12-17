@@ -25,11 +25,43 @@
     </p>
     <p>
       <ul>
-      {% for tag in tags %}
-        <li>{{ tag }}</li>
+      {% for tag, date in tags %}
+        <li>{{ tag }}, {{ date|naturaltime }}</li>
       {% endfor %}
       </ul>
     </p>
+
+    <table role="data">
+      <thead>
+        <tr>
+          <th width="200">Date</th>
+          <th>Author</th>
+          <th>Message</th>
+          <th width="150">Branch</th>
+          <th width="200">Files</th>
+          <th width="150">+</th>
+          <th width="150">-</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for commit in commits %}
+        <tr>
+          <td>{{ commit.commit_time|naturaltime }}</td>
+          <td>{{ commit.author.name }}</td>
+          <td>{{ commit.message|truncate(25, True) }}</td>
+          <td>Content Goes Here</td>
+          <td>Content Goes Here</td>
+          <td>Content Goes Here</td>
+          <td>Content Goes Here</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td>Empty!</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
   </div>
   <div class="columns small-3">
     <div id="applied-tags" class="panel radius">

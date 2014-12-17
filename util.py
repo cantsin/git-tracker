@@ -1,4 +1,5 @@
 from unicodedata import normalize
+from datetime import datetime
 
 import humanize
 import re
@@ -14,8 +15,8 @@ def slugify(text, delim=b'-'):
             result.append(word)
     return delim.join(result).decode("utf-8", "strict")
 
-def naturaltime(datetime):
-    return humanize.naturaltime(datetime)
+def naturaltime(ue):
+    return humanize.naturaltime(datetime.fromtimestamp(ue))
 
 def git_url_parse(git_repo):
     """Retrieve git user repository name from the git uri."""

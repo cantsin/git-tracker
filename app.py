@@ -5,7 +5,6 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from util import slugify, naturaltime
 from models import User, Repository, Tag
 
-from datetime import datetime
 from operator import itemgetter
 import pygit2
 import re
@@ -42,12 +41,14 @@ def view_repository(name):
     tag_regex = re.compile('^refs/tags')
     tag_info = filter(lambda r: tag_regex.match(r), ondisk.listall_references())
 
-    get_commit_time = lambda b: datetime.fromtimestamp(ondisk.revparse_single(b).commit_time)
+    get_commit_time = lambda b: ondisk.revparse_single(b).commit_time
     branches = list(zip(branch_info, map(get_commit_time, branch_info)))
-    branches.sort(key=itemgetter(1))
+    branches.sort(key=itemgetter(1), reverse=True)
 
     tags = list(zip(branch_info, map(get_commit_time, branch_info)))
     tags.sort(key=itemgetter(1))
+
+    commits = ondisk.walk(ondisk.head.target, pygit2.GIT_SORT_TOPOLOGICAL)
 
     main_branch = ondisk.lookup_branch('master')
     sha1 = str(main_branch.get_object().id)
@@ -55,6 +56,7 @@ def view_repository(name):
     kwargs = { 'user': user,
                'repository': repository,
                'branches': branches,
+               'commits': list(commits)[:10],
                'current_selection': repository.name,
                'git_identifier': main_branch.shorthand,
                'git_sha1': sha1[:6],
