@@ -16,7 +16,7 @@
         </a>
         {% if repository.name == current_selection %}
         <ul>
-          {% for ref, date in repository.get_latest_refs() %}
+          {% for ref, date in repository.get_latest_refs(count=7) %}
           <li>{{ ref }}, {{ date|naturaltime }}</li>
           {% endfor %}
         </ul>
