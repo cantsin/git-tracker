@@ -7,10 +7,38 @@
 
 {% block body %}
 <div class="row">
-  <div class="columns small-9">
+  <div class="columns small-12">
     View Tag {{ tag.name }}
-  </div>
-  <div class="columns small-3">
+
+    <table role="data">
+      <thead>
+        <tr>
+          <th width="200">Date</th>
+          <th>Repository</th>
+          <th width="200">Commits</th>
+          <th width="200">Files</th>
+          <th width="150">Lines</th>
+          <th width="150">Authors</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for repository in tag.repositories %}
+        <tr>
+          <td>{{ repository.get_last_updated()|naturaltime }}</td>
+          <td>{{ repository.get_name() }}</td>
+          <td>{{ repository.get_commit_count() }}</td>
+          <td>{{ repository.get_file_count() }}</td>
+          <td>{{ repository.get_line_count() }}</td>
+          <td>{{ repository.get_author_count() }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td>Empty!</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
   </div>
 </div>
 {% endblock %}

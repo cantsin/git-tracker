@@ -29,11 +29,16 @@ class GitMixin(object):
             return all_commits
         return list(all_commits)[:count]
 
-    def get_latest_refs(self):
+    def get_commit_count(self):
+        return len(list(self.ondisk.walk(self.ondisk.head.target)))
+
+    def get_latest_refs(self, count=None):
         info = list(self.filter_references(GitMixin.tag_or_remote_regex))
         refs = list(zip(info, map(self.get_commit_time, info)))
         refs.sort(key=itemgetter(1), reverse=True)
-        return refs
+        if not count:
+            return refs
+        return list(refs)[:count]
 
     def get_commit_time(self, name):
         ref = self.ondisk.revparse_single(name)
@@ -57,3 +62,18 @@ class GitMixin(object):
             additions += patch.additions
             deletions += patch.deletions
         return (len(diff), additions, deletions)
+
+    def get_last_updated(self):
+        return self.ondisk.head.get_object().commit_time
+
+    def get_file_count(self):
+        diff = self.ondisk.head.get_object().tree.diff_to_tree()
+        return len([patch.old_file_path for patch in diff])
+
+    def get_line_count(self):
+        diff = self.ondisk.head.get_object().tree.diff_to_tree()
+        return sum([patch.deletions for patch in diff])
+
+    def get_author_count(self):
+        commits = self.ondisk.walk(self.ondisk.head.target)
+        return len(set([commit.author.email for commit in commits]))
