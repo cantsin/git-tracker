@@ -5,10 +5,6 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from util import slugify, naturaltime
 from models import User, Repository, Tag
 
-from operator import itemgetter
-import pygit2
-import re
-
 app = Flask("git-tracker")
 app.jinja_env.filters['slugify'] = slugify
 app.jinja_env.filters['naturaltime'] = naturaltime
@@ -32,34 +28,15 @@ def logout():
 @app.route('/repository/<name>')
 def view_repository(name):
     repository = Repository.query.filter_by(name=name).first_or_404()
+    repository.connect_to_disk()
     user = User.query.first() # placeholder until we have login
-
-    ondisk = pygit2.Repository('repositories/' + repository.name)
-    branch_info = ondisk.listall_branches(pygit2.GIT_BRANCH_REMOTE)
-
-    # ugh.
-    tag_regex = re.compile('^refs/tags')
-    tag_info = filter(lambda r: tag_regex.match(r), ondisk.listall_references())
-
-    get_commit_time = lambda b: ondisk.revparse_single(b).commit_time
-    branches = list(zip(branch_info, map(get_commit_time, branch_info)))
-    branches.sort(key=itemgetter(1), reverse=True)
-
-    tags = list(zip(branch_info, map(get_commit_time, branch_info)))
-    tags.sort(key=itemgetter(1))
-
-    commits = ondisk.walk(ondisk.head.target, pygit2.GIT_SORT_TOPOLOGICAL)
-
-    main_branch = ondisk.lookup_branch('master')
-    sha1 = str(main_branch.get_object().id)
-
+    identifier = repository.get_shorthand_of_branch('master')
+    sha1 = repository.get_sha1_of_branch('master')
     kwargs = { 'user': user,
                'repository': repository,
-               'branches': branches,
-               'commits': list(commits)[:10],
                'current_selection': repository.name,
-               'git_identifier': main_branch.shorthand,
-               'git_sha1': sha1[:6],
+               'git_identifier': identifier,
+               'git_sha1': sha1,
                'selection': 'repositories' }
     return render_template('view_repository.html', **kwargs)
 

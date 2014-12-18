@@ -14,6 +14,13 @@
         <a href="{{ url_for('view_repository', name=repository.name) }}">
           {{ repository.get_name() }}
         </a>
+        {% if repository.name == current_selection %}
+        <ul>
+          {% for ref, date in repository.get_latest_refs() %}
+          <li>{{ ref }}, {{ date|naturaltime }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
       </li>
       {% endfor %}
     </ul>

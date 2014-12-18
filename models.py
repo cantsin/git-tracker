@@ -2,6 +2,7 @@ from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
 from datetime import datetime
 from util import slugify
+from git import GitMixin
 
 app = Flask("git-tracker")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
@@ -33,7 +34,7 @@ tags = db.Table('tags',
     db.Column('repository_id', db.Integer, db.ForeignKey('repository.id'))
 )
 
-class Repository(db.Model):
+class Repository(GitMixin, db.Model):
     LOCAL = "local"
     GITHUB = "github"
     BITBUCKET = "bitbucket"

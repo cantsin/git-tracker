@@ -16,20 +16,6 @@
   <div class="columns small-9">
     <p>View Repository {{ repository.get_name() }}</p>
     <p>Heat map and tree maps here</p>
-    <p>
-      <ul>
-      {% for branch, date in branches %}
-        <li>{{ branch }}, {{ date|naturaltime }}</li>
-      {% endfor %}
-      </ul>
-    </p>
-    <p>
-      <ul>
-      {% for tag, date in tags %}
-        <li>{{ tag }}, {{ date|naturaltime }}</li>
-      {% endfor %}
-      </ul>
-    </p>
 
     <table role="data">
       <thead>
@@ -44,15 +30,17 @@
         </tr>
       </thead>
       <tbody>
-        {% for commit in commits %}
+        {% for commit in repository.get_commits(count=10) %}
         <tr>
           <td>{{ commit.commit_time|naturaltime }}</td>
           <td>{{ commit.author.name }}</td>
           <td>{{ commit.message|truncate(25, True) }}</td>
-          <td>Content Goes Here</td>
-          <td>Content Goes Here</td>
-          <td>Content Goes Here</td>
-          <td>Content Goes Here</td>
+          <td>{{ commit.tree }}</td>
+          {% with changed_files, additions, deletions = repository.get_numstat(commit) %}
+          <td>{{ changed_files }}</td>
+          <td>{{ additions }}</td>
+          <td>{{ deletions }}</td>
+          {% endwith %}
         </tr>
         {% else %}
         <tr>
