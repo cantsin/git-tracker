@@ -50,4 +50,10 @@ class GitMixin(object):
         return str(self.ondisk.lookup_branch(branch).get_object().id)[:6]
 
     def get_numstat(self, commit):
-        return (0, 0, 0)
+        previous_commit = self.ondisk.revparse_single(str(commit.id) + '^')
+        diff = self.ondisk.diff(previous_commit, commit)
+        additions, deletions = 0, 0
+        for patch in diff:
+            additions += patch.additions
+            deletions += patch.deletions
+        return (len(diff), additions, deletions)

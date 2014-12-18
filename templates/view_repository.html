@@ -23,7 +23,6 @@
           <th width="200">Date</th>
           <th>Author</th>
           <th>Message</th>
-          <th width="150">Branch</th>
           <th width="200">Files</th>
           <th width="150">+</th>
           <th width="150">-</th>
@@ -35,7 +34,6 @@
           <td>{{ commit.commit_time|naturaltime }}</td>
           <td>{{ commit.author.name }}</td>
           <td>{{ commit.message|truncate(25, True) }}</td>
-          <td>{{ commit.tree }}</td>
           {% with changed_files, additions, deletions = repository.get_numstat(commit) %}
           <td>{{ changed_files }}</td>
           <td>{{ additions }}</td>
