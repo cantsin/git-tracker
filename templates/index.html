@@ -3,12 +3,6 @@
   <head>
     <title>git-tracker</title>
     <!-- js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ramda/0.8.0/ramda.min.js"></script>
-    <script src="https://google.github.io/traceur-compiler/bin/traceur.js"></script>
-    <script src="https://google.github.io/traceur-compiler/src/bootstrap.js"></script>
-    <script>
-      traceur.options.experimental = true;
-    </script>
     <script src="http://localhost:8081/skewer"></script>
     <script src="js/vendor/modernizr.js"></script>
     <!-- css -->
@@ -16,10 +10,23 @@
   </head>
   <body>
     <div class="row" id="header">
-      <div class="small-10 columns sidebar">
+      <div class="small-4 columns">
+        &nbsp;
       </div>
-      <div class="small-2 columns header">
-        <a href="{{ url_for('login') }}" class="logout button tiny radius">Log in</a>
+      <div class="small-4 columns">
+        <form action="{{ url_for('login') }}" method="post">
+          <input type="text" placeholder="Email" name="email" value="{{ request.form.email }}">
+          <input type="password" placeholder="Password" name="password" value="{{ request.form.password }}">
+          <input class="logout button tiny radius" type="submit" value="Login">
+        </form>
+        {% if error %}
+        <div data-alert class="alert-box alert">
+          {{ error }}
+        </div>
+        {% endif %}
+      </div>
+      <div class="small-4 columns">
+        &nbsp;
       </div>
     </div>
   </body>

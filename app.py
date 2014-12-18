@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import LoginManager, login_required, login_user, logout_user
 from util import slugify, naturaltime
@@ -25,11 +25,19 @@ def page_not_found(error):
 def index():
     return render_template('index.html')
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    user = User.query.first() # placeholder until we have login
-    login_user(user)
-    return redirect(url_for('all'))
+    error = None
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        user = User.query.filter_by(email=email).scalar()
+        if user and user.check_password(password):
+            login_user(user)
+            return redirect(url_for('all'))
+        else:
+            error = 'Email and password do not match.'
+    return render_template('index.html', error=error)
 
 @app.route('/logout')
 @login_required
