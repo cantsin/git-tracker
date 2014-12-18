@@ -1,5 +1,5 @@
 from flask import Flask
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask.ext.sqlalchemy import SQLAlchemy, orm
 from datetime import datetime
 from util import slugify
 from git import GitMixin
@@ -58,6 +58,11 @@ class Repository(GitMixin, db.Model):
         self.kind = kind
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
+
+    # initialize GitMixin
+    @orm.reconstructor
+    def reconstruct(self):
+        self.connect_to_disk()
 
     def get_name(self):
         return self.name[:-4] # strip .git suffix

@@ -28,7 +28,6 @@ def logout():
 @app.route('/repository/<name>')
 def view_repository(name):
     repository = Repository.query.filter_by(name=name).first_or_404()
-    repository.connect_to_disk()
     user = User.query.first() # placeholder until we have login
     identifier = repository.get_shorthand_of_branch('master')
     sha1 = repository.get_sha1_of_branch('master')
