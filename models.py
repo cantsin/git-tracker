@@ -2,6 +2,8 @@ from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy, orm
 from flask.ext.login import UserMixin
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+
 from util import slugify
 from git import GitMixin
 
@@ -12,7 +14,7 @@ db = SQLAlchemy(app)
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), nullable=False, unique=True)
-    password = db.Column(db.String(255), nullable=False)
+    password = orm.deferred(db.Column(db.String(255), nullable=False))
     ssh_public_key_path = db.Column(db.Text())
     ssh_private_key_path = db.Column(db.Text())
     avatar_image = db.Column(db.String(255))
@@ -20,9 +22,12 @@ class User(UserMixin, db.Model):
     created_at = db.Column(db.DateTime(), nullable=False)
     updated_at = db.Column(db.DateTime(), nullable=False)
 
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
+
     def __init__(self, email, password, ssh_key):
         self.email = email
-        self.password = password
+        self.password = generate_password_hash(password)
         self.ssh_key = ssh_key
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
