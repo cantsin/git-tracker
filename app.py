@@ -78,7 +78,11 @@ def static_proxy(path):
   return app.send_static_file(path)
 
 if __name__ == '__main__':
-    import os
-    app.secret_key = os.urandom(24)
+    try:
+        import config
+        app.secret_key = config.secret_key
+    except ImportError:
+        import os
+        app.secret_key = os.urandom(24)
     app.debug = True
     app.run()
