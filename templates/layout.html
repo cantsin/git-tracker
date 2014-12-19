@@ -30,7 +30,9 @@
             <h2>{% block header %}{% endblock %}</h2>
           </div>
           <div class="small-2 columns header">
-            <a href="{{ url_for('logout') }}" class="logout button tiny radius">Log out</a>
+            <a href="{{ url_for('logout') }}" class="logout button tiny radius">
+              <i class="fa fa-sign-out"></i> Log out
+            </a>
           </div>
         </div>
       </div>
