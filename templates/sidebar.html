@@ -24,6 +24,17 @@
       </li>
       {% endfor %}
     </ul>
+    <a href="javascript:void(0);" data-reveal-id="add_repository" class="button tiny radius">
+      <i class="fa fa-plus"></i> Add Repository
+    </a>
+    <div id="add_repository" class="reveal-modal medium" data-reveal>
+      <h2><i class="fa fa-plus"></i> Add Repository</h2>
+      <form action="{{ url_for('add_repository') }}" method="post">
+        <input type="text" placeholder="Repository URI" name="repository" value="{{ request.form.repository }}">
+        <input class="logout button tiny radius" type="submit" value="Save">
+      </form>
+      <a class="close-reveal-modal">&#215;</a>
+    </div>
   </div>
   <div class="content{% if selection == 'tags' %} active{% endif %}" id="tags">
     <ul class="side-nav no-bullet">
@@ -36,5 +47,16 @@
       </li>
       {% endfor %}
     </ul>
+    <a href="javascript:void(0);" data-reveal-id="add_tag" class="button tiny radius">
+      <i class="fa fa-plus"></i> Add Tag
+    </a>
+    <div id="add_tag" class="reveal-modal small" data-reveal>
+      <h2><i class="fa fa-plus"></i> Add tag</h2>
+      <form action="{{ url_for('add_tag') }}" method="post">
+        <input type="text" placeholder="Tag Name" name="tag" value="{{ request.form.tag }}">
+        <input class="logout button tiny radius" type="submit" value="Save">
+      </form>
+      <a class="close-reveal-modal">&#215;</a>
+    </div>
   </div>
 </div>
