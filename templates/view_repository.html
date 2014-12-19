@@ -1,5 +1,9 @@
 {% extends "layout.html" %}
 
+{% block javascript %}
+<script type="module" src="/js/repository.js"></script>
+{% endblock %}
+
 {% block header %}
 {% if repository.kind == "GITHUB" %}
   <i class="fa fa-git-square"></i>

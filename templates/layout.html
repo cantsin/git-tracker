@@ -10,14 +10,18 @@
     <link rel="stylesheet" href="/css/font-awesome.css" />
     <link rel="stylesheet" href="/css/git-tracker.css" />
     <!-- js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ramda/0.8.0/ramda.min.js"></script>
-    <script src="https://google.github.io/traceur-compiler/bin/traceur.js"></script>
-    <script src="https://google.github.io/traceur-compiler/src/bootstrap.js"></script>
-    <script>
-      traceur.options.experimental = true;
-    </script>
-    <script src="/js/vendor/modernizr.js"></script>
-    <script src="http://localhost:8081/skewer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/2.3.22/rx.all.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs-jquery/1.1.6/rx.jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ramda/0.8.0/ramda.min.js"></script> --
+    <script src="https://google.github.io/traceur-compiler/bin/traceur.js"></script> --
+    <script src="https://google.github.io/traceur-compiler/src/bootstrap.js"></script> --
+    <script> --
+      traceur.options.experimental = true; --
+    </script> --
+    <script src="/js/vendor/modernizr.js"></script> --
+    <script src="http://localhost:8081/skewer"></script> --
+    {% block javascript %}{% endblock %}
   </head>
   <body>
     <div class="row" id="header">

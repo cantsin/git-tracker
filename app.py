@@ -59,15 +59,16 @@ def view_repository(name):
                'selection': 'repositories' }
     return render_template('view_repository.html', **kwargs)
 
-@app.route('/repositories/add')
+@app.route('/repositories/add', methods=['POST'])
 @login_required
 def add_repository():
     try:
         location = request.form['location']
+        if Repository.query.filter_by(location=location).scalar():
+            return flask.jsonify(error='Given repository already exists.')
         repository = clone_bare_repository(current_user, location)
         url = url_for('view_repository', name=repository.name)
         return flask.jsonify(success=url)
-    # TODO: Check for pre-existing
     except GitException as e:
         return flask.jsonify(error=e)
     except IndexError:
@@ -82,15 +83,16 @@ def view_tag(slug):
                'selection': 'tags' }
     return render_template('view_tag.html', **kwargs)
 
-@app.route('/tags/add')
+@app.route('/tags/add', methods=['POST'])
 @login_required
 def add_tag():
     try:
         name = request.form['name']
+        if Tag.query.filter_by(name=name).scalar():
+            return flask.jsonify(error='Given tag already exists.')
         tag = Tag(current_user, name).save()
         url = url_for('view_tag', slug=tag.slug)
         return flask.jsonify(success=url)
-    # TODO: Check for pre-existing
     except IndexError:
         return flask.jsonify(error='Name field is invalid.')
 

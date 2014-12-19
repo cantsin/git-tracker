@@ -29,7 +29,7 @@
     </a>
     <div id="add_repository" class="reveal-modal medium" data-reveal>
       <h2><i class="fa fa-plus"></i> Add Repository</h2>
-      <form action="{{ url_for('add_repository') }}" method="post">
+      <form id="repository_form" action="{{ url_for('add_repository') }}" method="post">
         <input type="text" placeholder="Repository URI" name="repository" value="{{ request.form.repository }}">
         <input class="logout button tiny radius" type="submit" value="Save">
       </form>
