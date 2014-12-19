@@ -3,10 +3,10 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import LoginManager, login_required, login_user, logout_user
-from util import slugify, naturaltime
+from util import slugify, naturaltime, clone_bare_repository
 from models import User, Repository, Tag
 
-app = Flask("git-tracker")
+app = Flask('git-tracker')
 app.jinja_env.filters['slugify'] = slugify
 app.jinja_env.filters['naturaltime'] = naturaltime
 
@@ -58,6 +58,19 @@ def view_repository(name):
                'selection': 'repositories' }
     return render_template('view_repository.html', **kwargs)
 
+@app.route('/repositories/add')
+@login_required
+def add_repository():
+    try:
+        location = request.form['location']
+        repository = clone_bare_repository(current_user, location)
+        url = url_for('view_repository', name=repository.name)
+        return flask.jsonify(success=url)
+    # TODO error: invalid git url
+    # TODO error: wrong ssh keys
+    except IndexError:
+        return flask.jsonify(error='Location is invalid.')
+
 @app.route('/tag/<slug>')
 @login_required
 def view_tag(slug):
@@ -66,6 +79,17 @@ def view_tag(slug):
                'current_selection': tag.name,
                'selection': 'tags' }
     return render_template('view_tag.html', **kwargs)
+
+@app.route('/tags/add')
+@login_required
+def add_tag():
+    try:
+        name = request.form['name']
+        tag = Tag(current_user, name).save()
+        url = url_for('view_tag', slug=tag.slug)
+        return flask.jsonify(success=url)
+    except IndexError:
+        return flask.jsonify(error='Name field is invalid.')
 
 @app.route('/all')
 @login_required
