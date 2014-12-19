@@ -47,9 +47,7 @@ def clone_bare_repository(user, git_repo):
     git_user, name = git_url_parse(git_repo)
     creds = Keypair(git_user, user.ssh_public_key_path, user.ssh_private_key_path, '')
     clone_repository(git_repo, 'repositories/' + name,  bare=True, credentials=creds)
-    repo = Repository(user, name, git_repo, kind)
-    db.session.add(repo)
-    db.session.commit()
+    repo = Repository(user, name, git_repo, kind).save()
     return repo
 
 if __name__ == "__main__":

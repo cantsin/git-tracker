@@ -11,8 +11,7 @@ u = User("jtranovich@gmail.com", "password", "ssh-key")
 u.avatar_image = 'https://avatars2.githubusercontent.com/u/3013175?v=3&s=460'
 u.ssh_public_key_path = ssh_public_key_path
 u.ssh_private_key_path = ssh_private_key_path
-db.session.add(u)
-db.session.commit()
+u.save()
 
 tags = [('F#', 2),
         ('Data Structures', 3),
@@ -30,8 +29,7 @@ tags = [('F#', 2),
 for name, count in tags:
     t = Tag(u, name)
     t.count = count
-    db.session.add(t)
-    db.session.commit()
+    t.save()
 
 repositories = ['fsharp-finger-trees',
                 'glc-client',
@@ -46,5 +44,4 @@ for repository in repositories:
     r = clone_bare_repository(u, repo_path)
     for _ in range(randint(0,5)):
         r.tags.append(choice(Tag.query.all()))
-    db.session.add(r)
-    db.session.commit()
+    r.save()

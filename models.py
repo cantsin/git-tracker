@@ -11,7 +11,13 @@ app = Flask("git-tracker")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 db = SQLAlchemy(app)
 
-class User(UserMixin, db.Model):
+class SaveMixin(object):
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+        return self
+
+class User(SaveMixin, UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), nullable=False, unique=True)
     password = orm.deferred(db.Column(db.String(255), nullable=False))
@@ -43,7 +49,7 @@ tags = db.Table('tags',
     db.Column('repository_id', db.Integer, db.ForeignKey('repository.id'))
 )
 
-class Repository(GitMixin, db.Model):
+class Repository(SaveMixin, GitMixin, db.Model):
     LOCAL = "local"
     GITHUB = "github"
     BITBUCKET = "bitbucket"
@@ -79,7 +85,7 @@ class Repository(GitMixin, db.Model):
     def __repr__(self):
         return '<Repository %r (%r)>' % (self.name, self.kind)
 
-class Tag(db.Model):
+class Tag(SaveMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User',
