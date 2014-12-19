@@ -5,6 +5,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import LoginManager, login_required, login_user, logout_user
 from util import slugify, naturaltime, clone_bare_repository
 from models import User, Repository, Tag
+from git import GitException
 
 app = Flask('git-tracker')
 app.jinja_env.filters['slugify'] = slugify
@@ -66,8 +67,9 @@ def add_repository():
         repository = clone_bare_repository(current_user, location)
         url = url_for('view_repository', name=repository.name)
         return flask.jsonify(success=url)
-    # TODO error: invalid git url
-    # TODO error: wrong ssh keys
+    # TODO: Check for pre-existing
+    except GitException as e:
+        return flask.jsonify(error=e)
     except IndexError:
         return flask.jsonify(error='Location is invalid.')
 
@@ -88,6 +90,7 @@ def add_tag():
         tag = Tag(current_user, name).save()
         url = url_for('view_tag', slug=tag.slug)
         return flask.jsonify(success=url)
+    # TODO: Check for pre-existing
     except IndexError:
         return flask.jsonify(error='Name field is invalid.')
 

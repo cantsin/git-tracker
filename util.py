@@ -1,5 +1,6 @@
 from unicodedata import normalize
 from datetime import datetime
+from git import GitException
 
 import humanize
 import re
@@ -38,17 +39,22 @@ def git_url_parse(git_repo):
 def clone_bare_repository(user, git_repo):
     """Clone a bare repository."""
     from models import Repository, db
-    from pygit2 import clone_repository, Keypair
+    from pygit2 import clone_repository, Keypair, GitError
     kind = Repository.LOCAL
     if 'github' in git_repo:
         kind = Repository.GITHUB
     if 'bitbucket' in git_repo:
         kind = Repository.BITBUCKET
-    git_user, name = git_url_parse(git_repo)
-    creds = Keypair(git_user, user.ssh_public_key_path, user.ssh_private_key_path, '')
-    clone_repository(git_repo, 'repositories/' + name,  bare=True, credentials=creds)
-    repo = Repository(user, name, git_repo, kind).save()
-    return repo
+    try:
+        git_user, name = git_url_parse(git_repo)
+        creds = Keypair(git_user, user.ssh_public_key_path, user.ssh_private_key_path, '')
+        clone_repository(git_repo, 'repositories/' + name,  bare=True, credentials=creds)
+        repo = Repository(user, name, git_repo, kind).save()
+        return repo
+    except GitError as e:
+        raise GitException(e)
+    except ValueError as e:
+        raise GitException(e)
 
 if __name__ == "__main__":
     repos = [('git://github.com/rails/rails.git', 'git', 'rails.git'),
