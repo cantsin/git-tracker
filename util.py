@@ -52,9 +52,9 @@ def clone_bare_repository(user, git_repo):
         repo = Repository(user, name, git_repo, kind).save()
         return repo
     except GitError as e:
-        raise GitException(e)
+        raise GitException(e.args)
     except ValueError as e:
-        raise GitException(e)
+        raise GitException(e.args)
 
 if __name__ == "__main__":
     repos = [('git://github.com/rails/rails.git', 'git', 'rails.git'),

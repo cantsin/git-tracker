@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.login import LoginManager, login_required, login_user, logout_user
+from flask.ext.login import LoginManager, login_required, login_user, logout_user, current_user
 from util import slugify, naturaltime, clone_bare_repository
 from models import User, Repository, Tag
 from git import GitException
@@ -65,14 +65,14 @@ def add_repository():
     try:
         location = request.form['location']
         if Repository.query.filter_by(location=location).scalar():
-            return flask.jsonify(error='Given repository already exists.')
+            return jsonify(error='Given repository already exists.')
         repository = clone_bare_repository(current_user, location)
         url = url_for('view_repository', name=repository.name)
-        return flask.jsonify(success=url)
+        return jsonify(success=url)
     except GitException as e:
-        return flask.jsonify(error=e)
+        return jsonify(error=e.args)
     except IndexError:
-        return flask.jsonify(error='Location is invalid.')
+        return jsonify(error='Location is invalid.')
 
 @app.route('/tag/<slug>')
 @login_required
@@ -89,12 +89,12 @@ def add_tag():
     try:
         name = request.form['name']
         if Tag.query.filter_by(name=name).scalar():
-            return flask.jsonify(error='Given tag already exists.')
+            return jsonify(error='Given tag already exists.')
         tag = Tag(current_user, name).save()
         url = url_for('view_tag', slug=tag.slug)
-        return flask.jsonify(success=url)
+        return jsonify(success=url)
     except IndexError:
-        return flask.jsonify(error='Name field is invalid.')
+        return jsonify(error='Name field is invalid.')
 
 @app.route('/all')
 @login_required

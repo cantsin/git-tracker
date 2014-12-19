@@ -30,7 +30,7 @@
     <div id="add_repository" class="reveal-modal medium" data-reveal>
       <h2><i class="fa fa-plus"></i> Add Repository</h2>
       <form id="repository_form" action="{{ url_for('add_repository') }}" method="post">
-        <input type="text" placeholder="Repository URI" name="repository" value="{{ request.form.repository }}">
+        <input type="text" placeholder="Repository URI" name="location" value="{{ request.form.location }}">
         <input class="logout button tiny radius" type="submit" value="Save">
       </form>
       <a class="close-reveal-modal">&#215;</a>
