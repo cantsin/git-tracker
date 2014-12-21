@@ -90,6 +90,8 @@ def add_tag():
         name = request.form['name']
         if Tag.query.filter_by(name=name).scalar():
             return jsonify(error='Given tag already exists.')
+        if Tag.query.filter_by(slug=slugify(name)).scalar():
+            return jsonify(error='Given tag already exists.')
         tag = Tag(current_user, name).save()
         url = url_for('view_tag', slug=tag.slug)
         return jsonify(success=url)
