@@ -65,10 +65,10 @@
       <a href="javascript:void(0);" data-reveal-id="apply_tags" class="button tiny radius">
         <i class="fa fa-check-square-o"></i> Apply tags
       </a>
-      <div id="apply_tags" class="reveal-modal medium" data-reveal>
+      <div id="apply_tags" class="reveal-modal large" data-reveal>
         <h2><i class="fa fa-plus"></i> Apply tags</h2>
         <form id="apply_tags_form" action="" method="post">
-          <ul class="side-nav no-bullet">
+          <ul class="side-nav no-bullet small-block-grid-3">
           {% for tag in tags %}
             <li>
               <input id="apply-{{ tag.slug }}" type="checkbox" {% if tag in repository.tags %}checked="checked"{% endif %}>

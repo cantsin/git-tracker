@@ -52,7 +52,7 @@ def view_repository(name):
     repository = Repository.query.filter_by(name=name).first_or_404()
     identifier = repository.get_shorthand_of_branch('master')
     sha1 = repository.get_sha1_of_branch('master')
-    tags = Tag.query.all()
+    tags = Tag.query.order_by('name')
     kwargs = { 'repository': repository,
                'current_selection': repository.name,
                'git_identifier': identifier,
@@ -89,11 +89,13 @@ def view_tag(slug):
 @login_required
 def add_tag():
     try:
-        name = request.form['name']
+        name = request.form['name'].strip()
+        if name == '':
+            return jsonify(error='Tag cannot be blank.')
         if Tag.query.filter_by(name=name).scalar():
-            return jsonify(error='Given tag already exists.')
+            return jsonify(error='Given tag name already exists.')
         if Tag.query.filter_by(slug=slugify(name)).scalar():
-            return jsonify(error='Given tag already exists.')
+            return jsonify(error='Given tag slug already exists.')
         tag = Tag(current_user, name).save()
         url = url_for('view_tag', slug=tag.slug)
         return jsonify(success=url)
