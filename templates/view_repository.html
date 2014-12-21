@@ -54,21 +54,32 @@
   </div>
   <div class="columns small-3">
     <div id="applied-tags" class="panel radius">
-      <h5>Applied Tags</h5>
-      <ul class="side-nav no-bullet">
+      <h5>Tagged as</h5>
         {% for tag in repository.tags %}
-        <li>
           <a href="{{ url_for('view_tag', slug=tag.slug) }}">
-            <span class="label radius secondary">{{ tag.name }}</span> &#x2715;
+            <span class="label radius secondary">{{ tag.name }}</span>
           </a>
-        </li>
         {% else %}
-        None.
+          None.
         {% endfor %}
-      </ul>
-      <a href="" class="button tiny radius">
-        <i class="fa fa-check-square-o"></i> Apply more tags
+      <a href="javascript:void(0);" data-reveal-id="apply_tags" class="button tiny radius">
+        <i class="fa fa-check-square-o"></i> Apply tags
       </a>
+      <div id="apply_tags" class="reveal-modal medium" data-reveal>
+        <h2><i class="fa fa-plus"></i> Apply tags</h2>
+        <form id="apply_tags_form" action="" method="post">
+          <ul class="side-nav no-bullet">
+          {% for tag in tags %}
+            <li>
+              <input id="apply-{{ tag.slug }}" type="checkbox" {% if tag in repository.tags %}checked="checked"{% endif %}>
+              <label for="{{ tag.slug }}">{{ tag.name }}</label>
+            </li>
+          {% endfor %}
+          </ul>
+          <input class="logout button tiny radius" type="submit" value="Save">
+        </form>
+        <a class="close-reveal-modal">&#215;</a>
+      </div>
     </div>
   </div>
 </div>

@@ -52,10 +52,12 @@ def view_repository(name):
     repository = Repository.query.filter_by(name=name).first_or_404()
     identifier = repository.get_shorthand_of_branch('master')
     sha1 = repository.get_sha1_of_branch('master')
+    tags = Tag.query.all()
     kwargs = { 'repository': repository,
                'current_selection': repository.name,
                'git_identifier': identifier,
                'git_sha1': sha1,
+               'tags': tags,
                'selection': 'repositories' }
     return render_template('view_repository.html', **kwargs)
 
