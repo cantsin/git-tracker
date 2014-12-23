@@ -61,6 +61,19 @@ def view_repository(name):
                'selection': 'repositories' }
     return render_template('view_repository.html', **kwargs)
 
+@app.route('/repository/<repository_name>/tags/apply', methods=['POST'])
+@login_required
+def apply_tags(repository_name):
+    repository = Repository.query.filter_by(name=repository_name).first_or_404()
+    tag_names = filter(lambda t: t.startswith('apply-'), request.form.keys())
+    repository.tags.clear()
+    for tag_name in tag_names:
+        tag = Tag.query.filter_by(slug=tag_name[6:]).first_or_404()
+        repository.tags.append(tag)
+    repository.save()
+    url = url_for('view_repository', name=repository_name)
+    return jsonify(success=url)
+
 @app.route('/repositories/add', methods=['POST'])
 @login_required
 def add_repository():
