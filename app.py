@@ -1,8 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3.4
+# pylint: disable=C0103,C0111
 
 from flask import Flask, render_template, request, redirect, url_for, jsonify
-from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.login import LoginManager, login_required, login_user, logout_user, current_user
+from flask.ext.login import LoginManager, login_required, login_user, \
+    logout_user, current_user
 from util import slugify, naturaltime, clone_bare_repository
 from models import User, Repository, Tag
 from git import GitException
@@ -53,19 +54,19 @@ def view_repository(name):
     identifier = repository.get_shorthand_of_branch('master')
     sha1 = repository.get_sha1_of_branch('master')
     tags = Tag.query.order_by('name')
-    kwargs = { 'repository': repository,
-               'current_selection': repository.name,
-               'git_identifier': identifier,
-               'git_sha1': sha1,
-               'tags': tags,
-               'selection': 'repositories' }
+    kwargs = {'repository': repository,
+              'current_selection': repository.name,
+              'git_identifier': identifier,
+              'git_sha1': sha1,
+              'tags': tags,
+              'selection': 'repositories'}
     return render_template('view_repository.html', **kwargs)
 
 @app.route('/repository/<repository_name>/tags/apply', methods=['POST'])
 @login_required
 def apply_tags(repository_name):
     repository = Repository.query.filter_by(name=repository_name).first_or_404()
-    tag_names = filter(lambda t: t.startswith('apply-'), request.form.keys())
+    tag_names = [key for key in request.form.keys() if key.startswith('apply-')]
     repository.tags.clear()
     for tag_name in tag_names:
         tag = Tag.query.filter_by(slug=tag_name[6:]).first_or_404()
@@ -84,8 +85,8 @@ def add_repository():
         repository = clone_bare_repository(current_user, location)
         url = url_for('view_repository', name=repository.name)
         return jsonify(success=url)
-    except GitException as e:
-        return jsonify(error=e.args)
+    except GitException as ge:
+        return jsonify(error=ge.args)
     except IndexError:
         return jsonify(error='Location is invalid.')
 
@@ -93,9 +94,9 @@ def add_repository():
 @login_required
 def view_tag(slug):
     tag = Tag.query.filter_by(slug=slug).first_or_404()
-    kwargs = { 'tag': tag,
-               'current_selection': tag.name,
-               'selection': 'tags' }
+    kwargs = {'tag': tag,
+              'current_selection': tag.name,
+              'selection': 'tags'}
     return render_template('view_tag.html', **kwargs)
 
 @app.route('/tags/add', methods=['POST'])
@@ -118,12 +119,12 @@ def add_tag():
 @app.route('/all')
 @login_required
 def all():
-    kwargs = { 'selection': 'repositories' }
+    kwargs = {'selection': 'repositories'}
     return render_template('all.html', **kwargs)
 
 @app.route('/<path:path>')
 def static_proxy(path):
-  return app.send_static_file(path)
+    return app.send_static_file(path)
 
 if __name__ == '__main__':
     try:

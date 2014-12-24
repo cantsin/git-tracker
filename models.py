@@ -1,3 +1,5 @@
+# pylint: disable=C0103,C0111
+
 from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy, orm
 from flask.ext.login import UserMixin
@@ -61,7 +63,7 @@ class Repository(SaveMixin, GitMixin, db.Model):
                            secondary=tags,
                            backref=db.backref('repositories', lazy='dynamic'))
     name = db.Column(db.String(255), nullable=False)
-    kind = db.Column(db.String(255), nullable=False) # GITHUB, BITBUCKET, or LOCAL
+    kind = db.Column(db.String(255), nullable=False) # GITHUB, BITBUCKET, LOCAL
     location = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime(), nullable=False)
     updated_at = db.Column(db.DateTime(), nullable=False)

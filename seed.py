@@ -1,4 +1,6 @@
-from models import *
+# pylint: disable=C0103,C0111
+
+from models import User, Tag, db
 from random import choice, randint
 from util import clone_bare_repository
 from config import ssh_public_key_path, ssh_private_key_path
@@ -40,8 +42,8 @@ repositories = ['fsharp-finger-trees',
                 'rust']
 
 for repository in repositories:
-    repo_path = 'git@github.com:cantsin/' + repository
+    repo_path = 'git://github.com/cantsin/' + repository
     r = clone_bare_repository(u, repo_path)
-    for _ in range(randint(0,5)):
+    for _ in range(randint(0, 5)):
         r.tags.append(choice(Tag.query.all()))
     r.save()
