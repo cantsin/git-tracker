@@ -36,7 +36,7 @@ def login():
         user = User.query.filter_by(email=email).scalar()
         if user and user.check_password(password):
             login_user(user)
-            return redirect(url_for('all'))
+            return redirect(url_for('dashboard'))
         else:
             error = 'Email and password do not match.'
     return render_template('index.html', error=error)
@@ -116,11 +116,11 @@ def add_tag():
     except IndexError:
         return jsonify(error='Name field is invalid.')
 
-@app.route('/all')
+@app.route('/dashboard')
 @login_required
-def all():
+def dashboard():
     kwargs = {'selection': 'repositories'}
-    return render_template('all.html', **kwargs)
+    return render_template('dashboard.html', **kwargs)
 
 @app.route('/<path:path>')
 def static_proxy(path):
