@@ -19,7 +19,6 @@
   <div class="columns small-9">
     <p>View Repository {{ repository.get_name() }}</p>
     <p>Heat map and tree maps here</p>
-
     <table role="data">
       <thead>
         <tr>
@@ -50,7 +49,6 @@
         {% endfor %}
       </tbody>
     </table>
-
   </div>
   <div class="columns small-3">
     <div id="applied-tags" class="panel radius">
@@ -67,11 +65,16 @@
       </a>
       <div id="apply_tags" class="reveal-modal large" data-reveal>
         <h2><i class="fa fa-plus"></i> Apply tags</h2>
-        <form id="apply_tags_form" action="{{ url_for('apply_tags', repository_name=repository.name) }}" method="post">
+        <form id="apply_tags_form"
+              action="{{ url_for('apply_tags', repository_name=repository.name) }}"
+              method="post">
           <ul class="side-nav no-bullet small-block-grid-3">
           {% for tag in tags %}
             <li>
-              <input id="apply-{{ tag.slug }}" name="apply-{{ tag.slug }}" type="checkbox" {% if tag in repository.tags %}checked="checked"{% endif %}>
+              <input id="apply-{{ tag.slug }}"
+                     name="apply-{{ tag.slug }}"
+                     type="checkbox"
+                     {% if tag in repository.tags %}checked="checked"{% endif %}>
               <label for="apply-{{ tag.slug }}">{{ tag.name }}</label>
             </li>
           {% endfor %}
@@ -81,6 +84,18 @@
         <a class="close-reveal-modal">&#215;</a>
       </div>
     </div>
+  </div>
+</div>
+<div class="row">
+  <div class="columns small-9">
+    &nbsp;
+  </div>
+  <div class="columns small-3">
+    <small><i class="fa fa-trash"></i>
+      <a href="{{ url_for('delete_repository', name=repository.name) }}">
+        Delete repository statistics
+      </a>
+    </small>
   </div>
 </div>
 {% endblock %}

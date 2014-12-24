@@ -62,18 +62,12 @@ def view_repository(name):
               'selection': 'repositories'}
     return render_template('view_repository.html', **kwargs)
 
-@app.route('/repository/<repository_name>/tags/apply', methods=['POST'])
+@app.route('/repositories/<name>/delete', methods=['GET'])
 @login_required
-def apply_tags(repository_name):
-    repository = Repository.query.filter_by(name=repository_name).first_or_404()
-    tag_names = [key for key in request.form.keys() if key.startswith('apply-')]
-    repository.tags.clear()
-    for tag_name in tag_names:
-        tag = Tag.query.filter_by(slug=tag_name[6:]).first_or_404()
-        repository.tags.append(tag)
-    repository.save()
-    url = url_for('view_repository', name=repository_name)
-    return jsonify(success=url)
+def delete_repository(name):
+    repository = Repository.query.filter_by(name=name).first_or_404()
+    repository.delete()
+    return redirect(url_for('dashboard'))
 
 @app.route('/repositories/add', methods=['POST'])
 @login_required
@@ -90,6 +84,19 @@ def add_repository():
     except IndexError:
         return jsonify(error='Location is invalid.')
 
+@app.route('/repository/<repository_name>/tags/apply', methods=['POST'])
+@login_required
+def apply_tags(repository_name):
+    repository = Repository.query.filter_by(name=repository_name).first_or_404()
+    tag_names = [key for key in request.form.keys() if key.startswith('apply-')]
+    repository.tags.clear()
+    for tag_name in tag_names:
+        tag = Tag.query.filter_by(slug=tag_name[6:]).first_or_404()
+        repository.tags.append(tag)
+    repository.save()
+    url = url_for('view_repository', name=repository_name)
+    return jsonify(success=url)
+
 @app.route('/tag/<slug>')
 @login_required
 def view_tag(slug):
@@ -98,6 +105,13 @@ def view_tag(slug):
               'current_selection': tag.name,
               'selection': 'tags'}
     return render_template('view_tag.html', **kwargs)
+
+@app.route('/tag/<slug>/delete', methods=['GET'])
+@login_required
+def delete_tag(slug):
+    tag = Tag.query.filter_by(slug=slug).first_or_404()
+    tag.delete()
+    return redirect(url_for('dashboard'))
 
 @app.route('/tags/add', methods=['POST'])
 @login_required
