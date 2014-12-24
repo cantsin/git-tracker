@@ -4,7 +4,7 @@ jQuery.fn.toObservable = function(eventName, selector) {
   return Rx.Observable.fromEvent(this, eventName, selector);
 };
 
-var bind_creation = function(form_el) {
+export function bind_creation(form_el) {
   form_el.toObservable('submit').subscribe(e => {
     form_el.find('.temporary').remove();
     form_el.append('<i class="temporary fa fa-circle-o-notch fa-spin"></i>');
@@ -27,10 +27,7 @@ var bind_creation = function(form_el) {
     e.preventDefault();
     return false;
   });
-};
+}
 
 bind_creation($('#repository_form'));
 bind_creation($('#tag_form'));
-
-// only on view repository page
-bind_creation($('#apply_tags_form'));
