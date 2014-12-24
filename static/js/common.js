@@ -22,8 +22,7 @@ var bind_creation = function(form_el) {
       }
     });
     submit.fail(function(jqXHR, status, error) {
-      console.log(status);
-      console.log(error);
+      form_el.append('<div data-alert class="temporary alert-box alert">' + status + ': ' + error + '</div>');
     });
     e.preventDefault();
     return false;
