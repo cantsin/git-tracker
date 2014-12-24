@@ -1,3 +1,5 @@
+/* jshint esnext:true */
+
 jQuery.fn.toObservable = function(eventName, selector) {
   return Rx.Observable.fromEvent(this, eventName, selector);
 };
@@ -13,7 +15,7 @@ var bind_creation = function(form_el) {
     submit.done(function(response) {
       form_el.find('i.temporary').remove();
       if(response.success) {
-        window.location = response.success
+        window.location = response.success;
       }
       if(response.error) {
         form_el.append('<div data-alert class="temporary alert-box alert">' + response.error + '</div>');
@@ -30,3 +32,6 @@ var bind_creation = function(form_el) {
 
 bind_creation($('#repository_form'));
 bind_creation($('#tag_form'));
+
+// only on view repository page
+bind_creation($('#apply_tags_form'));
