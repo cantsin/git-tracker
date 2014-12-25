@@ -66,6 +66,7 @@ def view_repository(name):
 @login_required
 def delete_repository(name):
     repository = Repository.query.filter_by(name=name).first_or_404()
+    repository.clear_tags()
     repository.delete()
     return redirect(url_for('dashboard'))
 
@@ -88,8 +89,9 @@ def add_repository():
 @login_required
 def apply_tags(repository_name):
     repository = Repository.query.filter_by(name=repository_name).first_or_404()
-    tag_names = [key for key in request.form.keys() if key.startswith('apply-')]
-    repository.tags.clear()
+    tag_names = [key for (key, value) in request.form.items()
+                 if key.startswith('apply-') and value == 'on']
+    repository.clear_tags()
     for tag_name in tag_names:
         tag = Tag.query.filter_by(slug=tag_name[6:]).first_or_404()
         repository.tags.append(tag)

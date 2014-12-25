@@ -30,7 +30,7 @@ class User(SessionMixin, UserMixin, db.Model):
     ssh_public_key_path = db.Column(db.Text())
     ssh_private_key_path = db.Column(db.Text())
     avatar_image = db.Column(db.String(255))
-    is_active = db.Column(db.Boolean(), nullable=False, default=True)
+    active = db.Column(db.Boolean(), nullable=False, default=True)
     created_at = db.Column(db.DateTime(), nullable=False)
     updated_at = db.Column(db.DateTime(), nullable=False)
 
@@ -48,7 +48,7 @@ class User(SessionMixin, UserMixin, db.Model):
         return '<User %r>' % self.email
 
     def is_active(self):
-        return self.is_active
+        return self.active
 
 tags = db.Table('tags',
     db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')),
@@ -84,6 +84,11 @@ class Repository(SessionMixin, GitMixin, db.Model):
     @orm.reconstructor
     def reconstruct(self):
         self.connect_to_disk()
+
+    def clear_tags(self):
+        query = tags.delete().where(tags.c.repository_id == self.id)
+        db.session.execute(query)
+        db.session.commit()
 
     def get_name(self):
         return self.name[:-4] # strip .git suffix
