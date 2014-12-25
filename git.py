@@ -1,10 +1,13 @@
-# pylint: disable=C0103,C0111
+# pylint: disable=C0103,C0111,W0141
 
 from operator import itemgetter
-from itertools import islice
+from itertools import islice, dropwhile, takewhile, groupby
+from datetime import datetime, date
+from calendar import timegm
 
 from pygit2 import Tag, Commit, Repository, \
-    GIT_BRANCH_REMOTE, GIT_SORT_TOPOLOGICAL, GIT_SORT_TIME
+    GIT_BRANCH_REMOTE, GIT_SORT_TOPOLOGICAL, \
+    GIT_SORT_TIME, GIT_SORT_REVERSE
 import re
 
 class GitException(Exception):
@@ -70,12 +73,16 @@ class GitMixin(object):
         return (len(diff), additions, deletions)
 
     def get_first_updated(self):
-        all_commits = self.ondisk.walk(self.ondisk.head.target, GIT_SORT_TIME)
+        all_commits = self.ondisk.walk(self.ondisk.head.target,
+                                       GIT_SORT_TIME | GIT_SORT_REVERSE)
         first_commit = next(all_commits)
         return first_commit.commit_time
 
     def get_last_updated(self):
-        return self.ondisk.head.get_object().commit_time
+        all_commits = self.ondisk.walk(self.ondisk.head.target,
+                                       GIT_SORT_TIME)
+        last_commit = next(all_commits)
+        return last_commit.commit_time
 
     def get_file_count(self):
         diff = self.ondisk.head.get_object().tree.diff_to_tree()
@@ -88,3 +95,17 @@ class GitMixin(object):
     def get_author_count(self):
         commits = self.ondisk.walk(self.ondisk.head.target)
         return len(set([commit.author.email for commit in commits]))
+
+    def histogram(self, start, end):
+        all_commits = self.ondisk.walk(self.ondisk.head.target, GIT_SORT_TIME)
+        starting = dropwhile(lambda obj: obj.commit_time < start, all_commits)
+        series = takewhile(lambda obj: obj.commit_time <= end, starting)
+        def keyfunc(obj):
+            # we want to group our commit times by the day. so convert
+            # timestamp -> date -> timestamp
+            timestamp = date.fromtimestamp(obj.commit_time)
+            return timegm(timestamp.timetuple())
+        result = groupby(series, keyfunc)
+        return [{'date': commit_date,
+                 'value': len(list(commits))}
+                for commit_date, commits in result]

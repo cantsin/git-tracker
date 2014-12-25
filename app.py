@@ -68,7 +68,7 @@ def repository_activity(name):
     repository = Repository.query.filter_by(name=name).first_or_404()
     start = request.args.get('start') or repository.get_first_updated()
     end = request.args.get('end') or repository.get_last_updated()
-    return jsonify(repository.activity(start, end))
+    return jsonify(repository.histogram(start, end))
 
 @app.route('/repositories/<name>/delete', methods=['GET'])
 @login_required
