@@ -62,6 +62,14 @@ def view_repository(name):
               'selection': 'repositories'}
     return render_template('view_repository.html', **kwargs)
 
+@app.route('/repositories/<name>/activity/', methods=['GET'])
+@login_required
+def repository_activity(name):
+    repository = Repository.query.filter_by(name=name).first_or_404()
+    start = request.args.get('start') or repository.get_first_updated()
+    end = request.args.get('end') or repository.get_last_updated()
+    return jsonify(repository.activity(start, end))
+
 @app.route('/repositories/<name>/delete', methods=['GET'])
 @login_required
 def delete_repository(name):
