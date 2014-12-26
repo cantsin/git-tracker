@@ -1,10 +1,24 @@
 {% extends "layout.html" %}
 
+{% block javascript %}
+<script type="text/javascript" src="/js/raphael-min.js"></script>
+<script type="text/javascript" src="/js/treemap-squarify.js"></script>
+<script type="text/javascript" src="/js/treemap-raphael.js"></script>
+<script type="module" src="/js/git-treemap.js"></script>
+{% endblock %}
+
 {% block header %}
 <i class="fa fa-line-chart"></i>
 Overview
 {% endblock %}
 
 {% block body %}
-Summary of git commits.
+<div class="row">
+  <div class="columns small-12">
+    <div id="treemap"
+         data-tags='[{% for tag in current_user.tags %}"{{ tag.name }}"{% if not loop.last %},{% endif %}{% endfor %}]'
+         data-repository_count="[{% for tag in current_user.tags %}{{ tag.repositories.count() }}{% if not loop.last %},{% endif %}{% endfor %}]">
+    </div>
+  </div>
+</div>
 {% endblock %}

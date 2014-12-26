@@ -5,8 +5,8 @@
 {% endblock %}
 
 {% block javascript %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.js"></script>
-<script src="/js/cal-heatmap.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.js"></script>
+<script type="text/javascript" src="/js/cal-heatmap.js"></script>
 <script type="module" src="/js/git-heatmap.js"></script>
 {% endblock %}
 
@@ -31,11 +31,6 @@
              data-start="{{ repository.get_first_updated() }}"
              data-end="{{ repository.get_last_updated() }}">
         </div>
-      </div>
-    </div>
-    <div class="row">
-      <div class="columns small-12">
-        <div id="treemap"></div>
       </div>
     </div>
     <table role="data">
