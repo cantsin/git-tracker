@@ -3,7 +3,7 @@
 from itertools import islice, dropwhile, takewhile, groupby
 from operator import itemgetter
 from calendar import timegm
-from datetime import date
+from datetime import date, timedelta
 
 from pygit2 import Tag, Commit, Repository, Keypair, GitError, \
     clone_repository, \
@@ -161,8 +161,9 @@ class GitMixin(object):
         def keyfunc(obj):
             # we want to group our commit times by the day. so convert
             # timestamp -> date -> timestamp
-            timestamp = date.fromtimestamp(obj.commit_time)
-            return timegm(timestamp.timetuple())
+            new_date = date.fromtimestamp(obj.commit_time)
+            new_date += timedelta(days=1)
+            return timegm(new_date.timetuple())
         result = groupby(series, keyfunc)
         return [{'date': commit_date,
                  'value': len(list(commits))}
