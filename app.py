@@ -4,9 +4,9 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask.ext.login import LoginManager, login_required, login_user, \
     logout_user, current_user
-from util import slugify, naturaltime, clone_bare_repository
+from util import slugify, naturaltime
 from models import User, Repository, Tag
-from git import GitException
+from git import GitOperations, GitException
 
 app = Flask('git-tracker')
 app.jinja_env.filters['slugify'] = slugify
@@ -78,6 +78,14 @@ def delete_repository(name):
     repository.delete()
     return redirect(url_for('dashboard'))
 
+@app.route('/repositories/<name>refresh', methods=['GET'])
+@login_required
+def refresh_repository(name):
+    repository = Repository.query.filter_by(name=name).first_or_404()
+    repository.refresh()
+    url = url_for('view_repository', name=repository.name)
+    return jsonify(success=url)
+
 @app.route('/repositories/add', methods=['POST'])
 @login_required
 def add_repository():
@@ -85,7 +93,7 @@ def add_repository():
         location = request.form['location']
         if Repository.query.filter_by(location=location).scalar():
             return jsonify(error='Given repository already exists.')
-        repository = clone_bare_repository(current_user, location)
+        repository = GitOperations.create_repository(current_user, location)
         url = url_for('view_repository', name=repository.name)
         return jsonify(success=url)
     except GitException as ge:

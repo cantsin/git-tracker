@@ -1,11 +1,12 @@
 # pylint: disable=C0103,C0111,W0141
 
-from operator import itemgetter
 from itertools import islice, dropwhile, takewhile, groupby
-from datetime import datetime, date
+from operator import itemgetter
 from calendar import timegm
+from datetime import date
 
-from pygit2 import Tag, Commit, Repository, \
+from pygit2 import Tag, Commit, Repository, Keypair, GitError, \
+    clone_repository, \
     GIT_BRANCH_REMOTE, GIT_SORT_TOPOLOGICAL, \
     GIT_SORT_TIME, GIT_SORT_REVERSE
 import re
@@ -13,13 +14,63 @@ import re
 class GitException(Exception):
     pass
 
+class GitOperations(object):
+
+    # where we store our git repos.
+    git_repositories = 'repositories/'
+
+    @staticmethod
+    def git_uri_parse(git_repo):
+        """Parse out git user/repository name from the git uri."""
+        # strip the protocol if applicable
+        stripped = git_repo
+        if '://' in git_repo:
+            _, _, stripped = git_repo.partition('://')
+        # obtain the repository name.
+        results = stripped.split('/')
+        repository_name = results[-1]
+        if not '.git' in repository_name:
+            repository_name += '.git'
+        # obtain the git user (default is 'git')
+        git_username = 'git'
+        if '@' in results[0]:
+            git_username = results[0].split('@')[0]
+        return git_username, repository_name
+
+    @staticmethod
+    def get_credentials(git_user, user):
+        return Keypair(git_user,
+                       user.ssh_public_key_path,
+                       user.ssh_private_key_path,
+                       '')
+
+    @staticmethod
+    def create_repository(user, git_repo):
+        from models import Repository as LocalRepository
+        try:
+            git_user, git_name = GitOperations.git_uri_parse(git_repo)
+            creds = GitOperations.get_credentials(git_user, user)
+            where = GitOperations.git_repositories + git_name
+            clone_repository(git_repo, where, bare=True, credentials=creds)
+            repo = LocalRepository(user, git_user, git_name, git_repo).save()
+            return repo
+        except GitError as e:
+            raise GitException(e.args)
+        except ValueError as e:
+            raise GitException(e.args)
+
 class GitMixin(object):
 
     tag_regex = re.compile('^refs/tags')
     tag_or_remote_regex = re.compile('^refs/(tags|remotes)')
 
     def connect_to_disk(self):
-        self.ondisk = Repository('repositories/' + self.name)
+        self.ondisk = Repository(GitOperations.git_repositories + self.name)
+
+    def refresh(self, user):
+        creds = GitOperations.get_credentials(self.git_user, user)
+        for remote in self.ondisk.remotes:
+            remote.fetch(creds, '')
 
     def filter_references(self, regex):
         return [ref for ref in self.ondisk.listall_references()
@@ -110,3 +161,17 @@ class GitMixin(object):
         return [{'date': commit_date,
                  'value': len(list(commits))}
                 for commit_date, commits in result]
+
+if __name__ == "__main__":
+    repos = [
+        ('git://github.com/rails/rails.git', 'git', 'rails.git'),
+        ('git@github.com:cantsin/random-repo', 'git', 'random-repo.git'),
+        ('https://github.com/cantsin/test.git', 'git', 'test.git'),
+        ('ssh://git@github.com/cantsin/test-2.git', 'git', 'test-2.git'),
+        ('git@github.com:cantsin/test-3.git', 'git', 'test-3.git'),
+        ('git@bitbucket.org:accountname/reponame.git', 'git', 'reponame.git'),
+        ('ssh://git@bitbucket.org/account/reponame.git', 'git', 'reponame.git'),
+        ('https://foo@bitbucket.org/foo/reponame.git', 'foo', 'reponame.git'),
+        ('james@foo:random/testing.git', 'james', 'testing.git')]
+    for test_repo, test_user, test_name in repos:
+        assert GitOperations.git_uri_parse(test_repo) == (test_user, test_name)

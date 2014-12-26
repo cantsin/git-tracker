@@ -55,7 +55,7 @@ tags = db.Table('tags',
     db.Column('repository_id', db.Integer, db.ForeignKey('repository.id'))
 )
 
-class Repository(SessionMixin, GitMixin, db.Model):
+class Repository(SessionMixin, GitMixin, db.Model): #pylint: disable-msg=R0904
     LOCAL = "local"
     GITHUB = "github"
     BITBUCKET = "bitbucket"
@@ -66,17 +66,24 @@ class Repository(SessionMixin, GitMixin, db.Model):
     tags = db.relationship('Tag',
                            secondary=tags,
                            backref=db.backref('repositories', lazy='dynamic'))
+    git_user = db.Column(db.String(255), nullable=False)
     name = db.Column(db.String(255), nullable=False)
     kind = db.Column(db.String(255), nullable=False) # GITHUB, BITBUCKET, LOCAL
     location = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime(), nullable=False)
     updated_at = db.Column(db.DateTime(), nullable=False)
 
-    def __init__(self, user, name, location, kind):
+    def __init__(self, user, git_user, name, location):
         self.user_id = user.id
+        self.git_user = git_user
         self.name = name
         self.location = location
-        self.kind = kind
+        if 'github' in location:
+            self.kind = Repository.GITHUB
+        elif 'bitbucket' in location:
+            self.kind = Repository.BITBUCKET
+        else:
+            self.kind = Repository.LOCAL
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
 

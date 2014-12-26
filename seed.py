@@ -2,14 +2,14 @@
 
 from models import User, Tag, db
 from random import choice, randint
-from util import clone_bare_repository
+from git import GitOperations
 from config import ssh_public_key_path, ssh_private_key_path
 
 # destructive!
 db.drop_all()
 db.create_all()
 
-u = User("jtranovich@gmail.com", "password", "ssh-key")
+u = User("username", "password", "ssh-key")
 u.avatar_image = 'https://avatars2.githubusercontent.com/u/3013175?v=3&s=460'
 u.ssh_public_key_path = ssh_public_key_path
 u.ssh_private_key_path = ssh_private_key_path
@@ -43,7 +43,7 @@ repositories = ['fsharp-finger-trees',
 
 for repository in repositories:
     repo_path = 'git://github.com/cantsin/' + repository
-    r = clone_bare_repository(u, repo_path)
+    r = GitOperations.create_repository(u, repo_path)
     for _ in range(randint(0, 5)):
         r.tags.append(choice(Tag.query.all()))
     r.save()
