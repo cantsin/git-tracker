@@ -64,13 +64,11 @@ class GitMixin(object):
     tag_regex = re.compile('^refs/tags')
     tag_or_remote_regex = re.compile('^refs/(tags|remotes)')
 
-    def connect_to_disk(self):
+    def __init__(self):
         self.ondisk = Repository(GitOperations.git_repositories + self.name)
 
-    def refresh(self, user):
-        creds = GitOperations.get_credentials(self.git_user, user)
-        for remote in self.ondisk.remotes:
-            remote.fetch(creds, '')
+    def refresh(self):
+        return [remote.fetch() for remote in self.ondisk.remotes]
 
     def filter_references(self, regex):
         return [ref for ref in self.ondisk.listall_references()

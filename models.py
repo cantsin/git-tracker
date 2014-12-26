@@ -90,7 +90,7 @@ class Repository(SessionMixin, GitMixin, db.Model): #pylint: disable-msg=R0904
     # initialize GitMixin
     @orm.reconstructor
     def reconstruct(self):
-        self.connect_to_disk()
+        GitMixin.__init__(self)
 
     def clear_tags(self):
         query = tags.delete().where(tags.c.repository_id == self.id)

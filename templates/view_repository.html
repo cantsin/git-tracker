@@ -71,6 +71,20 @@
   </div>
   <div class="columns small-3">
     <div id="applied-tags" class="panel radius">
+      <a href="javascript:void(0);" data-reveal-id="fetch_repository" class="button tiny radius">
+        <i class="fa fa-refresh"></i> Fetch Repository
+      </a>
+      <div id="fetch_repository"
+           data-url="{{ url_for('refresh_repository', name=repository.name) }}"
+           class="reveal-modal small"
+           data-reveal>
+        <h2><i class="temporary fa fa-refresh fa-spin"></i> Fetching...</h2>
+        <a class="close-reveal-modal">&#215;</a>
+      </div>
+    </div>
+  </div>
+  <div class="columns small-3">
+    <div id="applied-tags" class="panel radius">
       <h5>Tagged as</h5>
         {% for tag in repository.tags %}
           <a href="{{ url_for('view_tag', slug=tag.slug) }}">

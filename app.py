@@ -78,11 +78,15 @@ def delete_repository(name):
     repository.delete()
     return redirect(url_for('dashboard'))
 
-@app.route('/repositories/<name>refresh', methods=['GET'])
+@app.route('/repositories/<name>/refresh', methods=['GET'])
 @login_required
 def refresh_repository(name):
     repository = Repository.query.filter_by(name=name).first_or_404()
-    repository.refresh()
+    progress_bars = repository.refresh()
+    for progress_bar in progress_bars:
+        while progress_bar.received_objects != progress_bar.total_objects:
+            print(progress_bar.received_objects + '/' +
+                  progress_bar.total_objects)
     url = url_for('view_repository', name=repository.name)
     return jsonify(success=url)
 
