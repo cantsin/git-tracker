@@ -1,6 +1,13 @@
 {% extends "layout.html" %}
 
+{% block css %}
+<link rel="stylesheet" href="/css/cal-heatmap.css" />
+{% endblock %}
+
 {% block javascript %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.js"></script>
+<script src="/js/cal-heatmap.js"></script>
+<script type="module" src="/js/git-heatmap.js"></script>
 {% endblock %}
 
 {% block header %}
@@ -17,8 +24,20 @@
 {% block body %}
 <div class="row">
   <div class="columns small-9">
-    <p>View Repository {{ repository.get_name() }}</p>
-    <p>Heat map and tree maps here</p>
+    <div class="row">
+      <div class="columns small-12">
+        <div id="heatmap"
+             data-url="{{ url_for('repository_activity', name=repository.name ) }}"
+             data-start="{{ repository.get_first_updated() }}"
+             data-end="{{ repository.get_last_updated() }}">
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="columns small-12">
+        <div id="treemap"></div>
+      </div>
+    </div>
     <table role="data">
       <thead>
         <tr>
