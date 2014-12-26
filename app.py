@@ -82,11 +82,7 @@ def delete_repository(name):
 @login_required
 def refresh_repository(name):
     repository = Repository.query.filter_by(name=name).first_or_404()
-    progress_bars = repository.refresh()
-    for progress_bar in progress_bars:
-        while progress_bar.received_objects != progress_bar.total_objects:
-            print(progress_bar.received_objects + '/' +
-                  progress_bar.total_objects)
+    repository.refresh()
     url = url_for('view_repository', name=repository.name)
     return jsonify(success=url)
 

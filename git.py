@@ -68,7 +68,15 @@ class GitMixin(object):
         self.ondisk = Repository(GitOperations.git_repositories + self.name)
 
     def refresh(self):
-        return [remote.fetch() for remote in self.ondisk.remotes]
+        progress_bars = [remote.fetch() for remote in self.ondisk.remotes]
+        for progress_bar in progress_bars:
+            while progress_bar.received_objects != progress_bar.total_objects:
+                print(progress_bar.received_objects + '/' +
+                      progress_bar.total_objects)
+        # update current reference
+        master_ref = self.ondisk.lookup_reference('refs/heads/master')
+        remote_ref = self.ondisk.lookup_reference('refs/remotes/origin/master')
+        master_ref.set_target(remote_ref.target)
 
     def filter_references(self, regex):
         return [ref for ref in self.ondisk.listall_references()
