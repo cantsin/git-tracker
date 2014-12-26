@@ -5,6 +5,14 @@ let url = $(id).data("url");
 let end = new Date($(id).data("end") * 1000);
 let start = new Date($(id).data("start") * 1000);
 let months = Math.ceil((end.getTime() - start.getTime()) / (30 * 24 * 60 * 60 * 1000)) + 1;
+let month_span = Math.min(months, 4);
+
+// adjust starting time if we have too broad a time range
+if (months >= 4) {
+  start = end;
+  start.setMonth(end.getMonth() - 3);
+}
+
 let calendar = new CalHeatMap();
 
 let parser = function(data) {
@@ -22,7 +30,7 @@ calendar.init({
   afterLoadData: parser,
   domain: "month",
   subDomain: "x_day",
-  range: months,
+  range: month_span,
   cellSize: 15,
   cellPadding: 3,
   cellRadius: 5,

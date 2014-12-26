@@ -97,7 +97,8 @@ class GitMixin(object):
         return len(set([commit.author.email for commit in commits]))
 
     def histogram(self, start, end):
-        all_commits = self.ondisk.walk(self.ondisk.head.target, GIT_SORT_TIME)
+        all_commits = self.ondisk.walk(self.ondisk.head.target,
+                                       GIT_SORT_TIME | GIT_SORT_REVERSE)
         starting = dropwhile(lambda obj: obj.commit_time < start, all_commits)
         series = takewhile(lambda obj: obj.commit_time <= end, starting)
         def keyfunc(obj):
