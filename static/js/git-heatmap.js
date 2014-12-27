@@ -32,7 +32,7 @@ calendar.init({
   domain: "month",
   subDomain: "x_day",
   range: month_span,
-  cellSize: 15,
+  cellSize: 17,
   cellPadding: 3,
   cellRadius: 5,
   domainGutter: 15,
