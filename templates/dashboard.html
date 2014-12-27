@@ -16,8 +16,7 @@ Overview
 <div class="row">
   <div class="columns small-12">
     <div id="treemap"
-         data-tags='[{% for tag in current_user.tags %}"{{ tag.name }}"{% if not loop.last %},{% endif %}{% endfor %}]'
-         data-repository_count="[{% for tag in current_user.tags %}{{ tag.repositories.count() }}{% if not loop.last %},{% endif %}{% endfor %}]">
+         data-tags='[{% for tag in current_user.tags %}{"tag": "{{ tag.name }}", "count": {{ tag.repositories.count() }} }{% if not loop.last %},{% endif %}{% endfor %}]'>
     </div>
   </div>
 </div>
