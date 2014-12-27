@@ -1,5 +1,15 @@
 {% extends "layout.html" %}
 
+{% block css %}
+<link rel="stylesheet" href="/css/cal-heatmap.css" />
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.js"></script>
+<script type="text/javascript" src="/js/cal-heatmap.js"></script>
+<script type="module" src="/js/git-heatmap.js"></script>
+{% endblock %}
+
 {% block header %}
 <i class="fa fa-tag"></i>
 {{ tag.name }} <span class="label radius secondary">{{ tag.repositories.count() }}</span>

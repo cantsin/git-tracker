@@ -153,21 +153,30 @@ class GitMixin(object):
         commits = self.ondisk.walk(self.ondisk.head.target)
         return len(set([commit.author.email for commit in commits]))
 
-    def histogram(self, start, end):
+    def commits_between(self, start, end):
         all_commits = self.ondisk.walk(self.ondisk.head.target,
                                        GIT_SORT_TIME | GIT_SORT_REVERSE)
         starting = dropwhile(lambda obj: obj.commit_time < start, all_commits)
-        series = takewhile(lambda obj: obj.commit_time <= end, starting)
-        def keyfunc(obj):
-            # we want to group our commit times by the day. so convert
-            # timestamp -> date -> timestamp
-            new_date = date.fromtimestamp(obj.commit_time)
-            new_date += timedelta(days=1)
-            return timegm(new_date.timetuple())
-        result = groupby(series, keyfunc)
+        return takewhile(lambda obj: obj.commit_time <= end, starting)
+
+    @staticmethod
+    def by_day(obj):
+        # we want to group our commit times by the day. so convert
+        # timestamp -> date -> timestamp
+        new_date = date.fromtimestamp(obj.commit_time)
+        new_date += timedelta(days=1)
+        return timegm(new_date.timetuple())
+
+    @staticmethod
+    def group_by(series):
+        result = groupby(series, GitMixin.by_day)
         return [{'date': commit_date,
                  'value': len(list(commits))}
                 for commit_date, commits in result]
+
+    def histogram(self, start, end):
+        series = self.commits_between(start, end)
+        return GitMixin.group_by(series)
 
 if __name__ == "__main__":
     repos = [
