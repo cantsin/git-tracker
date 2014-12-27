@@ -1,5 +1,5 @@
 #!/usr/bin/env python3.4
-# pylint: disable=C0103,C0111
+# pylint: disable=C0103,C0111,W0142
 
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask.ext.login import LoginManager, login_required, login_user, \
@@ -124,7 +124,15 @@ def view_tag(slug):
               'selection': 'tags'}
     return render_template('view_tag.html', **kwargs)
 
-@app.route('/tag/<slug>/delete', methods=['GET'])
+@app.route('/tags/<slug>/activity/', methods=['GET'])
+@login_required
+def tag_activity(slug):
+    tag = Tag.query.filter_by(slug=slug).first_or_404()
+    start = int(request.args.get('start')) or tag.get_first_updated()
+    end = int(request.args.get('end')) or tag.get_last_updated()
+    return jsonify({'result': tag.histogram(start, end)})
+
+@app.route('/tags/<slug>/delete', methods=['GET'])
 @login_required
 def delete_tag(slug):
     tag = Tag.query.filter_by(slug=slug).first_or_404()

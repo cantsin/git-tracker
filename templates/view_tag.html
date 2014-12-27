@@ -8,7 +8,15 @@
 {% block body %}
 <div class="row">
   <div class="columns small-12">
-    View Tag {{ tag.name }}
+    <div id="heatmap"
+         data-url="{{ url_for('tag_activity', slug=tag.slug) }}"
+         data-start="{{ tag.get_first_updated() }}"
+         data-end="{{ tag.get_last_updated() }}">
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="columns small-12">
     <table role="data">
       <thead>
         <tr>
@@ -32,7 +40,7 @@
         </tr>
         {% else %}
         <tr>
-          <td>Empty!</td>
+          <td colspan="6">Empty!</td>
         </tr>
         {% endfor %}
       </tbody>
