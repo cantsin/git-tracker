@@ -16,7 +16,7 @@ let boxFormatter = (coordinates, index) => {
 
   let saturation = (datapoint * 0.6) + 0.4;
   let brightness = (datapoint * 0.3) + 0.2;
-  let color = 'hsb(0.2,' + saturation + ',' + brightness + ')';
+  let color = 'hsb(0.6,' + saturation + ',' + brightness + ')';
 
   return {'fill' : color};
 };

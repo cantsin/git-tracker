@@ -42,6 +42,11 @@ calendar.init({
   legendHorizontalPosition: "left",
   legendCellSize: 15,
   legendCellPadding: 3,
+  legendColors: {
+    min: "#F2F2F2",
+    max: "#2A3E5A",
+    base: "white",
+  },
   label: {
     position: "top"
   }

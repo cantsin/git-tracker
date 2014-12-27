@@ -22,16 +22,6 @@ img.avatar {
 .logout, .tabs {
     margin-top: 1em;
 }
-.tabs, .tabs-content {
-    //display: block;
-}
-.hasChildren:before{
-   content: "+";
-   float: left;
-}
-.hasChildren.active:before{
-   content: "-";
-}
 .tabs dd > a, .tabs .tab-title > a {
     padding: 0.5em;
 }
