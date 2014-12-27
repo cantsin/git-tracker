@@ -19,7 +19,7 @@ img.avatar {
 .side-nav li a:not(.button) {
     padding: 0px;
 }
-#applied-tags, .logout, .tabs {
+.logout, .tabs {
     margin-top: 1em;
 }
 .tabs, .tabs-content {
@@ -40,4 +40,10 @@ img.avatar {
 }
 .columns.end small {
     float: right;
+}
+.button {
+    margin-bottom: 0px;
+}
+.applied-tags {
+    margin-bottom: 1em;
 }

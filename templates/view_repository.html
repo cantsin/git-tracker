@@ -75,7 +75,7 @@
     <div class="row">
       <div class="columns small-12">
         <div id="applied-tags" class="panel radius">
-          <p>Last updated {{ repository.updated_at|naturaltime }}</p>
+          <h6>Last updated {{ repository.updated_at|naturaltime }}</h6>
           <a href="javascript:void(0);" data-reveal-id="fetch_repository" class="button tiny radius">
             <i class="fa fa-refresh"></i> Fetch Repository
           </a>
@@ -90,14 +90,16 @@
       </div>
       <div class="columns small-12">
         <div id="applied-tags" class="panel radius">
-          <h5>Tagged as</h5>
-          {% for tag in repository.tags %}
-          <a href="{{ url_for('view_tag', slug=tag.slug) }}">
-            <span class="label radius secondary">{{ tag.name }}</span>
-          </a>
-          {% else %}
-          None.
-          {% endfor %}
+          <h6>Tagged as</h6>
+          <div class="applied-tags">
+            {% for tag in repository.tags %}
+            <a href="{{ url_for('view_tag', slug=tag.slug) }}">
+              <span class="label radius secondary">{{ tag.name }}</span>
+            </a>
+            {% else %}
+            None.
+            {% endfor %}
+          </div>
           <a href="javascript:void(0);" data-reveal-id="apply_tags" class="button tiny radius">
             <i class="fa fa-check-square-o"></i> Apply tags
           </a>
