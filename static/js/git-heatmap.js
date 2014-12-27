@@ -5,12 +5,13 @@ let url = $(id).data("url");
 let end = new Date($(id).data("end") * 1000);
 let start = new Date($(id).data("start") * 1000);
 let months = Math.ceil((end.getTime() - start.getTime()) / (30 * 24 * 60 * 60 * 1000)) + 1;
-let month_span = Math.min(months, 4);
+let max_span = 5;
+let month_span = Math.min(months, max_span);
 
 // adjust starting time if we have too broad a time range
-if (months >= 4) {
+if (months >= max_span) {
   start = end;
-  start.setMonth(end.getMonth() - 3);
+  start.setMonth(end.getMonth() - (month_span - 1));
 }
 
 let calendar = new CalHeatMap();

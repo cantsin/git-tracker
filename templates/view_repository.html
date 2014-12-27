@@ -23,17 +23,17 @@
 
 {% block body %}
 <div class="row">
-  <div class="columns small-9">
-    <div class="row">
-      <div class="columns small-12">
-        <div id="heatmap"
-             data-url="{{ url_for('repository_activity', name=repository.name ) }}"
-             data-start="{{ repository.get_first_updated() }}"
-             data-end="{{ repository.get_last_updated() }}">
-        </div>
-      </div>
+  <div class="columns small-12">
+    <div id="heatmap"
+         data-url="{{ url_for('repository_activity', name=repository.name ) }}"
+         data-start="{{ repository.get_first_updated() }}"
+         data-end="{{ repository.get_last_updated() }}">
     </div>
-    <table role="data">
+  </div>
+</div>
+<div class="row">
+  <div class="columns small-9">
+    <table role="data" width="100%">
       <thead>
         <tr>
           <th>Date</th>
@@ -49,7 +49,14 @@
         <tr>
           <td>{{ commit.commit_time|naturaltime }}</td>
           <td>{{ commit.author.name }}</td>
-          <td>{{ commit.message|truncate(25, True) }}</td>
+          <td>
+            <span data-tooltip
+                  aria-haspopup="true"
+                  class="has-tip"
+                  title="{{ commit.message }}">
+              {{ commit.message|truncate(20, True) }}
+            </span>
+          </td>
           {% with changed_files, additions, deletions = repository.get_numstat(commit) %}
           <td>{{ changed_files }}</td>
           <td>{{ additions }}</td>
@@ -65,51 +72,56 @@
     </table>
   </div>
   <div class="columns small-3">
-    <div id="applied-tags" class="panel radius">
-      <a href="javascript:void(0);" data-reveal-id="fetch_repository" class="button tiny radius">
-        <i class="fa fa-refresh"></i> Fetch Repository
-      </a>
-      <div id="fetch_repository"
-           data-url="{{ url_for('refresh_repository', name=repository.name) }}"
-           class="reveal-modal small"
-           data-reveal>
-        <h2><i class="temporary fa fa-refresh fa-spin"></i> Fetching...</h2>
-        <a class="close-reveal-modal">&#215;</a>
+    <div class="row">
+      <div class="columns small-12">
+        <div id="applied-tags" class="panel radius">
+          <p>Last updated {{ repository.updated_at }}</p>
+          <a href="javascript:void(0);" data-reveal-id="fetch_repository" class="button tiny radius">
+            <i class="fa fa-refresh"></i> Fetch Repository
+          </a>
+          <div id="fetch_repository"
+               data-url="{{ url_for('refresh_repository', name=repository.name) }}"
+               class="reveal-modal small"
+               data-reveal>
+            <h2><i class="temporary fa fa-refresh fa-spin"></i> Fetching...</h2>
+            <a class="close-reveal-modal">&#215;</a>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-  <div class="columns small-3">
-    <div id="applied-tags" class="panel radius">
-      <h5>Tagged as</h5>
-        {% for tag in repository.tags %}
+      <div class="columns small-12">
+        <div id="applied-tags" class="panel radius">
+          <h5>Tagged as</h5>
+          {% for tag in repository.tags %}
           <a href="{{ url_for('view_tag', slug=tag.slug) }}">
             <span class="label radius secondary">{{ tag.name }}</span>
           </a>
-        {% else %}
+          {% else %}
           None.
-        {% endfor %}
-      <a href="javascript:void(0);" data-reveal-id="apply_tags" class="button tiny radius">
-        <i class="fa fa-check-square-o"></i> Apply tags
-      </a>
-      <div id="apply_tags" class="reveal-modal large" data-reveal>
-        <h2><i class="fa fa-plus"></i> Apply tags</h2>
-        <form id="apply_tags_form"
-              action="{{ url_for('apply_tags', repository_name=repository.name) }}"
-              method="post">
-          <ul class="side-nav no-bullet small-block-grid-3">
-          {% for tag in tags %}
-            <li>
-              <input id="apply-{{ tag.slug }}"
-                     name="apply-{{ tag.slug }}"
-                     type="checkbox"
-                     {% if tag in repository.tags %}checked="checked"{% endif %}>
-              <label for="apply-{{ tag.slug }}">{{ tag.name }}</label>
-            </li>
           {% endfor %}
-          </ul>
-          <input class="logout button tiny radius" type="submit" value="Save">
-        </form>
-        <a class="close-reveal-modal">&#215;</a>
+          <a href="javascript:void(0);" data-reveal-id="apply_tags" class="button tiny radius">
+            <i class="fa fa-check-square-o"></i> Apply tags
+          </a>
+          <div id="apply_tags" class="reveal-modal large" data-reveal>
+            <h2><i class="fa fa-plus"></i> Apply tags</h2>
+            <form id="apply_tags_form"
+                  action="{{ url_for('apply_tags', repository_name=repository.name) }}"
+                  method="post">
+              <ul class="side-nav no-bullet small-block-grid-3">
+                {% for tag in tags %}
+                <li>
+                  <input id="apply-{{ tag.slug }}"
+                         name="apply-{{ tag.slug }}"
+                         type="checkbox"
+                         {% if tag in repository.tags %}checked="checked"{% endif %}>
+                  <label for="apply-{{ tag.slug }}">{{ tag.name }}</label>
+                </li>
+                {% endfor %}
+              </ul>
+              <input class="logout button tiny radius" type="submit" value="Save">
+            </form>
+            <a class="close-reveal-modal">&#215;</a>
+          </div>
+        </div>
       </div>
     </div>
   </div>

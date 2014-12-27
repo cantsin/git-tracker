@@ -42,7 +42,11 @@
         {% for repository in tag.repositories %}
         <tr>
           <td>{{ repository.get_last_updated()|naturaltime }}</td>
-          <td>{{ repository.get_name() }}</td>
+          <td>
+            <a href="{{ url_for('view_repository', name=repository.name) }}">
+              {{ repository.get_name() }}
+            </a>
+          </td>
           <td>{{ repository.get_commit_count() }}</td>
           <td>{{ repository.get_file_count() }}</td>
           <td>{{ repository.get_line_count() }}</td>

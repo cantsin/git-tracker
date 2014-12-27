@@ -61,14 +61,14 @@ class GitOperations(object):
 
 class GitMixin(object):
 
-    tag_regex = re.compile('^refs/tags')
-    tag_or_remote_regex = re.compile('^refs/(tags|remotes)')
+    tag_or_remote_regex = re.compile('^refs/(tags|remotes)/(.*)')
 
     def __init__(self):
         self.ondisk = Repository(GitOperations.git_repositories + self.name)
 
     def refresh(self):
         progress_bars = [remote.fetch() for remote in self.ondisk.remotes]
+        # blocking, for now...
         for progress_bar in progress_bars:
             while progress_bar.received_objects != progress_bar.total_objects:
                 print(progress_bar.received_objects + '/' +
@@ -82,11 +82,26 @@ class GitMixin(object):
         return [ref for ref in self.ondisk.listall_references()
                 if regex.match(ref)]
 
-    def get_tags(self):
-        return self.filter_references(GitMixin.tag_regex)
+    def get_commit_time(self, name):
+        ref = self.ondisk.revparse_single(name)
+        if isinstance(ref, Tag):
+            return ref.get_object().commit_time
+        if isinstance(ref, Commit):
+            return ref.commit_time
+        raise GitException('invalid reference: commit time could not be found.')
 
-    def get_branches(self):
-        return self.ondisk.listall_branches(GIT_BRANCH_REMOTE)
+    def get_latest_refs(self, count=None):
+        info = self.filter_references(GitMixin.tag_or_remote_regex)
+        refs = list(zip(info, map(self.get_commit_time, info)))
+        refs.sort(key=itemgetter(1), reverse=True)
+        def ref_info(info):
+            (ref, commit_time) = info
+            what, name = GitMixin.tag_or_remote_regex.findall(ref)[0]
+            return (what, name, commit_time)
+        refs = map(ref_info, refs)
+        if not count:
+            return refs
+        return islice(refs, count)
 
     def get_commits(self, count=None):
         all_commits = self.ondisk.walk(self.ondisk.head.target,
@@ -97,22 +112,6 @@ class GitMixin(object):
 
     def get_commit_count(self):
         return len(list(self.ondisk.walk(self.ondisk.head.target)))
-
-    def get_latest_refs(self, count=None):
-        info = self.filter_references(GitMixin.tag_or_remote_regex)
-        refs = list(zip(info, map(self.get_commit_time, info)))
-        refs.sort(key=itemgetter(1), reverse=True)
-        if not count:
-            return refs
-        return islice(refs, count)
-
-    def get_commit_time(self, name):
-        ref = self.ondisk.revparse_single(name)
-        if isinstance(ref, Tag):
-            return ref.get_object().commit_time
-        if isinstance(ref, Commit):
-            return ref.commit_time
-        raise GitException('invalid reference: commit time could not be found.')
 
     def get_shorthand_of_branch(self, branch):
         return self.ondisk.lookup_branch(branch).shorthand

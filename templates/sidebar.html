@@ -16,8 +16,20 @@
         </a>
         {% if repository.name == current_selection %}
         <ul>
-          {% for ref, date in repository.get_latest_refs(count=7) %}
-          <li>{{ ref }}, {{ date|naturaltime }}</li>
+          {% for what, ref, date in repository.get_latest_refs(count=7) %}
+          <li>
+            {% if what == 'tags' %}
+              <i class="fa fa-tags"></i>
+            {% elif what == 'remotes' %}
+              <i class="fa fa-code-fork"></i>
+            {% endif %}
+            <span data-tooltip
+                  aria-haspopup="true"
+                  class="has-tip"
+                  title="updated {{ date|naturaltime }}">
+              {{ ref }}
+            </span>
+          </li>
           {% endfor %}
         </ul>
         {% endif %}
