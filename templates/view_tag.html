@@ -20,8 +20,8 @@
   <div class="columns small-12">
     <div id="heatmap"
          data-url="{{ url_for('tag_activity', slug=tag.slug) }}"
-         data-start="{{ tag.get_first_updated() }}"
-         data-end="{{ tag.get_last_updated() }}">
+         data-start="{{ first_updated }}"
+         data-end="{{ last_updated }}">
     </div>
   </div>
 </div>

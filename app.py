@@ -7,6 +7,7 @@ from flask.ext.login import LoginManager, login_required, login_user, \
 from util import slugify, naturaltime
 from models import User, Repository, Tag
 from git import GitOperations, GitException
+from data import DataOperations
 
 app = Flask('git-tracker')
 app.jinja_env.filters['slugify'] = slugify
@@ -119,8 +120,12 @@ def apply_tags(repository_name):
 @login_required
 def view_tag(slug):
     tag = Tag.query.filter_by(slug=slug).first_or_404()
+    first_updated = DataOperations.get_first_updated(tag.repositories)
+    last_updated = DataOperations.get_last_updated(tag.repositories)
     kwargs = {'tag': tag,
               'current_selection': tag.name,
+              'first_updated': first_updated,
+              'last_updated': last_updated,
               'selection': 'tags'}
     return render_template('view_tag.html', **kwargs)
 
@@ -128,9 +133,12 @@ def view_tag(slug):
 @login_required
 def tag_activity(slug):
     tag = Tag.query.filter_by(slug=slug).first_or_404()
-    start = int(request.args.get('start')) or tag.get_first_updated()
-    end = int(request.args.get('end')) or tag.get_last_updated()
-    return jsonify({'result': tag.histogram(start, end)})
+    first_updated = DataOperations.get_first_updated(tag.repositories)
+    last_updated = DataOperations.get_last_updated(tag.repositories)
+    start = int(request.args.get('start')) or first_updated
+    end = int(request.args.get('end')) or last_updated
+    result = DataOperations.histogram(tag.repositories, start, end)
+    return jsonify({'result': result})
 
 @app.route('/tags/<slug>/delete', methods=['GET'])
 @login_required
@@ -156,10 +164,24 @@ def add_tag():
     except IndexError:
         return jsonify(error='Name field is invalid.')
 
+@app.route('/dashboard/activity')
+@login_required
+def all_activity():
+    first_updated = DataOperations.get_first_updated(current_user.repositories)
+    last_updated = DataOperations.get_last_updated(current_user.repositories)
+    start = int(request.args.get('start')) or first_updated
+    end = int(request.args.get('end')) or last_updated
+    result = DataOperations.histogram(current_user.repositories, start, end)
+    return jsonify({'result': result})
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    kwargs = {'selection': 'repositories'}
+    first_updated = DataOperations.get_first_updated(current_user.repositories)
+    last_updated = DataOperations.get_last_updated(current_user.repositories)
+    kwargs = {'first_updated': first_updated,
+              'last_updated': last_updated,
+              'selection': 'repositories'}
     return render_template('dashboard.html', **kwargs)
 
 @app.route('/<path:path>')

@@ -8,7 +8,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from util import slugify
 from git import GitMixin
-from tag import TagDataMixin
 
 app = Flask("git-tracker")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
@@ -104,7 +103,7 @@ class Repository(SessionMixin, GitMixin, db.Model): #pylint: disable-msg=R0904
     def __repr__(self):
         return '<Repository %r (%r)>' % (self.name, self.kind)
 
-class Tag(TagDataMixin, SessionMixin, db.Model):
+class Tag(SessionMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User',

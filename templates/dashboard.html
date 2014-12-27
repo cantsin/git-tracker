@@ -1,9 +1,16 @@
 {% extends "layout.html" %}
 
+{% block css %}
+<link rel="stylesheet" href="/css/cal-heatmap.css" />
+{% endblock %}
+
 {% block javascript %}
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.js"></script>
 <script type="text/javascript" src="/js/raphael-min.js"></script>
 <script type="text/javascript" src="/js/treemap-squarify.js"></script>
 <script type="text/javascript" src="/js/treemap-raphael.js"></script>
+<script type="text/javascript" src="/js/cal-heatmap.js"></script>
+<script type="module" src="/js/git-heatmap.js"></script>
 <script type="module" src="/js/git-treemap.js"></script>
 {% endblock %}
 
@@ -13,6 +20,15 @@ Overview
 {% endblock %}
 
 {% block body %}
+<div class="row">
+  <div class="columns small-12">
+    <div id="heatmap"
+         data-url="{{ url_for('all_activity') }}"
+         data-start="{{ first_updated }}"
+         data-end="{{ last_updated }}">
+    </div>
+  </div>
+</div>
 <div class="row">
   <div class="columns small-12">
     <div id="treemap"

@@ -4,21 +4,24 @@ from operator import attrgetter
 from git import GitMixin
 from sys import maxsize
 
-class TagDataMixin(object):
+class DataOperations(object):
 
-    def get_first_updated(self):
+    @staticmethod
+    def get_first_updated(repositories):
         return min([repository.get_first_updated()
-                    for repository in self.repositories],
+                    for repository in repositories],
                    default=maxsize)
 
-    def get_last_updated(self):
+    @staticmethod
+    def get_last_updated(repositories):
         return max([repository.get_last_updated()
-                    for repository in self.repositories],
+                    for repository in repositories],
                    default=0)
 
-    def histogram(self, start, end):
+    @staticmethod
+    def histogram(repositories, start, end):
         commits = []
-        for repository in self.repositories:
+        for repository in repositories:
             commits.extend(list(repository.commits_between(start, end)))
         commits.sort(key=attrgetter('commit_time'))
         return GitMixin.group_by(commits)

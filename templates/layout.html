@@ -31,7 +31,9 @@
   <body>
     <div class="row" id="header">
       <div class="small-2 columns sidebar">
-        <img src="{{ current_user.avatar_image }}" class="avatar" />
+        <a href="{{ url_for('dashboard') }}">
+          <img src="{{ current_user.avatar_image }}" class="avatar" />
+        </a>
       </div>
       <div class="small-10 columns header">
         <div class="row">
