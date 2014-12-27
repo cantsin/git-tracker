@@ -36,12 +36,12 @@
     <table role="data">
       <thead>
         <tr>
-          <th width="200">Date</th>
+          <th>Date</th>
           <th>Author</th>
           <th>Message</th>
-          <th width="200">Files</th>
-          <th width="150">+</th>
-          <th width="150">-</th>
+          <th width="50">Files</th>
+          <th width="50">+</th>
+          <th width="50">-</th>
         </tr>
       </thead>
       <tbody>
@@ -118,7 +118,7 @@
   <div class="columns small-9">
     &nbsp;
   </div>
-  <div class="columns small-3">
+  <div class="columns small-3 end">
     <small><i class="fa fa-trash"></i>
       <a href="{{ url_for('delete_repository', name=repository.name) }}">
         Delete repository statistics

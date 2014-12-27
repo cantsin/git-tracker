@@ -27,15 +27,15 @@
 </div>
 <div class="row">
   <div class="columns small-12">
-    <table role="data">
+    <table role="data" width="100%">
       <thead>
         <tr>
-          <th width="200">Date</th>
+          <th>Date</th>
           <th>Repository</th>
-          <th width="200">Commits</th>
-          <th width="200">Files</th>
-          <th width="150">Lines</th>
-          <th width="150">Authors</th>
+          <th width="100">Commits</th>
+          <th width="100">Files</th>
+          <th width="100">Lines</th>
+          <th width="50">Authors</th>
         </tr>
       </thead>
       <tbody>
@@ -61,7 +61,7 @@
   <div class="columns small-9">
     &nbsp;
   </div>
-  <div class="columns small-3">
+  <div class="columns small-3 end">
     <small><i class="fa fa-trash"></i>
       <a href="{{ url_for('delete_tag', slug=tag.slug) }}">
         Delete tag

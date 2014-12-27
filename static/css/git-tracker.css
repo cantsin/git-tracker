@@ -38,3 +38,6 @@ img.avatar {
 .cal-heatmap-container {
     margin: 1em;
 }
+.columns.end small {
+    float: right;
+}
