@@ -15,6 +15,7 @@ db = SQLAlchemy(app)
 
 class SessionMixin(object):
     def save(self):
+        self.updated_at = datetime.now()
         db.session.add(self)
         db.session.commit()
         return self

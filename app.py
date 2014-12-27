@@ -84,6 +84,7 @@ def delete_repository(name):
 def refresh_repository(name):
     repository = Repository.query.filter_by(name=name).first_or_404()
     repository.refresh()
+    repository.save()
     url = url_for('view_repository', name=repository.name)
     return jsonify(success=url)
 

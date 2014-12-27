@@ -18,4 +18,6 @@ def slugify(text, delim=b'-'):
     return delim.join(result).decode("utf-8", "strict")
 
 def naturaltime(ue):
-    return humanize.naturaltime(datetime.fromtimestamp(ue))
+    if isinstance(ue, int):
+        return humanize.naturaltime(datetime.fromtimestamp(ue))
+    return humanize.naturaltime(ue)

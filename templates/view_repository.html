@@ -75,7 +75,7 @@
     <div class="row">
       <div class="columns small-12">
         <div id="applied-tags" class="panel radius">
-          <p>Last updated {{ repository.updated_at }}</p>
+          <p>Last updated {{ repository.updated_at|naturaltime }}</p>
           <a href="javascript:void(0);" data-reveal-id="fetch_repository" class="button tiny radius">
             <i class="fa fa-refresh"></i> Fetch Repository
           </a>
