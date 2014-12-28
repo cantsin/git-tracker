@@ -26,7 +26,7 @@ class SessionMixin(object):
 
 class User(SessionMixin, UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(255), nullable=False, unique=True)
+    login = db.Column(db.String(255), nullable=False, unique=True)
     password = orm.deferred(db.Column(db.String(255), nullable=False))
     ssh_public_key_path = db.Column(db.Text())
     ssh_private_key_path = db.Column(db.Text())
@@ -35,26 +35,39 @@ class User(SessionMixin, UserMixin, db.Model):
     created_at = db.Column(db.DateTime(), nullable=False)
     updated_at = db.Column(db.DateTime(), nullable=False)
 
-    def check_password(self, password):
-        return check_password_hash(self.password, password)
-
-    def __init__(self, email, password, ssh_key):
-        self.email = email
+    def __init__(self, login, password, ssh_key):
+        self.login = login
         self.password = generate_password_hash(password)
         self.ssh_key = ssh_key
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
 
     def __repr__(self):
-        return '<User %r>' % self.email
+        return '<User %r>' % self.id
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
 
     def is_active(self):
         return self.active
 
+class UserEmail(SessionMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship('User', backref=db.backref('emails', lazy='dynamic'))
+    created_at = db.Column(db.DateTime(), nullable=False)
+    updated_at = db.Column(db.DateTime(), nullable=False)
+
+    def __init__(self, user, email):
+        self.user_id = user.id
+        self.email = email
+        self.created_at = datetime.now()
+        self.updated_at = datetime.now()
+
 tags = db.Table('tags',
-    db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')),
-    db.Column('repository_id', db.Integer, db.ForeignKey('repository.id'))
-)
+                db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')),
+                db.Column('repository_id', db.Integer, db.ForeignKey('repository.id')))
 
 class Repository(SessionMixin, GitMixin, db.Model): #pylint: disable-msg=R0904
     LOCAL = "local"

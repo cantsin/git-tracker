@@ -1,6 +1,6 @@
 # pylint: disable=C0103,C0111
 
-from models import User, Tag, db
+from models import User, Tag, UserEmail, db
 from random import choice, randint
 from git import GitOperations
 from config import ssh_public_key_path, ssh_private_key_path
@@ -14,6 +14,13 @@ u.avatar_image = 'https://avatars2.githubusercontent.com/u/3013175?v=3&s=460'
 u.ssh_public_key_path = ssh_public_key_path
 u.ssh_private_key_path = ssh_private_key_path
 u.save()
+
+emails = ['jtranovich@gmail.com',
+          'james@openhorizonlabs.com']
+
+for email in emails:
+    ue = UserEmail(u, email).save()
+    u.emails.append(ue)
 
 tags = [('F#', 2),
         ('Data Structures', 3),
