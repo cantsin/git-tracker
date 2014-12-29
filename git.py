@@ -6,9 +6,8 @@ from calendar import timegm
 from datetime import date, timedelta
 
 from pygit2 import Tag, Commit, Repository, Keypair, GitError, \
-    clone_repository, \
-    GIT_BRANCH_REMOTE, GIT_SORT_TOPOLOGICAL, \
-    GIT_SORT_TIME, GIT_SORT_REVERSE
+    GIT_SORT_TOPOLOGICAL, GIT_SORT_TIME, GIT_SORT_REVERSE, \
+    clone_repository
 import re
 
 class GitException(Exception):
@@ -103,15 +102,19 @@ class GitMixin(object):
             return refs
         return islice(refs, count)
 
+    def filter_commits(self, flags=0):
+        all_commits = self.ondisk.walk(self.ondisk.head.target, flags)
+        emails = [ue.email for ue in self.user.emails.all()]
+        return filter(lambda commit: commit.author.email in emails, all_commits)
+
     def get_commits(self, count=None):
-        all_commits = self.ondisk.walk(self.ondisk.head.target,
-                                       GIT_SORT_TOPOLOGICAL)
+        all_commits = self.filter_commits(GIT_SORT_TOPOLOGICAL)
         if not count:
             return all_commits
         return islice(all_commits, count)
 
     def get_commit_count(self):
-        return len(list(self.ondisk.walk(self.ondisk.head.target)))
+        return len(list(self.filter_commits()))
 
     def get_shorthand_of_branch(self, branch):
         return self.ondisk.lookup_branch(branch).shorthand
@@ -129,14 +132,12 @@ class GitMixin(object):
         return (len(diff), additions, deletions)
 
     def get_first_updated(self):
-        all_commits = self.ondisk.walk(self.ondisk.head.target,
-                                       GIT_SORT_TIME | GIT_SORT_REVERSE)
+        all_commits = self.filter_commits(GIT_SORT_TIME | GIT_SORT_REVERSE)
         first_commit = next(all_commits)
         return first_commit.commit_time
 
     def get_last_updated(self):
-        all_commits = self.ondisk.walk(self.ondisk.head.target,
-                                       GIT_SORT_TIME)
+        all_commits = self.filter_commits(GIT_SORT_TIME)
         last_commit = next(all_commits)
         return last_commit.commit_time
 
@@ -149,12 +150,11 @@ class GitMixin(object):
         return sum([patch.deletions for patch in diff])
 
     def get_author_count(self):
-        commits = self.ondisk.walk(self.ondisk.head.target)
+        commits = self.filter_commits()
         return len(set([commit.author.email for commit in commits]))
 
     def commits_between(self, start, end):
-        all_commits = self.ondisk.walk(self.ondisk.head.target,
-                                       GIT_SORT_TIME | GIT_SORT_REVERSE)
+        all_commits = self.filter_commits(GIT_SORT_TIME | GIT_SORT_REVERSE)
         starting = dropwhile(lambda obj: obj.commit_time < start, all_commits)
         return takewhile(lambda obj: obj.commit_time <= end, starting)
 

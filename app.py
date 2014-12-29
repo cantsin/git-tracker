@@ -34,7 +34,7 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        user = User.query.filter_by(email=email).scalar()
+        user = User.query.filter_by(login=email).scalar()
         if user and user.check_password(password):
             login_user(user)
             return redirect(url_for('dashboard'))

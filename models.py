@@ -51,7 +51,7 @@ class User(SessionMixin, UserMixin, db.Model):
     def is_active(self):
         return self.active
 
-class UserEmail(SessionMixin, db.Model):
+class UserEmail(SessionMixin, db.Model): #pylint: disable-msg=R0903
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -64,6 +64,9 @@ class UserEmail(SessionMixin, db.Model):
         self.email = email
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
+
+    def __repr__(self):
+        return '<Email %r for %r>' % (self.email, self.user)
 
 tags = db.Table('tags',
                 db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')),
@@ -117,7 +120,7 @@ class Repository(SessionMixin, GitMixin, db.Model): #pylint: disable-msg=R0904
     def __repr__(self):
         return '<Repository %r (%r)>' % (self.name, self.kind)
 
-class Tag(SessionMixin, db.Model):
+class Tag(SessionMixin, db.Model): #pylint: disable-msg=R0903
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User',
