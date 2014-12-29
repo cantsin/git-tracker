@@ -132,12 +132,14 @@ class GitMixin(object):
         return (len(diff), additions, deletions)
 
     def get_first_updated(self):
-        all_commits = self.filter_commits(GIT_SORT_TIME | GIT_SORT_REVERSE)
+        all_commits = self.ondisk.walk(self.ondisk.head.target,
+                                       GIT_SORT_TIME | GIT_SORT_REVERSE)
         first_commit = next(all_commits)
         return first_commit.commit_time
 
     def get_last_updated(self):
-        all_commits = self.filter_commits(GIT_SORT_TIME)
+        all_commits = self.ondisk.walk(self.ondisk.head.target,
+                                       GIT_SORT_TIME)
         last_commit = next(all_commits)
         return last_commit.commit_time
 
