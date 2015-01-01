@@ -125,19 +125,16 @@
           </div>
         </div>
       </div>
+      <div id="delete_repository" class="columns small-12">
+        <p>
+          <small><i class="fa fa-trash"></i>
+            <a href="{{ url_for('delete_repository', name=repository.name) }}">
+              Delete repository statistics
+            </a>
+          </small>
+        </p>
+      </div>
     </div>
-  </div>
-</div>
-<div class="row">
-  <div class="columns small-9">
-    &nbsp;
-  </div>
-  <div class="columns small-3 end">
-    <small><i class="fa fa-trash"></i>
-      <a href="{{ url_for('delete_repository', name=repository.name) }}">
-        Delete repository statistics
-      </a>
-    </small>
   </div>
 </div>
 {% endblock %}

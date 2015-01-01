@@ -31,9 +31,8 @@
   <body>
     <div class="row" id="header">
       <div class="small-2 columns sidebar">
-        <a href="{{ url_for('dashboard') }}">
-          <img src="{{ current_user.avatar_image }}" class="avatar" />
-        </a>
+        <img src="{{ current_user.avatar_image }}" class="avatar" />
+        <p><a href="{{ url_for('dashboard') }}">View Dashboard</a></p>
       </div>
       <div class="small-10 columns header">
         <div class="row">
@@ -53,6 +52,16 @@
         {% include "sidebar.html" %}
       </div>
       <div class="small-10 columns">{% block body %}{% endblock %}</div>
+    </div>
+    <div class="row">
+      <div class="small-4 columns">&nbsp;</div>
+      <div class="small-4 columns">
+        <small>
+          <a href="https://github.com/cantsin/git-tracker">
+            quantify progress! <i class="fa fa-heart"></i> git-tracker {{ config.version }}
+          </a>
+        </small>
+      <div class="small-4 columns">&nbsp;</div>
     </div>
     <!-- js, redux -->
     <script src="/js/foundation.min.js"></script>

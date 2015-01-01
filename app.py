@@ -197,4 +197,5 @@ if __name__ == '__main__':
         import os
         app.secret_key = os.urandom(24)
     app.debug = True
+    app.config.version = "1.0"
     app.run()

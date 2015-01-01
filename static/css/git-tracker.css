@@ -1,11 +1,14 @@
 #header {
     margin-top: 1em;
 }
+#header p, #delete_repository p, #delete_tag p {
+    text-align: center;
+}
 .sidebar {
     border-right-style: solid;
     border-right-width: 1px;
     border-right-color: #D8D8D8;
-    padding: 0px;
+    padding: 0.25em;
 }
 img.avatar {
     width: 69px;
