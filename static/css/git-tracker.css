@@ -1,7 +1,7 @@
-#header {
-    margin-top: 1em;
+#login {
+    margin-top: 5em;
 }
-#header p, #delete_repository p, #delete_tag p {
+#header p, #delete_repository p, #delete_tag p, #footer p {
     text-align: center;
 }
 .sidebar {

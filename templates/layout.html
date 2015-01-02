@@ -53,16 +53,7 @@
       </div>
       <div class="small-10 columns">{% block body %}{% endblock %}</div>
     </div>
-    <div class="row">
-      <div class="small-4 columns">&nbsp;</div>
-      <div class="small-4 columns">
-        <small>
-          <a href="https://github.com/cantsin/git-tracker">
-            quantify progress! <i class="fa fa-heart"></i> git-tracker {{ config.version }}
-          </a>
-        </small>
-      <div class="small-4 columns">&nbsp;</div>
-    </div>
+    {% include "footer.html" %}
     <!-- js, redux -->
     <script src="/js/foundation.min.js"></script>
     <script>
