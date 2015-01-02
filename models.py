@@ -44,6 +44,13 @@ class User(SessionMixin, UserMixin, db.Model):
     def __repr__(self):
         return '<User %r>' % self.id
 
+    def add_emails(self, emails):
+        if not isinstance(emails, list):
+            emails = [emails]
+        for email in emails:
+            user_email = UserEmail(self, email).save()
+            self.emails.append(user_email)
+
     def check_password(self, password):
         return check_password_hash(self.password, password)
 

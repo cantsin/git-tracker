@@ -6,7 +6,7 @@ from flask.ext.login import LoginManager, login_required, login_user, \
     logout_user, current_user
 from werkzeug import secure_filename
 from util import slugify, naturaltime, get_gravatar
-from models import User, Repository, Tag
+from models import User, Repository, Tag, UserEmail
 from git import GitOperations, GitException
 from data import DataOperations
 
@@ -53,6 +53,14 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
+# helper function.
+def save_uploaded_file(user, request_file):
+    prefix = os.path.join(app.config['UPLOAD_FOLDER'], str(user.id))
+    os.makedirs(prefix, exist_ok=True)
+    path = os.path.join(prefix, secure_filename(request_file.filename))
+    request_file.save(path)
+    return path
+
 @app.route('/users/add', methods=['POST'])
 def add_user():
     try:
@@ -64,25 +72,18 @@ def add_user():
         if password1 != password2:
             return jsonify(error='Passwords do not match.')
         public_key = request.files['public-key']
-        if not public_key:
+        if not public_key.filename:
             return jsonify(error='No public key provided.')
         private_key = request.files['private-key']
-        if not private_key:
+        if not private_key.filename:
             return jsonify(error='No private key provided.')
         new_user = User(email, password1)
         new_user.avatar_image = get_gravatar(email)
         new_user.save()
-        # handle uploaded files.
-        prefix = os.path.join(app.config['UPLOAD_FOLDER'], str(new_user.id))
-        os.makedirs(prefix, exist_ok=True)
-        location = lambda filename: os.path.join(prefix, filename)
-        public_key_path = location(secure_filename(public_key.filename))
-        private_key_path = location(secure_filename(private_key.filename))
-        public_key.save(public_key_path)
-        private_key.save(private_key_path)
-        new_user.ssh_public_key_path = public_key_path
-        new_user.ssh_private_key_path = private_key_path
+        new_user.ssh_public_key_path = save_uploaded_file(new_user, public_key)
+        new_user.ssh_private_key_path = save_uploaded_file(new_user, private_key)
         new_user.save()
+        new_user.add_emails(email)
         url = url_for('login')
         return jsonify(success=url)
     except IndexError:

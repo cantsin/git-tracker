@@ -1,6 +1,13 @@
 #login {
     margin-top: 5em;
 }
+form {
+    margin-bottom: 0px;
+}
+#add_user_link {
+    float: right;
+    margin-top: -2em;
+}
 #header p, #delete_repository p, #delete_tag p, #footer p {
     text-align: center;
 }

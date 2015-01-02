@@ -2,3 +2,4 @@
 /repositories/*.git/
 /config.py
 /*.pyc
+/uploads/
