@@ -34,6 +34,8 @@
         </ul>
         {% endif %}
       </li>
+      {% else %}
+      <li>(None)</li>
       {% endfor %}
     </ul>
     <a href="javascript:void(0);" data-reveal-id="add_repository" class="button tiny radius">
@@ -57,6 +59,8 @@
           <span class="label radius secondary">{{ tag.repositories.count() }}</span>
         </a>
       </li>
+      {% else %}
+      <li>(None)</li>
       {% endfor %}
     </ul>
     <a href="javascript:void(0);" data-reveal-id="add_tag" class="button tiny radius">

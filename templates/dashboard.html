@@ -20,20 +20,30 @@ Overview
 {% endblock %}
 
 {% block body %}
-<div class="row">
-  <div class="columns small-12">
-    <div id="heatmap"
-         data-url="{{ url_for('all_activity') }}"
-         data-start="{{ first_updated }}"
-         data-end="{{ last_updated }}">
+  {% if current_user.repositories.count() == 0 %}
+  <div class="row">
+    <div class="columns small-12">
+      <h3>Welcome to git-tracker!</h3>
+      <p><a href="javascript:void(0);" data-reveal-id="add_repository">Add a repository</a> to get started.</p>
+      <p>Or you can <a href="javascript:void(0);" data-reveal-id="add_tag">add tags</a>.</p>
     </div>
   </div>
-</div>
-<div class="row">
-  <div class="columns small-12">
-    <div id="treemap"
-         data-tags='[{% for tag in current_user.tags %}{"tag": "{{ tag.name }}", "count": {{ tag.repositories.count() }} }{% if not loop.last %},{% endif %}{% endfor %}]'>
+  {% else %}
+  <div class="row">
+    <div class="columns small-12">
+      <div id="heatmap"
+           data-url="{{ url_for('all_activity') }}"
+           data-start="{{ first_updated }}"
+           data-end="{{ last_updated }}">
+      </div>
     </div>
   </div>
-</div>
+  <div class="row">
+    <div class="columns small-12">
+      <div id="treemap"
+           data-tags='[{% for tag in current_user.tags %}{"tag": "{{ tag.name }}", "count": {{ tag.repositories.count() }} }{% if not loop.last %},{% endif %}{% endfor %}]'>
+      </div>
+    </div>
+  </div>
+  {% endif %}
 {% endblock %}
