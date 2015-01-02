@@ -49,3 +49,6 @@ input[type=file] {
     opacity: 0;
     font-size: 40px;
 }
+#outside {
+    background-color: rgb(125, 151, 156);
+}
