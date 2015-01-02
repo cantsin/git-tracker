@@ -40,9 +40,24 @@
             <h2>{% block header %}{% endblock %}</h2>
           </div>
           <div class="small-2 columns header">
-            <a href="{{ url_for('logout') }}" class="logout button tiny radius">
-              <i class="fa fa-sign-out"></i> Log out
-            </a>
+            <button href="#" data-dropdown="userdrop" aria-controls="userdrop" aria-expanded="false" class="logout button tiny radius dropdown"><i class="fa fa-gears"></i> User Settings</button><br>
+            <ul id="userdrop" data-dropdown-content class="f-dropdown" aria-hidden="true" tabindex="-1">
+              <li>
+                <a href="#">
+                  <i class="fa fa-user"></i> Account
+                </a>
+              </li>
+              <li>
+                <a href="#">
+                  <i class="fa fa-envelope-square"></i> Emails
+                </a>
+              </li>
+              <li>
+                <a href="{{ url_for('logout') }}">
+                  <i class="fa fa-sign-out"></i> Log out
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
       </div>

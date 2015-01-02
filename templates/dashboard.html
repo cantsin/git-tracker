@@ -16,7 +16,7 @@
 
 {% block header %}
 <i class="fa fa-line-chart"></i>
-Overview
+Dashboard
 {% endblock %}
 
 {% block body %}
@@ -24,7 +24,8 @@ Overview
   <div class="row">
     <div class="columns small-12">
       <h3>Welcome to git-tracker!</h3>
-      <p><a href="javascript:void(0);" data-reveal-id="add_repository">Add a repository</a> to get started.</p>
+      <p>&nbsp;</p>
+      <p><a href="javascript:void(0);" data-reveal-id="add_repository">Add repositories</a> to get started.</p>
       <p>Or you can <a href="javascript:void(0);" data-reveal-id="add_tag">add tags</a>.</p>
     </div>
   </div>
@@ -40,9 +41,13 @@ Overview
   </div>
   <div class="row">
     <div class="columns small-12">
+      {% if current_user.tags.count() == 0 %}
+      <p><a href="javascript:void(0);" data-reveal-id="add_tag">Add tags</a> to get started.</p>
+      {% else %}
       <div id="treemap"
            data-tags='[{% for tag in current_user.tags %}{"tag": "{{ tag.name }}", "count": {{ tag.repositories.count() }} }{% if not loop.last %},{% endif %}{% endfor %}]'>
       </div>
+      {% endif %}
     </div>
   </div>
   {% endif %}
