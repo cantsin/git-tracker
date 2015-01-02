@@ -48,6 +48,10 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
+@app.route('/users/add')
+def add_user():
+    pass
+
 @app.route('/repository/<name>')
 @login_required
 def view_repository(name):

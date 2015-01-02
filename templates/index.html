@@ -1,14 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html class="no-js" lang="en">
   <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>git-tracker</title>
-    <!-- js -->
-    <script src="http://localhost:8081/skewer"></script>
-    <script src="js/vendor/modernizr.js"></script>
     <!-- css -->
+    <link rel="stylesheet" href="/css/normalize.css" />
     <link rel="stylesheet" href="/css/foundation.css"></link>
     <link rel="stylesheet" href="/css/font-awesome.css" />
     <link rel="stylesheet" href="/css/git-tracker.css" />
+    <!-- js -->
+    <script src="/js/vendor/jquery.js"></script>
+    <script src="/js/vendor/modernizr.js"></script>
+    <script src="http://localhost:8081/skewer"></script>
   </head>
   <body>
     <div class="row" id="header" style="margin-left: 0px; margin-right: 0px; max-width: 100%">
@@ -21,7 +25,45 @@
           <input type="password" placeholder="Password" name="password" value="{{ request.form.password }}">
           <input class="logout button tiny radius" type="submit" value="Login">
           &nbsp;
-          <small><a href="{{ url_for('add_users') }}">Or create a new user</a></small>
+          <small><a href="javascript:void(0);" data-reveal-id="add_user" >Or create a new user</a></small>
+          <div id="add_user" class="reveal-modal small" data-reveal>
+            <h2><i class="fa fa-plus"></i> Create A New User</h2>
+            <form id="create_user_form"
+                  enctype="multipart/form-data"
+                  action="{{ url_for('add_user') }}"
+                  method="post">
+              <ul class="side-nav no-bullet small-block-grid-3">
+                <div class="row">
+                  <div class="small-12 columns">
+                    <input type="text" placeholder="Email" name="email" value="{{ request.form.email }}">
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="small-12 columns">
+                    <input type="password" placeholder="Password" name="password" value="{{ request.form.password }}">
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="small-12 columns" style="margin-bottom: 16px;">
+                    <a class="button tiny radius" href="javascript:void(0);">
+                      Public Key
+                      <input id="public-key" type="file" placeholder="Public key" name="public-key" value="{{ request.form.public_key }}">
+                    </a>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="small-12 columns" style="margin-bottom: 16px;">
+                    <a class="button tiny radius" href="javascript:void(0);">
+                      Private Key
+                      <input type="file" placeholder="Private key" name="private-key" value="{{ request.form.private_key }}">
+                    </a>
+                  </div>
+                </div>
+              </ul>
+              <input class="logout button tiny radius" type="submit" value="Add">
+            </form>
+            <a class="close-reveal-modal">&#215;</a>
+          </div>
         </form>
         {% if error %}
         <div data-alert class="alert-box alert">
@@ -34,5 +76,10 @@
       </div>
     </div>
     {% include "footer.html" %}
+    <!-- js, redux -->
+    <script src="/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+    </script>
   </body>
 </html>
