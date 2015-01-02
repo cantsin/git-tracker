@@ -1,5 +1,5 @@
 /__pycache__/
-/repositories/*.git/
+/repositories/*/*.git/
 /config.py
 /*.pyc
 /uploads/

@@ -9,6 +9,7 @@ from pygit2 import Tag, Commit, Repository, Keypair, GitError, \
     GIT_SORT_TOPOLOGICAL, GIT_SORT_TIME, GIT_SORT_REVERSE, \
     clone_repository
 import re
+import os
 
 class GitException(Exception):
     pass
@@ -44,12 +45,18 @@ class GitOperations(object):
                        '')
 
     @staticmethod
+    def get_repository_location(user, git_name):
+        return os.path.join(GitOperations.git_repositories,
+                            str(user.id),
+                            git_name)
+
+    @staticmethod
     def create_repository(user, git_repo):
         from models import Repository as LocalRepository
         try:
             git_user, git_name = GitOperations.git_uri_parse(git_repo)
             creds = GitOperations.get_credentials(git_user, user)
-            where = GitOperations.git_repositories + git_name
+            where = GitOperations.get_repository_location(user, git_name)
             clone_repository(git_repo, where, bare=True, credentials=creds)
             repo = LocalRepository(user, git_user, git_name, git_repo).save()
             return repo
@@ -63,7 +70,8 @@ class GitMixin(object):
     tag_or_remote_regex = re.compile('^refs/(tags|remotes)/(.*)')
 
     def __init__(self):
-        self.ondisk = Repository(GitOperations.git_repositories + self.name)
+        where = GitOperations.get_repository_location(self.user, self.name)
+        self.ondisk = Repository(where)
 
     def refresh(self):
         progress_bars = [remote.fetch() for remote in self.ondisk.remotes]

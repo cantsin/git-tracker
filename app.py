@@ -6,7 +6,7 @@ from flask.ext.login import LoginManager, login_required, login_user, \
     logout_user, current_user
 from werkzeug import secure_filename
 from util import slugify, naturaltime, get_gravatar
-from models import User, Repository, Tag, UserEmail
+from models import User, Tag
 from git import GitOperations, GitException
 from data import DataOperations
 
@@ -92,10 +92,10 @@ def add_user():
 @app.route('/repository/<name>')
 @login_required
 def view_repository(name):
-    repository = Repository.query.filter_by(name=name).first_or_404()
+    repository = current_user.repositories.filter_by(name=name).first_or_404()
     identifier = repository.get_shorthand_of_branch('master')
     sha1 = repository.get_sha1_of_branch('master')
-    tags = Tag.query.order_by('name')
+    tags = current_user.tags.order_by('name')
     kwargs = {'repository': repository,
               'current_selection': repository.name,
               'git_identifier': identifier,
@@ -107,7 +107,7 @@ def view_repository(name):
 @app.route('/repositories/<name>/activity/', methods=['GET'])
 @login_required
 def repository_activity(name):
-    repository = Repository.query.filter_by(name=name).first_or_404()
+    repository = current_user.repositories.filter_by(name=name).first_or_404()
     start = int(request.args.get('start')) or repository.get_first_updated()
     end = int(request.args.get('end')) or repository.get_last_updated()
     return jsonify({'result': repository.histogram(start, end)})
@@ -115,7 +115,7 @@ def repository_activity(name):
 @app.route('/repositories/<name>/delete', methods=['GET'])
 @login_required
 def delete_repository(name):
-    repository = Repository.query.filter_by(name=name).first_or_404()
+    repository = current_user.repositories.filter_by(name=name).first_or_404()
     repository.clear_tags()
     repository.delete()
     return redirect(url_for('dashboard'))
@@ -123,7 +123,7 @@ def delete_repository(name):
 @app.route('/repositories/<name>/refresh', methods=['GET'])
 @login_required
 def refresh_repository(name):
-    repository = Repository.query.filter_by(name=name).first_or_404()
+    repository = current_user.repositories.filter_by(name=name).first_or_404()
     repository.refresh()
     repository.save()
     url = url_for('view_repository', name=repository.name)
@@ -134,7 +134,7 @@ def refresh_repository(name):
 def add_repository():
     try:
         location = request.form['location']
-        if Repository.query.filter_by(location=location).scalar():
+        if current_user.repositories.filter_by(location=location).scalar():
             return jsonify(error='Given repository already exists.')
         repository = GitOperations.create_repository(current_user, location)
         url = url_for('view_repository', name=repository.name)
@@ -147,12 +147,12 @@ def add_repository():
 @app.route('/repository/<repository_name>/tags/apply', methods=['POST'])
 @login_required
 def apply_tags(repository_name):
-    repository = Repository.query.filter_by(name=repository_name).first_or_404()
+    repository = current_user.repositories.filter_by(name=repository_name).first_or_404()
     tag_names = [key for (key, value) in request.form.items()
                  if key.startswith('apply-') and value == 'on']
     repository.clear_tags()
     for tag_name in tag_names:
-        tag = Tag.query.filter_by(slug=tag_name[6:]).first_or_404()
+        tag = current_user.tags.filter_by(slug=tag_name[6:]).first_or_404()
         repository.tags.append(tag)
     repository.save()
     url = url_for('view_repository', name=repository_name)
@@ -161,7 +161,7 @@ def apply_tags(repository_name):
 @app.route('/tag/<slug>')
 @login_required
 def view_tag(slug):
-    tag = Tag.query.filter_by(slug=slug).first_or_404()
+    tag = current_user.tags.filter_by(slug=slug).first_or_404()
     first_updated = DataOperations.get_first_updated(tag.repositories)
     last_updated = DataOperations.get_last_updated(tag.repositories)
     kwargs = {'tag': tag,
@@ -174,7 +174,7 @@ def view_tag(slug):
 @app.route('/tags/<slug>/activity/', methods=['GET'])
 @login_required
 def tag_activity(slug):
-    tag = Tag.query.filter_by(slug=slug).first_or_404()
+    tag = current_user.tags.filter_by(slug=slug).first_or_404()
     first_updated = DataOperations.get_first_updated(tag.repositories)
     last_updated = DataOperations.get_last_updated(tag.repositories)
     start = int(request.args.get('start')) or first_updated
@@ -185,7 +185,7 @@ def tag_activity(slug):
 @app.route('/tags/<slug>/delete', methods=['GET'])
 @login_required
 def delete_tag(slug):
-    tag = Tag.query.filter_by(slug=slug).first_or_404()
+    tag = current_user.tags.filter_by(slug=slug).first_or_404()
     tag.delete()
     return redirect(url_for('dashboard'))
 
@@ -196,9 +196,9 @@ def add_tag():
         name = request.form['name'].strip()
         if name == '':
             return jsonify(error='Tag cannot be blank.')
-        if Tag.query.filter_by(name=name).scalar():
+        if current_user.tags.filter_by(name=name).scalar():
             return jsonify(error='Given tag name already exists.')
-        if Tag.query.filter_by(slug=slugify(name)).scalar():
+        if current_user.tags.filter_by(slug=slugify(name)).scalar():
             return jsonify(error='Given tag slug already exists.')
         tag = Tag(current_user, name).save()
         url = url_for('view_tag', slug=tag.slug)
