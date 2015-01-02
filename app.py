@@ -4,10 +4,15 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask.ext.login import LoginManager, login_required, login_user, \
     logout_user, current_user
+from werkzeug import secure_filename
 from util import slugify, naturaltime, get_gravatar
 from models import User, Repository, Tag
 from git import GitOperations, GitException
 from data import DataOperations
+
+import os
+
+UPLOAD_FOLDER = 'uploads'
 
 app = Flask('git-tracker')
 app.jinja_env.filters['slugify'] = slugify
@@ -48,9 +53,40 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
-@app.route('/users/add')
+@app.route('/users/add', methods=['POST'])
 def add_user():
-    pass
+    try:
+        email = request.form['email']
+        if not '@' in email:
+            return jsonify(error='Please provide a proper email.')
+        password1 = request.form['password']
+        password2 = request.form['password2']
+        if password1 != password2:
+            return jsonify(error='Passwords do not match.')
+        public_key = request.files['public-key']
+        if not public_key:
+            return jsonify(error='No public key provided.')
+        private_key = request.files['private-key']
+        if not private_key:
+            return jsonify(error='No private key provided.')
+        new_user = User(email, password1)
+        new_user.avatar_image = get_gravatar(email)
+        new_user.save()
+        # handle uploaded files.
+        prefix = os.path.join(app.config['UPLOAD_FOLDER'], str(new_user.id))
+        os.makedirs(prefix, exist_ok=True)
+        location = lambda filename: os.path.join(prefix, filename)
+        public_key_path = location(secure_filename(public_key.filename))
+        private_key_path = location(secure_filename(private_key.filename))
+        public_key.save(public_key_path)
+        private_key.save(private_key_path)
+        new_user.ssh_public_key_path = public_key_path
+        new_user.ssh_private_key_path = private_key_path
+        new_user.save()
+        url = url_for('login')
+        return jsonify(success=url)
+    except IndexError:
+        return jsonify(error='Please fill out all fields.')
 
 @app.route('/repository/<name>')
 @login_required
@@ -201,5 +237,6 @@ if __name__ == '__main__':
         import os
         app.secret_key = os.urandom(24)
     app.debug = True
-    app.config.version = "1.0"
+    app.config['version'] = "1.0"
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
     app.run()
