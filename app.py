@@ -4,7 +4,7 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask.ext.login import LoginManager, login_required, login_user, \
     logout_user, current_user
-from util import slugify, naturaltime
+from util import slugify, naturaltime, get_gravatar
 from models import User, Repository, Tag
 from git import GitOperations, GitException
 from data import DataOperations

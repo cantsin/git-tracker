@@ -3,6 +3,8 @@
 from unicodedata import normalize
 from datetime import datetime
 
+import urllib.parse
+import hashlib
 import humanize
 import re
 
@@ -21,3 +23,10 @@ def naturaltime(ue):
     if isinstance(ue, int):
         return humanize.naturaltime(datetime.fromtimestamp(ue))
     return humanize.naturaltime(ue)
+
+def get_gravatar(email):
+    size = 69
+    base_url = 'http://www.gravatar.com/avatar/'
+    url = base_url + hashlib.md5(email.lower().encode('utf8')).hexdigest() + "?"
+    url += urllib.parse.urlencode({'d': 'identicon', 's': str(size)})
+    return url
