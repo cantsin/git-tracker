@@ -9,7 +9,7 @@ from config import ssh_public_key_path, ssh_private_key_path
 db.drop_all()
 db.create_all()
 
-u = User("username", "password", "ssh-key")
+u = User("username", "password")
 u.avatar_image = 'https://avatars2.githubusercontent.com/u/3013175?v=3&s=460'
 u.ssh_public_key_path = ssh_public_key_path
 u.ssh_private_key_path = ssh_private_key_path

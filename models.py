@@ -35,10 +35,9 @@ class User(SessionMixin, UserMixin, db.Model):
     created_at = db.Column(db.DateTime(), nullable=False)
     updated_at = db.Column(db.DateTime(), nullable=False)
 
-    def __init__(self, login, password, ssh_key):
+    def __init__(self, login, password):
         self.login = login
         self.password = generate_password_hash(password)
-        self.ssh_key = ssh_key
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
 

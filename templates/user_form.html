@@ -1,0 +1,46 @@
+<div id="add_user" class="reveal-modal medium" data-reveal>
+  <h2><i class="fa fa-plus"></i> {{ user_form_title }}</h2>
+  <form id="create_user_form"
+        enctype="multipart/form-data"
+        action="{{ url_for('add_user') }}"
+        method="post">
+    <ul class="side-nav no-bullet small-block-grid-3">
+      <div class="row">
+        <div class="small-12 columns">
+          <input type="text" placeholder="Email" name="email" value="{{ request.form.email }}">
+        </div>
+      </div>
+      <div class="row">
+        <div class="small-12 columns">
+          <input type="password" placeholder="Password" name="password" value="{{ request.form.password }}">
+        </div>
+      </div>
+      <div class="row">
+        <div class="small-12 columns">
+          <input type="password" placeholder="Password (again)" name="password2" value="{{ request.form.password2 }}">
+        </div>
+      </div>
+      <div class="row">
+        <div class="small-12 columns" style="margin-bottom: 16px;">
+          <a class="button tiny radius" href="javascript:void(0);">
+            Public Key
+            <input id="public-key" type="file" placeholder="Public key" name="public-key" value="{{ request.form.public_key }}">
+          </a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="small-12 columns" style="margin-bottom: 16px;">
+          <a class="button tiny radius" href="javascript:void(0);">
+            Private Key
+            <input type="file" placeholder="Private key" name="private-key" value="{{ request.form.private_key }}">
+          </a>
+        </div>
+      </div>
+    </ul>
+    <input class="logout button tiny radius" type="submit" value="Add User">
+  </form>
+  <div data-alert class="alert-box alert">
+    Please make sure your uploaded ssh key is a machine key: e.g., it is not pass-phrase protected and has read-only access to your repositories.
+  </div>
+  <a class="close-reveal-modal">&#215;</a>
+</div>
