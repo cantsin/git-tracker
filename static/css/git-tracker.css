@@ -59,3 +59,8 @@ input[type=file] {
 #outside {
     background-color: #516581;
 }
+#user-settings {
+    padding-right: 0;
+    padding-left: 0;
+    width: 100%;
+}
