@@ -12,6 +12,11 @@
     {% block css %}{% endblock %}
     <!-- js -->
     <script src="/js/vendor/jquery.js"></script>
+    <script src="/js/vendor/modernizr.js"></script>
+    <script src="/js/foundation/foundation.js"></script>
+    <script src="/js/foundation/foundation.reveal.js"></script>
+    <script src="/js/foundation/foundation.alert.js"></script>
+    <script src="/js/foundation/foundation.dropdown.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/2.3.22/rx.all.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs-jquery/1.1.6/rx.jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ramda/0.8.0/ramda.min.js"></script>
@@ -20,7 +25,6 @@
     <script>
       traceur.options.experimental = true;
     </script>
-    <script src="/js/vendor/modernizr.js"></script>
     <script src="http://localhost:8081/skewer"></script>
     <!-- git-tracker global code -->
     <script type="module" src="/js/common.js"></script>
@@ -70,7 +74,6 @@
     </div>
     {% include "footer.html" %}
     <!-- js, redux -->
-    <script src="/js/foundation.min.js"></script>
     <script>
       $(document).foundation();
     </script>
