@@ -17,9 +17,32 @@
             </a>
           </li>
           <li>
-            <a href="#">
+            <a href="javascript:void(0);" data-reveal-id="emails">
               <i class="fa fa-envelope-square"></i> Emails
             </a>
+            <div id="emails" class="reveal-modal small" data-reveal>
+              <h2><i class="fa fa-plus"></i> Add emails</h2>
+              <form id="add_emails_form"
+                    action="{{ url_for('add_user_email') }}"
+                    method="post">
+                <div data-alert class="alert-box info">
+                  If you commit code under alternate email identities, please add them here so that git-tracker can obtain better tracking results.
+                </div>
+                <ul>
+                  {% for ue in current_user.emails.all() %}
+                    <li>
+                      {{ ue.email }} <a href="{{ url_for('delete_user_email', useremail_id=ue.id) }}"><i class="fa fa-close"></i></a>
+                    </li>
+                  {% else %}
+                    <li>(None)</li>
+                  {% endfor %}
+                </ul>
+                <input type="text" placeholder="Your email" name="email" value="">
+                <input type="hidden" value="{{ next or '' }}" name="next">
+                <input class="logout button tiny radius" type="submit" value="Save">
+              </form>
+              <a class="close-reveal-modal">&#215;</a>
+            </div>
           </li>
           <li>
             <a href="{{ url_for('logout') }}">

@@ -95,22 +95,20 @@ def add_user_email():
         email = request.form['email']
         if not '@' in email:
             return jsonify(error='Please provide a proper email.')
+        if current_user.emails.filter_by(email=email).scalar():
+            return jsonify(error='Current email already exists.')
         current_user.add_emails(email)
         url = url_for_redirect_back('dashboard')
         return jsonify(success=url)
     except IndexError:
         return jsonify(error='Please fill out all fields.')
 
-@app.route('/users/email/delete', methods=['POST'])
-def delete_user_email():
-    try:
-        email = request.form['email']
-        ue = current_user.emails.filter_by(email=email).first_or_404()
-        ue.delete()
-        url = url_for_redirect_back('dashboard')
-        return jsonify(success=url)
-    except IndexError:
-        return jsonify(error='Please fill out all fields.')
+@app.route('/users/email/<useremail_id>/delete', methods=['GET'])
+def delete_user_email(useremail_id):
+    ue = current_user.emails.filter_by(id=useremail_id).first_or_404()
+    ue.delete()
+    url = url_for_redirect_back('dashboard')
+    return jsonify(success=url)
 
 @app.route('/repository/<name>')
 @login_required
