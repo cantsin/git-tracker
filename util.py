@@ -2,6 +2,7 @@
 
 from unicodedata import normalize
 from datetime import datetime
+from flask import request, url_for
 
 import urllib.parse
 import hashlib
@@ -30,3 +31,15 @@ def get_gravatar(email):
     url = base_url + hashlib.md5(email.lower().encode('utf8')).hexdigest() + "?"
     url += urllib.parse.urlencode({'d': 'identicon', 's': str(size)})
     return url
+
+def is_safe_url(target):
+    ref_url = urllib.parse.urlparse(request.host_url)
+    test_url = urllib.parse.urlparse(urljoin(request.host_url, target))
+    return test_url.scheme in ('http', 'https') and \
+           ref_url.netloc == test_url.netloc
+
+def url_for_redirect_back(endpoint, **values):
+    target = request.form['next']
+    if not target or not is_safe_url(target):
+        target = url_for(endpoint, **values)
+    return target

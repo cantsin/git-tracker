@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask.ext.login import LoginManager, login_required, login_user, \
     logout_user, current_user
 from werkzeug import secure_filename
-from util import slugify, naturaltime, get_gravatar
+from util import slugify, naturaltime, get_gravatar, url_for_redirect_back
 from models import User, Tag
 from git import GitOperations, GitException
 from data import DataOperations
@@ -96,7 +96,7 @@ def add_user_email():
         if not '@' in email:
             return jsonify(error='Please provide a proper email.')
         current_user.add_emails(email)
-        url = url_for('dashboard')
+        url = url_for_redirect_back('dashboard')
         return jsonify(success=url)
     except IndexError:
         return jsonify(error='Please fill out all fields.')
@@ -107,7 +107,7 @@ def delete_user_email():
         email = request.form['email']
         ue = current_user.emails.filter_by(email=email).first_or_404()
         ue.delete()
-        url = url_for('dashboard')
+        url = url_for_redirect_back('dashboard')
         return jsonify(success=url)
     except IndexError:
         return jsonify(error='Please fill out all fields.')
