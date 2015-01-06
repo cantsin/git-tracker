@@ -79,12 +79,35 @@ def add_user():
             return jsonify(error='No private key provided.')
         new_user = User(email, password1)
         new_user.avatar_image = get_gravatar(email)
-        new_user.save()
+        new_user.save() # generate an id for this user
         new_user.ssh_public_key_path = save_uploaded_file(new_user, public_key)
         new_user.ssh_private_key_path = save_uploaded_file(new_user, private_key)
         new_user.save()
         new_user.add_emails(email)
         url = url_for('login')
+        return jsonify(success=url)
+    except IndexError:
+        return jsonify(error='Please fill out all fields.')
+
+@app.route('/users/email/add', methods=['POST'])
+def add_user_email():
+    try:
+        email = request.form['email']
+        if not '@' in email:
+            return jsonify(error='Please provide a proper email.')
+        current_user.add_emails(email)
+        url = url_for('dashboard')
+        return jsonify(success=url)
+    except IndexError:
+        return jsonify(error='Please fill out all fields.')
+
+@app.route('/users/email/delete', methods=['POST'])
+def delete_user_email():
+    try:
+        email = request.form['email']
+        ue = current_user.emails.filter_by(email=email).first_or_404()
+        ue.delete()
+        url = url_for('dashboard')
         return jsonify(success=url)
     except IndexError:
         return jsonify(error='Please fill out all fields.')
