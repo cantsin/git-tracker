@@ -1,0 +1,33 @@
+<div class="row" id="header">
+  <div class="small-2 columns sidebar">
+    <img src="{{ current_user.avatar_image }}" class="avatar" />
+    <p><a href="{{ url_for('dashboard') }}">View Dashboard</a></p>
+  </div>
+  <div class="small-10 columns header">
+    <div class="row">
+      <div class="small-10 columns header">
+        <h2>{% block header %}{% endblock %}</h2>
+      </div>
+      <div class="small-2 columns header">
+        <button href="#" id="user-settings" data-dropdown="userdrop" aria-controls="userdrop" aria-expanded="false" class="logout button tiny radius dropdown"><i class="fa fa-gears"></i> User Settings</button><br>
+        <ul id="userdrop" data-dropdown-content class="f-dropdown" aria-hidden="true" tabindex="-1">
+          <li>
+            <a href="#">
+              <i class="fa fa-user"></i> Account
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <i class="fa fa-envelope-square"></i> Emails
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('logout') }}">
+              <i class="fa fa-sign-out"></i> Log out
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
