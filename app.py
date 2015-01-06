@@ -90,6 +90,7 @@ def add_user():
         return jsonify(error='Please fill out all fields.')
 
 @app.route('/users/email/add', methods=['POST'])
+@login_required
 def add_user_email():
     try:
         email = request.form['email']
@@ -104,10 +105,11 @@ def add_user_email():
         return jsonify(error='Please fill out all fields.')
 
 @app.route('/users/email/<useremail_id>/delete', methods=['GET'])
+@login_required
 def delete_user_email(useremail_id):
     ue = current_user.emails.filter_by(id=useremail_id).first_or_404()
     ue.delete()
-    url = url_for_redirect_back('dashboard')
+    url = url_for('dashboard')
     return jsonify(success=url)
 
 @app.route('/repository/<name>')
