@@ -6,7 +6,7 @@
     <title>git-tracker</title>
     <!-- css -->
     <link rel="stylesheet" href="/css/normalize.css" />
-    <link rel="stylesheet" href="/css/foundation.css"></link>
+    <link rel="stylesheet" href="/css/foundation.css" />
     <link rel="stylesheet" href="/css/font-awesome.css" />
     <link rel="stylesheet" href="/css/git-tracker.css" />
     <style>
@@ -20,7 +20,17 @@
     <script src="/js/foundation/foundation.js"></script>
     <script src="/js/foundation/foundation.reveal.js"></script>
     <script src="/js/foundation/foundation.alert.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/2.3.22/rx.all.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs-jquery/1.1.6/rx.jquery.min.js"></script>
+    <script src="https://google.github.io/traceur-compiler/bin/traceur.js"></script>
+    <script src="https://google.github.io/traceur-compiler/src/bootstrap.js"></script>
+    <script>
+      traceur.options.experimental = true;
+    </script>
     <script src="http://localhost:8081/skewer"></script>
+    <!-- git-tracker global code -->
+    <script type="module" src="/js/common.js"></script>
+    <script type="module" src="/js/user.js"></script>
   </head>
   <body id="outside">
     <div class="row" id="header" style="margin-left: 0px; margin-right: 0px; max-width: 100%">

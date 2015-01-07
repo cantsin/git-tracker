@@ -26,14 +26,16 @@
             Public Key
             <input id="public-key" type="file" placeholder="Public key" name="public-key" value="{{ request.form.public_key }}">
           </a>
+          <label>No uploaded file.</label>
         </div>
       </div>
       <div class="row">
         <div class="small-12 columns" style="margin-bottom: 16px;">
           <a class="button tiny radius" href="javascript:void(0);">
             Private Key
-            <input type="file" placeholder="Private key" name="private-key" value="{{ request.form.private_key }}">
+            <input id="private-key" type="file" placeholder="Private key" name="private-key" value="{{ request.form.private_key }}">
           </a>
+          <label>No uploaded file.</label>
         </div>
       </div>
     </ul>
