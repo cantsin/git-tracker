@@ -89,6 +89,23 @@ def add_user():
     except IndexError:
         return jsonify(error='Please fill out all fields.')
 
+@app.route('/users/keys', methods=['POST'])
+@login_required
+def update_keys():
+    try:
+        public_key = request.files['public-key']
+        if public_key.filename:
+            current_user.ssh_public_key_path = save_uploaded_file(current_user, public_key)
+            current_user.save()
+        private_key = request.files['private-key']
+        if private_key.filename:
+            current_user.ssh_private_key_path = save_uploaded_file(current_user, private_key)
+            current_user.save()
+        url = url_for_redirect_back('dashboard')
+        return redirect(url)
+    except KeyError:
+        return jsonify(error='Please fill out all fields.')
+
 @app.route('/users/email/add', methods=['POST'])
 @login_required
 def add_user_email():

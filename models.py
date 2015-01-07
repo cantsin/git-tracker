@@ -57,6 +57,12 @@ class User(SessionMixin, UserMixin, db.Model):
     def is_active(self):
         return self.active
 
+    def public_key_name(self):
+        return self.ssh_public_key_path.split('/')[-1]
+
+    def private_key_name(self):
+        return self.ssh_private_key_path.split('/')[-1]
+
 class UserEmail(SessionMixin, db.Model): #pylint: disable-msg=R0903
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), nullable=False)
