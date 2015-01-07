@@ -67,3 +67,7 @@ input[type=file] {
 .dropdown.button::after, button.dropdown::after {
     content: none;
 }
+.alert-box {
+    margin-bottom: 0px;
+    margin-top: 1.25rem;
+}
