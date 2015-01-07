@@ -67,7 +67,9 @@ class UserEmail(SessionMixin, db.Model): #pylint: disable-msg=R0903
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    user = db.relationship('User', backref=db.backref('emails', lazy='dynamic'))
+    user = db.relationship('User', backref=db.backref('emails',
+                                                      cascade="all,delete",
+                                                      lazy='dynamic'))
     created_at = db.Column(db.DateTime(), nullable=False)
     updated_at = db.Column(db.DateTime(), nullable=False)
 
@@ -91,10 +93,14 @@ class Repository(SessionMixin, GitMixin, db.Model): #pylint: disable-msg=R0904
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User',
-                           backref=db.backref('repositories', lazy='dynamic'))
+                           backref=db.backref('repositories',
+                                              cascade="all,delete",
+                                              lazy='dynamic'))
     tags = db.relationship('Tag',
                            secondary=tags,
-                           backref=db.backref('repositories', lazy='dynamic'))
+                           backref=db.backref('repositories',
+                                              cascade="all,delete",
+                                              lazy='dynamic'))
     git_user = db.Column(db.String(255), nullable=False)
     name = db.Column(db.String(255), nullable=False)
     kind = db.Column(db.String(255), nullable=False) # GITHUB, BITBUCKET, LOCAL
@@ -136,7 +142,9 @@ class Tag(SessionMixin, db.Model): #pylint: disable-msg=R0903
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User',
-                           backref=db.backref('tags', lazy='dynamic'))
+                           backref=db.backref('tags',
+                                              cascade="all,delete",
+                                              lazy='dynamic'))
     name = db.Column(db.String(255), nullable=False)
     slug = db.Column(db.String(255), nullable=False)
     count = db.Column(db.Integer, nullable=False)
