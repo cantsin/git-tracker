@@ -5,9 +5,11 @@
 {% endblock %}
 
 {% block javascript %}
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.js"></script>
-<script type="text/javascript" src="/js/cal-heatmap.js"></script>
-<script type="module" src="/js/git-heatmap.js"></script>
+  {% if tag.repositories.count() > 0 %}
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.js"></script>
+    <script type="text/javascript" src="/js/cal-heatmap.js"></script>
+    <script type="module" src="/js/git-heatmap.js"></script>
+  {% endif %}
 {% endblock %}
 
 {% block header %}
@@ -54,7 +56,7 @@
         </tr>
         {% else %}
         <tr>
-          <td colspan="6">Empty!</td>
+          <td colspan="6">Empty! Tag a repository or <a href="javascript:void(0);" data-reveal-id="add_repository">add a new repository</a>.</td>
         </tr>
         {% endfor %}
       </tbody>
