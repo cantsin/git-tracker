@@ -61,22 +61,26 @@ def save_uploaded_file(user, request_file):
     request_file.save(path)
     return path
 
-@app.route('/users/add', methods=['POST'])
+@app.route('/users/add', methods=['GET', 'POST'])
 def add_user():
-    try:
+    if request.method == 'POST':
         email = request.form['email']
         if not '@' in email:
-            return jsonify(error='Please provide a proper email.')
+            error = 'Please provide a proper email.'
+            return render_template('user_form.html', error=error)
         password1 = request.form['password']
         password2 = request.form['password2']
         if password1 != password2:
-            return jsonify(error='Passwords do not match.')
+            error = 'Passwords do not match.'
+            return render_template('user_form.html', error=error)
         public_key = request.files['public-key']
         if not public_key.filename:
-            return jsonify(error='No public key provided.')
+            error = 'No public key provided.'
+            return render_template('user_form.html', error=error)
         private_key = request.files['private-key']
         if not private_key.filename:
-            return jsonify(error='No private key provided.')
+            error = 'No private key provided.'
+            return render_template('user_form.html', error=error)
         new_user = User(email, password1)
         new_user.avatar_image = get_gravatar(email)
         new_user.save() # generate an id for this user
@@ -84,10 +88,8 @@ def add_user():
         new_user.ssh_private_key_path = save_uploaded_file(new_user, private_key)
         new_user.save()
         new_user.add_emails(email)
-        url = url_for('login')
-        return jsonify(success=url)
-    except IndexError:
-        return jsonify(error='Please fill out all fields.')
+        return redirect(url_for('login'))
+    return render_template('user_form.html')
 
 @app.route('/users/keys', methods=['POST'])
 @login_required

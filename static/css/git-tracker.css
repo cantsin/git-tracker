@@ -1,4 +1,4 @@
-#login {
+#login, #user_add {
     margin-top: 5em;
 }
 form {
@@ -68,6 +68,5 @@ input[type=file] {
     content: none;
 }
 .alert-box {
-    margin-bottom: 0px;
     margin-top: 1.25rem;
 }

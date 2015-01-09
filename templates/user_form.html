@@ -1,5 +1,14 @@
-<div id="add_user" class="reveal-modal medium" data-reveal>
-  <h2><i class="fa fa-plus"></i> {{ user_form_title }}</h2>
+{% extends "bare.html" %}
+
+{% block body %}
+<div class="small-3 columns">
+  &nbsp;
+</div>
+<div id="user_add" class="small-6 columns panel radius">
+  <h2><i class="fa fa-plus"></i> Create A New User</h2>
+  <div data-alert class="alert-box warning round">
+    Please make sure your uploaded ssh key is a machine key: e.g., it is not pass-phrase protected and has read-only access to your repositories.
+  </div>
   <form id="create_user_form"
         enctype="multipart/form-data"
         action="{{ url_for('add_user') }}"
@@ -45,8 +54,13 @@
     </ul>
     <input class="logout button tiny radius" type="submit" value="Add User">
   </form>
+  {% if error %}
   <div data-alert class="alert-box alert">
-    Please make sure your uploaded ssh key is a machine key: e.g., it is not pass-phrase protected and has read-only access to your repositories.
+    {{ error }}
   </div>
-  <a class="close-reveal-modal">&#215;</a>
+  {% endif %}
 </div>
+<div class="small-3 columns">
+  &nbsp;
+</div>
+{% endblock %}
