@@ -5,13 +5,15 @@
 {% endblock %}
 
 {% block javascript %}
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.js"></script>
-<script type="text/javascript" src="/js/raphael-min.js"></script>
-<script type="text/javascript" src="/js/treemap-squarify.js"></script>
-<script type="text/javascript" src="/js/treemap-raphael.js"></script>
-<script type="text/javascript" src="/js/cal-heatmap.js"></script>
-<script type="module" src="/js/git-heatmap.js"></script>
-<script type="module" src="/js/git-treemap.js"></script>
+  {% if current_user.repositories.count() > 0 %}
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.js"></script>
+    <script type="text/javascript" src="/js/raphael-min.js"></script>
+    <script type="text/javascript" src="/js/treemap-squarify.js"></script>
+    <script type="text/javascript" src="/js/treemap-raphael.js"></script>
+    <script type="text/javascript" src="/js/cal-heatmap.js"></script>
+    <script type="module" src="/js/git-heatmap.js"></script>
+    <script type="module" src="/js/git-treemap.js"></script>
+  {% endif %}
 {% endblock %}
 
 {% block header %}
