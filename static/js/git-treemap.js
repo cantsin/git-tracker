@@ -25,4 +25,6 @@ if(labels.count) {
 
   let width = $('#treemap').width();
   Treemap.draw('treemap', width, 200, counts, labels, {'box' : boxFormatter});
+} else {
+  $("#treemap").append('<div data-alert class="alert-box info">Please tag a repository for the tree map to show up.</div>');
 }
