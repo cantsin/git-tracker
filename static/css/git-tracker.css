@@ -70,3 +70,9 @@ input[type=file] {
 .alert-box {
     margin-top: 1.25rem;
 }
+.cal-heatmap-container {
+    margin-top: 0px;
+}
+#dashboard {
+    margin-bottom: 0px;
+}

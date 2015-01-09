@@ -1,89 +1,76 @@
-<div class="row" id="header">
-  <div class="small-2 columns sidebar">
-    <img src="{{ current_user.avatar_image }}" class="avatar" />
-    <p><a href="{{ url_for('dashboard') }}">View Dashboard</a></p>
-  </div>
-  <div class="small-10 columns header">
-    <div class="row">
-      <div class="small-10 columns header">
-        <h2>{% block header %}{% endblock %}</h2>
-      </div>
-      <div class="small-2 columns header">
-        <button href="#" id="user-settings" data-dropdown="userdrop" aria-controls="userdrop" aria-expanded="false" class="logout button tiny radius dropdown"><i class="fa fa-gears"></i> User Settings</button><br>
-        <ul id="userdrop" data-dropdown-content class="f-dropdown" aria-hidden="true" tabindex="-1">
-          <li>
-            <a href="javascript:void(0);" data-reveal-id="keys">
-              <i class="fa fa-key"></i> SSH Keys
-            </a>
-            <div id="keys" class="reveal-modal small" data-reveal>
-              <h2><i class="fa fa-key"></i> Change SSH Keys</h2>
-              <form id="add_keys_form"
-                    enctype="multipart/form-data"
-                    action="{{ url_for('update_keys') }}"
-                    method="post">
-                <div class="row">
-                  <div class="small-4 columns" style="margin-bottom: 16px;">
-                    <a class="button tiny radius" href="javascript:void(0);">
-                      Public Key
-                      <input id="public-key" type="file" placeholder="Public key" name="public-key" value="{{ current_user.public_key_name() }}">
-                    </a>
-                  </div>
-                  <div class="small-8 columns" style="margin-bottom: 16px;">
-                    <label>Current file: {{ current_user.public_key_name() }}</label>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="small-4 columns" style="margin-bottom: 16px;">
-                    <a class="button tiny radius" href="javascript:void(0);">
-                      Private Key
-                      <input id="private-key" type="file" placeholder="Private key" name="private-key" value="{{ current_user.public_key_name() }}">
-                    </a>
-                  </div>
-                  <div class="small-8 columns" style="margin-bottom: 16px;">
-                    <label>Current file: {{ current_user.private_key_name() }}</label>
-                  </div>
-                </div>
-                <input type="hidden" value="{{ next or '' }}" name="next">
-                <input class="logout button tiny radius" type="submit" value="Update">
-              </form>
-              <a class="close-reveal-modal">&#215;</a>
+<div class="small-2 columns header">
+  <button href="#" id="user-settings" data-dropdown="userdrop" aria-controls="userdrop" aria-expanded="false" class="logout button tiny radius dropdown"><i class="fa fa-gears"></i> User Settings</button><br>
+  <ul id="userdrop" data-dropdown-content class="f-dropdown" aria-hidden="true" tabindex="-1">
+    <li>
+      <a href="javascript:void(0);" data-reveal-id="keys">
+        <i class="fa fa-key"></i> SSH Keys
+      </a>
+      <div id="keys" class="reveal-modal small" data-reveal>
+        <h2><i class="fa fa-key"></i> Change SSH Keys</h2>
+        <form id="add_keys_form"
+              enctype="multipart/form-data"
+              action="{{ url_for('update_keys') }}"
+              method="post">
+          <div class="row">
+            <div class="small-4 columns" style="margin-bottom: 16px;">
+              <a class="button tiny radius" href="javascript:void(0);">
+                Public Key
+                <input id="public-key" type="file" placeholder="Public key" name="public-key" value="{{ current_user.public_key_name() }}">
+              </a>
             </div>
-          </li>
-          <li>
-            <a href="javascript:void(0);" data-reveal-id="emails">
-              <i class="fa fa-envelope-square"></i> Emails
-            </a>
-            <div id="emails" class="reveal-modal small" data-reveal>
-              <h2><i class="fa fa-envelope-square"></i> Add or remove emails</h2>
-              <form id="add_emails_form"
-                    action="{{ url_for('add_user_email') }}"
-                    method="post">
-                <div data-alert class="alert-box info">
-                  If you commit code under alternate email identities, please add them here so that git-tracker can obtain better tracking results.
-                </div>
-                <ul>
-                  {% for ue in current_user.emails.all() %}
-                    <li>
-                      {{ ue.email }} <a href="{{ url_for('delete_user_email', useremail_id=ue.id) }}"><i class="fa fa-close"></i></a>
-                    </li>
-                  {% else %}
-                    <li>(None)</li>
-                  {% endfor %}
-                </ul>
-                <input type="text" placeholder="Your email" name="email" value="">
-                <input type="hidden" value="{{ next or '' }}" name="next">
-                <input class="logout button tiny radius" type="submit" value="Add email">
-              </form>
-              <a class="close-reveal-modal">&#215;</a>
+            <div class="small-8 columns" style="margin-bottom: 16px;">
+              <label>Current file: {{ current_user.public_key_name() }}</label>
             </div>
-          </li>
-          <li>
-            <a href="{{ url_for('logout') }}">
-              <i class="fa fa-sign-out"></i> Log out
-            </a>
-          </li>
-        </ul>
+          </div>
+          <div class="row">
+            <div class="small-4 columns" style="margin-bottom: 16px;">
+              <a class="button tiny radius" href="javascript:void(0);">
+                Private Key
+                <input id="private-key" type="file" placeholder="Private key" name="private-key" value="{{ current_user.public_key_name() }}">
+              </a>
+            </div>
+            <div class="small-8 columns" style="margin-bottom: 16px;">
+              <label>Current file: {{ current_user.private_key_name() }}</label>
+            </div>
+          </div>
+          <input type="hidden" value="{{ next or '' }}" name="next">
+          <input class="logout button tiny radius" type="submit" value="Update">
+        </form>
+        <a class="close-reveal-modal">&#215;</a>
       </div>
-    </div>
-  </div>
+    </li>
+    <li>
+      <a href="javascript:void(0);" data-reveal-id="emails">
+        <i class="fa fa-envelope-square"></i> Emails
+      </a>
+      <div id="emails" class="reveal-modal small" data-reveal>
+        <h2><i class="fa fa-envelope-square"></i> Add or remove emails</h2>
+        <form id="add_emails_form"
+              action="{{ url_for('add_user_email') }}"
+              method="post">
+          <div data-alert class="alert-box info">
+            If you commit code under alternate email identities, please add them here so that git-tracker can obtain better tracking results.
+          </div>
+          <ul>
+            {% for ue in current_user.emails.all() %}
+            <li>
+              {{ ue.email }} <a href="{{ url_for('delete_user_email', useremail_id=ue.id) }}"><i class="fa fa-close"></i></a>
+            </li>
+            {% else %}
+            <li>(None)</li>
+            {% endfor %}
+          </ul>
+          <input type="text" placeholder="Your email" name="email" value="">
+          <input type="hidden" value="{{ next or '' }}" name="next">
+          <input class="logout button tiny radius" type="submit" value="Add email">
+        </form>
+        <a class="close-reveal-modal">&#215;</a>
+      </div>
+    </li>
+    <li>
+      <a href="{{ url_for('logout') }}">
+        <i class="fa fa-sign-out"></i> Log out
+      </a>
+    </li>
+  </ul>
 </div>

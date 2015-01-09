@@ -35,7 +35,20 @@
     {% block javascript %}{% endblock %}
   </head>
   <body>
-    {% include "header.html" %}
+    <div class="row" id="header">
+      <div class="small-2 columns sidebar">
+        <img src="{{ current_user.avatar_image }}" class="avatar" />
+        <p id="dashboard"><a href="{{ url_for('dashboard') }}">View Dashboard</a></p>
+      </div>
+      <div class="small-10 columns header">
+        <div class="row">
+          <div class="small-10 columns header">
+            <h2>{% block header %}{% endblock %}</h2>
+          </div>
+          {% include "header.html" %}
+        </div>
+      </div>
+    </div>
     <div class="row">
       <div class="small-2 columns sidebar">
         {% include "sidebar.html" %}
