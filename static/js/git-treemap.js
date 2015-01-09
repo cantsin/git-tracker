@@ -7,7 +7,7 @@ data = data.sort((a, b) => { return b.count - a.count; });
 let labels = R.pluck('tag')(data);
 
 // do we have data to work with?
-if(labels.count) {
+if(labels.length > 0) {
   // normalize the data.
   let n = data[0].count;
   let counts = [for (i of R.pluck('count')(data)) i / n];
