@@ -33,7 +33,7 @@
               <label>Current file: {{ current_user.private_key_name() }}</label>
             </div>
           </div>
-          <input type="hidden" value="{{ next or '' }}" name="next">
+          <input type="hidden" value="{{ request.path }}" name="next">
           <input class="logout button tiny radius" type="submit" value="Update">
         </form>
         <a class="close-reveal-modal">&#215;</a>
@@ -61,7 +61,7 @@
             {% endfor %}
           </ul>
           <input type="text" placeholder="Your email" name="email" value="">
-          <input type="hidden" value="{{ next or '' }}" name="next">
+          <input type="hidden" value="{{ request.path }}" name="next">
           <input class="logout button tiny radius" type="submit" value="Add email">
         </form>
         <a class="close-reveal-modal">&#215;</a>
