@@ -5,7 +5,8 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask.ext.login import LoginManager, login_required, login_user, \
     logout_user, current_user
 from werkzeug import secure_filename
-from util import slugify, naturaltime, get_gravatar, url_for_redirect_back
+from util import slugify, naturaltime, get_gravatar, \
+    url_for_redirect_back, get_redirect_target
 from models import User, Tag
 from git import GitOperations, GitException
 from data import DataOperations
@@ -36,16 +37,20 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
+    next_target = get_redirect_target()
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
         user = User.query.filter_by(login=email).scalar()
         if user and user.check_password(password):
             login_user(user)
-            return redirect(url_for('dashboard'))
+            url = url_for_redirect_back('dashboard')
+            return redirect(url)
         else:
             error = 'Email and password do not match.'
-    return render_template('index.html', error=error)
+    return render_template('index.html',
+                           next=next_target,
+                           error=error)
 
 @app.route('/logout')
 @login_required

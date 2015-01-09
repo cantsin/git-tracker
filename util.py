@@ -34,7 +34,8 @@ def get_gravatar(email):
 
 def is_safe_url(target):
     ref_url = urllib.parse.urlparse(request.host_url)
-    test_url = urllib.parse.urlparse(urljoin(request.host_url, target))
+    parsed_url = urllib.parse.urljoin(request.host_url, target)
+    test_url = urllib.parse.urlparse(parsed_url)
     return test_url.scheme in ('http', 'https') and \
            ref_url.netloc == test_url.netloc
 
@@ -43,3 +44,10 @@ def url_for_redirect_back(endpoint, **values):
     if not target or not is_safe_url(target):
         target = url_for(endpoint, **values)
     return target
+
+def get_redirect_target():
+    for target in request.values.get('next'), request.referrer:
+        if not target:
+            continue
+        if is_safe_url(target):
+            return target
