@@ -2,6 +2,7 @@
 
 import { bind_creation } from '/js/common';
 
+bind_creation($('#repository_form'));
 bind_creation($('#apply_tags_form'));
 
 let fetch_el = $("#fetch_repository");

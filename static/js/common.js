@@ -28,6 +28,3 @@ export function bind_creation(form_el) {
     return false;
   });
 }
-
-bind_creation($('#repository_form'));
-bind_creation($('#tag_form'));
