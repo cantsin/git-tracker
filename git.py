@@ -74,12 +74,10 @@ class GitMixin(object):
         self.ondisk = Repository(where)
 
     def refresh(self):
-        progress_bars = [remote.fetch() for remote in self.ondisk.remotes]
-        # blocking, for now...
-        for progress_bar in progress_bars:
-            while progress_bar.received_objects != progress_bar.total_objects:
-                print(progress_bar.received_objects + '/' +
-                      progress_bar.total_objects)
+        creds = GitOperations.get_credentials(self.git_user, self.user)
+        for remote in self.ondisk.remotes:
+            remote.credentials = creds
+            remote.fetch()
         # update current reference
         master_ref = self.ondisk.lookup_reference('refs/heads/master')
         remote_ref = self.ondisk.lookup_reference('refs/remotes/origin/master')
