@@ -131,8 +131,13 @@ class GitMixin(object):
         return str(self.ondisk.lookup_branch(branch).get_object().id)[:6]
 
     def get_numstat(self, commit):
-        previous_commit = self.ondisk.revparse_single(str(commit.id) + '^')
-        diff = self.ondisk.diff(previous_commit, commit)
+        diff = None
+        try:
+            previous_commit = self.ondisk.revparse_single(str(commit.id) + '^')
+            diff = self.ondisk.diff(previous_commit, commit)
+        except KeyError:
+            # likely we hit the very first commit.
+            diff = commit.tree.diff_to_tree(swap=True)
         additions, deletions = 0, 0
         for patch in diff:
             additions += patch.additions
