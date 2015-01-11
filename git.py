@@ -125,7 +125,10 @@ class GitMixin(object):
         return len(list(self.filter_commits()))
 
     def get_shorthand_of_branch(self, branch):
-        return self.ondisk.lookup_branch(branch).shorthand
+        commit = self.ondisk.lookup_branch(branch)
+        if commit:
+            return commit.shorthand
+        return '(none)'
 
     def get_sha1_of_branch(self, branch):
         return str(self.ondisk.lookup_branch(branch).get_object().id)[:6]
