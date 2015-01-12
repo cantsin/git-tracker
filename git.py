@@ -29,6 +29,10 @@ class GitOperations(object):
         # obtain the repository name.
         results = stripped.split('/')
         repository_name = results[-1]
+        if ':' in repository_name:
+            # did not work. try again.
+            results = stripped.split(':')
+            repository_name = results[-1]
         if not '.git' in repository_name:
             repository_name += '.git'
         # obtain the git user (default is 'git')
@@ -203,6 +207,7 @@ if __name__ == "__main__":
         ('git@bitbucket.org:accountname/reponame.git', 'git', 'reponame.git'),
         ('ssh://git@bitbucket.org/account/reponame.git', 'git', 'reponame.git'),
         ('https://foo@bitbucket.org/foo/reponame.git', 'foo', 'reponame.git'),
-        ('james@foo:random/testing.git', 'james', 'testing.git')]
+        ('james@foo:random/testing.git', 'james', 'testing.git'),
+        ('git@random-server:random.git', 'git', 'random.git')]
     for test_repo, test_user, test_name in repos:
         assert GitOperations.git_uri_parse(test_repo) == (test_user, test_name)
