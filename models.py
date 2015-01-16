@@ -133,7 +133,9 @@ class Repository(SessionMixin, GitMixin, db.Model): #pylint: disable-msg=R0904
         db.session.commit()
 
     def get_name(self):
-        return self.name[:-4] # strip .git suffix
+        if '.git' in self.name:
+            return self.name[:-4] # strip .git suffix
+        return self.name
 
     def __repr__(self):
         return '<Repository %r (%r)>' % (self.name, self.kind)
