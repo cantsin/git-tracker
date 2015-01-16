@@ -133,7 +133,10 @@ class GitMixin(object):
         return '(none)'
 
     def get_sha1_of_branch(self, branch):
-        return str(self.ondisk.lookup_branch(branch).get_object().id)[:6]
+        commit = self.ondisk.lookup_branch(branch)
+        if commit:
+            return str(commit.get_object().id)[:6]
+        return '(none)'
 
     def get_numstat(self, commit):
         diff = None
