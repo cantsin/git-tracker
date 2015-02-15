@@ -20,6 +20,7 @@ from util import slugify, naturaltime, get_gravatar, \
 from models import User, Tag
 from git import GitOperations, GitException
 from data import DataOperations
+from cron import scheduler
 
 import os
 
@@ -297,4 +298,5 @@ if __name__ == '__main__':
     app.debug = True
     app.config['version'] = "1.0"
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+    scheduler.start()
     app.run()
