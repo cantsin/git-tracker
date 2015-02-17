@@ -1,0 +1,13 @@
+{
+    "version": "1.0.0",
+    "summary": "Track your git history.",
+    "repository": "https://github.com/cantsin/git-tracker.git",
+    "license": "Apache",
+    "source-directories": [
+        "static/elm/"
+    ],
+    "exposed-modules": [],
+    "dependencies": {
+        "elm-lang/core": "1.1.0 <= v < 2.0.0"
+    }
+}
