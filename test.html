@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>git-tracker</title>
+    <!-- css -->
+    <link rel="stylesheet" href="/css/normalize.css" />
+    <link rel="stylesheet" href="/css/foundation.css" />
+    <link rel="stylesheet" href="/css/font-awesome.css" />
+    <link rel="stylesheet" href="/css/git-tracker.css" />
+    <style>
+      #footer a {
+          color: white;
+      }
+    </style>
+    <!-- js -->
+    <script src="elm.js"></script>
+  </head>
+  <body id="outside">
+    <div class="row" id="header" style="margin-left: 0px; margin-right: 0px; max-width: 100%">
+    </div>
+  </body>
+  <script>
+var div = document.getElementById("header");
+var start = new Date("Jan 1 2015");
+var end = new Date("Feb 1 2015");
+var options = {
+  appToday: Date.now(),
+  appMinDate: start.getTime(),
+  appMaxDate: end.getTime()
+};
+Elm.embed(Elm.Heatmap, div, options);
+  </script>
+</html>
