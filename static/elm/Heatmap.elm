@@ -5,12 +5,15 @@ import Date (..)
 import Html (..)
 import Html.Events (..)
 import Signal
+import Json.Encode
+
+import Cell (..)
 import Util (..)
 
 port appMinDate: Float
 port appMaxDate: Float
 port appToday: Float
--- TODO json data to process
+port appData: Json.Encode.Value
 
 -- our calendar model.
 type alias CalendarView = { minDate: Date
@@ -18,9 +21,6 @@ type alias CalendarView = { minDate: Date
                           , starting: Date
                           , days: Int
                           }
-
--- drawing options.
--- TODO
 
 -- actions that can be applied to our model.
 type Action = PreviousCalendar | NextCalendar | Display
