@@ -295,8 +295,12 @@ if __name__ == '__main__':
     except ImportError:
         import os
         app.secret_key = os.urandom(24)
+    import sys
     app.debug = True
     app.config['version'] = "1.0"
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
     scheduler.start()
+    port = 5000
+    if len(sys.argv) > 1:
+        port = int(sys.argv[1])
     app.run(host='0.0.0.0')
