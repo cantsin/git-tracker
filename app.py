@@ -299,4 +299,4 @@ if __name__ == '__main__':
     app.config['version'] = "1.0"
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
     scheduler.start()
-    app.run()
+    app.run(host='0.0.0.0')
