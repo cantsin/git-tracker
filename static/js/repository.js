@@ -1,6 +1,6 @@
 /* jshint esnext:true */
 
-import { bind_creation } from '/js/common';
+import { bind_creation } from '../js/common.js';
 
 bind_creation($('#repository_form'));
 bind_creation($('#apply_tags_form'));
