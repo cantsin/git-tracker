@@ -6,3 +6,4 @@
 /.sass-cache/
 /node_modules/
 /src/static/dist/
+/bower_components/

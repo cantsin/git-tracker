@@ -1,0 +1,25 @@
+{
+  "name": "git-tracker",
+  "version": "0.1.0",
+  "description": "Track your git usage.",
+  "main": "Gruntfile.js",
+  "dependencies": {
+    "grunt": "~0.4.5",
+    "grunt-purescript": "~0.6.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/cantsin/git-tracker"
+  },
+  "author": "James Tranovich",
+  "license": "Apache 2.0",
+  "readmeFilename": "README.md",
+  "gitHead": "8067cab10555423b6befa74ca3bc02303af7b1bf",
+  "dependencies": {
+    "grunt-purescript": "0.6.0"
+  }
+}
