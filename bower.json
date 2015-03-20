@@ -21,6 +21,7 @@
   "dependencies": {
     "purescript-math": "0.1.0",
     "purescript-signal": "2.2.1",
-    "purescript-d3": "0.6.0"
+    "purescript-d3": "0.6.0",
+    "purescript-datetime": "0.3.1"
   }
 }
