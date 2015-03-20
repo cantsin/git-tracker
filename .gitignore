@@ -4,3 +4,5 @@
 /src/*.pyc
 /uploads/
 /.sass-cache/
+/node_modules/
+/src/static/dist/
