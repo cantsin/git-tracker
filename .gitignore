@@ -1,6 +1,6 @@
 /__pycache__/
 /repositories/*/*.git/
-/config.py
-/*.pyc
+/src/config.py
+/src/*.pyc
 /uploads/
 /.sass-cache/
