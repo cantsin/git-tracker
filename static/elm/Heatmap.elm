@@ -16,7 +16,7 @@ port appToday: Float
 port appData: Json.Encode.Value
 
 -- our calendar model.
-type alias CalendarView = { minDate: Date
+type alias CalendarData = { minDate: Date
                           , maxDate: Date
                           , starting: Date
                           , days: Int
@@ -25,7 +25,7 @@ type alias CalendarView = { minDate: Date
 -- actions that can be applied to our model.
 type Action = PreviousCalendar | NextCalendar | Display
 
-update: Action -> CalendarView -> CalendarView
+update: Action -> CalendarData -> CalendarData
 update action cal =
     case action of
         PreviousCalendar ->
@@ -35,7 +35,7 @@ update action cal =
             let next = toTime cal.starting + daysToFloat cal.days in
             { cal | starting <- minDate cal.maxDate (fromTime next) }
 
-view: CalendarView -> Html
+view: CalendarData -> Html
 view cal =
     let clickPrev = button [ onClick (Signal.send actionChannel PreviousCalendar) ] [ text "<" ]
         clickNext = button [ onClick (Signal.send actionChannel NextCalendar) ] [ text ">" ]
@@ -44,7 +44,7 @@ view cal =
         calendar = List.map (\n -> div [] [ text <| timeToString (start + (toFloat n) * oneday) ]) [1..cal.days] in
     div [] <| header :: clickPrev :: clickNext :: calendar
 
-model: Signal CalendarView
+model: Signal CalendarData
 model =
     let cal = { minDate = fromTime appMinDate
               , maxDate = fromTime appMaxDate
