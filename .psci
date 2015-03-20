@@ -1,0 +1,2 @@
+:m src/static/purescript/Heatmap.purs
+:m bower_components/purescript-math/src/Math.purs

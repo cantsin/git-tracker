@@ -15,11 +15,13 @@ module.exports = function(grunt) {
         src: ["<%=srcFiles%>"],
         dest: "src/static/dist/Main.js"
       }
-    }
+    },
+
+    dotPsci: ["<%=srcFiles%>"]
   });
 
   grunt.loadNpmTasks("grunt-purescript");
 
-  grunt.registerTask("default", ["psc:all"]);
+  grunt.registerTask("default", ["psc:all", "dotPsci"]);
 
 };
