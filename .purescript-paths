@@ -37,6 +37,11 @@ bower_components/purescript-foldable-traversable/src/Data/Traversable.purs
 bower_components/purescript-foreign/src/Data/Foreign.purs
 bower_components/purescript-globals/src/Global.purs
 bower_components/purescript-math/src/Math.purs
+bower_components/purescript-maps/src/Data/StrMap/Unsafe.purs
+bower_components/purescript-maps/src/Data/StrMap/ST.purs
+bower_components/purescript-maps/src/Data/StrMap/ST/Unsafe.purs
+bower_components/purescript-maps/src/Data/Map.purs
+bower_components/purescript-maps/src/Data/StrMap.purs
 bower_components/purescript-maybe/src/Data/Maybe.purs
 bower_components/purescript-maybe/src/Data/Maybe/Unsafe.purs
 bower_components/purescript-monoid/src/Data/Monoid/Additive.purs
