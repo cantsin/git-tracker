@@ -4,3 +4,11 @@
 /*.pyc
 /uploads/
 /.sass-cache/
+/bin/
+/.psci_modules/
+/bower_components/
+/include/
+/lib/
+/node_modules/
+/pip-selfcheck.json
+/share/
