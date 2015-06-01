@@ -31095,6 +31095,7 @@ System.registerModule("traceur@0.0.90/src/WebPageTranscoder.js", [], function() 
   var ErrorReporter = System.get("traceur@0.0.90/src/util/ErrorReporter.js").ErrorReporter;
   var Options = System.get("traceur@0.0.90/src/Options.js").Options;
   var scriptSelector = 'script[type="module"],script[type="text/traceur"]';
+  var webLoader = System.get("traceur@0.0.90/src/runtime/webLoader.js").webLoader;
   var WebPageTranscoder = (function() {
     function WebPageTranscoder() {
       var url = arguments[0] !== (void 0) ? arguments[0] : document.location.href;
