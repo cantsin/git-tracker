@@ -163,3 +163,7 @@ class Tag(SessionMixin, db.Model): #pylint: disable-msg=R0903
 
     def __repr__(self):
         return '<Tag %r>' % self.name
+
+# create the tables if it doesn't already exist.
+db.create_all()
+db.session.commit()
