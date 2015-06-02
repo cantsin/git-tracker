@@ -5,7 +5,7 @@ RUN apt-get update
 RUN apt-get install -y git python python-dev python3.4 python3.4-dev python3-pip libffi-dev cmake
 # manually install libgit2 -- the ubuntu repos are behind.
 RUN git clone https://github.com/libgit2/libgit2/ /usr/src/libgit2
-RUN cd /usr/src/libgit2 && git checkout tags/v0.21.4
+RUN cd /usr/src/libgit2 && git checkout tags/v0.22.1
 RUN mkdir /usr/src/libgit2/build && cd /usr/src/libgit2/build && cmake .. -DCMAKE_INSTALL_PREFIX=/usr/ && cmake --build . && cmake --build . --target install
 # git-tracker.
 RUN git clone https://github.com/cantsin/git-tracker /git-tracker
