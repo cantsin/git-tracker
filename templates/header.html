@@ -30,6 +30,32 @@
       </div>
     </li>
     <li>
+      <a href="javascript:void(0);" data-reveal-id="import">
+        <i class="fa fa-upload"></i> Import
+      </a>
+      <div id="import" class="reveal-modal small" data-reveal>
+        <h2><i class="fa fa-key"></i> Upload Repository Data</h2>
+        <div data-alert class="alert-box info">
+          You may upload a CSV to bulk import repositories all at once. To do this, the CSV file must have four columns: <code>Repository name</code>, <code>Repository location</code>, <code>Kind</code> (accepted values are: <code>github</code>, <code>bitbucket</code>, and <code>local</code>), and <code>Tags</code> (in a quoted and comma separated list). Please do not add a CSV header.
+        </div>
+        <form id="add_multiple_repositories"
+              enctype="multipart/form-data"
+              action="{{ url_for('load_repositories') }}"
+              method="post">
+          <div class="row">
+            <input id="upload_repositories" type="file" placeholder="Bulk upload" name="bulk-upload" value="">
+          </div>
+          <input class="button tiny radius" type="submit" value="Upload">
+        </form>
+        <a class="close-reveal-modal">&#215;</a>
+      </div>
+    </li>
+    <li>
+      <a href="{{ url_for('dump_repositories') }}">
+        <i class="fa fa-download"></i> Export
+      </a>
+    </li>
+    <li>
       <a href="javascript:void(0);" data-reveal-id="emails">
         <i class="fa fa-envelope-square"></i> Emails
       </a>
