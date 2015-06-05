@@ -11,7 +11,8 @@ def override_loader(*args, **kwargs):
         return None
 pkgutil.get_loader = override_loader
 
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, \
+    jsonify, make_response
 from flask.ext.login import LoginManager, login_required, login_user, \
     logout_user, current_user
 from werkzeug import secure_filename
@@ -22,6 +23,7 @@ from git import GitOperations, GitException
 from data import DataOperations
 from cron import scheduler
 
+import io, csv
 import os
 
 UPLOAD_FOLDER = 'uploads'
@@ -204,6 +206,19 @@ def add_repository():
         return jsonify(error=ge.args)
     except IndexError:
         return jsonify(error='Location is invalid.')
+
+@app.route('/repositories/dump', methods=['GET'])
+@login_required
+def dump_repositories():
+    si = io.StringIO()
+    fake_csv = csv.writer(si)
+    for repository in current_user.repositories.all():
+        tags = ','.join([tag.name for tag in repository.tags])
+        fake_csv.writerow([repository.get_name(), repository.location, repository.kind, tags])
+    response = make_response(si.getvalue())
+    response.headers["Content-Disposition"] = "attachment; filename=repositories.csv"
+    response.headers["Content-Type"] = "text/csv"
+    return response
 
 @app.route('/repository/<repository_name>/tags/apply', methods=['POST'])
 @login_required
