@@ -53,4 +53,15 @@ Dashboard
     </div>
   </div>
   {% endif %}
+
+  <form id="add_multiple_repositories"
+        enctype="multipart/form-data"
+        action="{{ url_for('load_repositories') }}"
+        method="post">
+    <div class="row">
+      Bulk upload repositories here:
+      <input id="upload_repositories" type="file" placeholder="Bulk upload" name="bulk-upload" value="">
+    </div>
+    <input class="button tiny radius" type="submit" value="Upload">
+  </form>
 {% endblock %}
