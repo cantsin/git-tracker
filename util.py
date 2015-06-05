@@ -47,6 +47,10 @@ def url_for_redirect_back(endpoint, **values):
 
 def get_redirect_target():
     for target in request.values.get('next'), request.referrer:
+        # when adding a new user, don't end up back to the new user
+        # page when we successfully login!
+        if request.referrer and request.referrer.endswith(url_for('add_user')):
+            continue
         if not target:
             continue
         if is_safe_url(target):
