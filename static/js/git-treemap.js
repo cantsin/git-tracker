@@ -10,7 +10,8 @@ let labels = R.pluck('tag')(data);
 if(labels.length > 0) {
   // normalize the data.
   let n = data[0].count;
-  let counts = [for (i of R.pluck('count')(data)) i / n];
+  let count_data = R.pluck('count')(data);
+  let counts = count_data.map(function(elem){ return elem / n; })
 
   let boxFormatter = (coordinates, index) => {
     // we don't have any recursive indices.
