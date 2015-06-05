@@ -12,25 +12,15 @@
               action="{{ url_for('update_keys') }}"
               method="post">
           <div class="row">
-            <div class="small-4 columns" style="margin-bottom: 16px;">
-              <a class="button tiny radius" href="javascript:void(0);">
-                Public Key
-                <input id="public-key" type="file" placeholder="Public key" name="public-key" value="{{ current_user.public_key_name() }}">
-              </a>
-            </div>
             <div class="small-8 columns" style="margin-bottom: 16px;">
-              <label>Current file: {{ current_user.public_key_name() }}</label>
+              Public Key
+              <input id="public-key" type="file" placeholder="Public key" name="public-key" value="{{ current_user.public_key_name() }}">
             </div>
           </div>
           <div class="row">
-            <div class="small-4 columns" style="margin-bottom: 16px;">
-              <a class="button tiny radius" href="javascript:void(0);">
-                Private Key
-                <input id="private-key" type="file" placeholder="Private key" name="private-key" value="{{ current_user.public_key_name() }}">
-              </a>
-            </div>
             <div class="small-8 columns" style="margin-bottom: 16px;">
-              <label>Current file: {{ current_user.private_key_name() }}</label>
+              Private Key
+              <input id="private-key" type="file" placeholder="Private key" name="private-key" value="{{ current_user.public_key_name() }}">
             </div>
           </div>
           <input type="hidden" value="{{ request.path }}" name="next">
