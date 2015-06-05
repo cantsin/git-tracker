@@ -105,6 +105,8 @@ class Repository(SessionMixin, GitMixin, db.Model): #pylint: disable-msg=R0904
     name = db.Column(db.String(255), nullable=False)
     kind = db.Column(db.String(255), nullable=False) # GITHUB, BITBUCKET, LOCAL
     location = db.Column(db.String(255), nullable=False)
+    first_commit = db.Column(db.DateTime())
+    last_commit = db.Column(db.DateTime())
     created_at = db.Column(db.DateTime(), nullable=False)
     updated_at = db.Column(db.DateTime(), nullable=False)
 
@@ -121,6 +123,12 @@ class Repository(SessionMixin, GitMixin, db.Model): #pylint: disable-msg=R0904
             self.kind = Repository.LOCAL
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
+
+    def update_commit_info(self):
+        self.reconstruct()
+        self.first_commit = datetime.fromtimestamp(self.get_first_updated())
+        self.last_commit = datetime.fromtimestamp(self.get_last_updated())
+        self.save()
 
     # initialize GitMixin
     @orm.reconstructor

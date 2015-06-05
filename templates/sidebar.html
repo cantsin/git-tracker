@@ -9,7 +9,7 @@
 <div class="tabs-content">
   <div class="content{% if selection == 'repositories' %} active{% endif %}" id="repositories">
     <ul class="side-nav no-bullet">
-      {% for repository in current_user.repositories %}
+      {% for repository in current_user.repositories.order_by("-last_commit") %}
       <li {% if repository.name == current_selection %}class="active"{% endif %}>
         <a href="{{ url_for('view_repository', name=repository.name) }}">
           {{ repository.get_name() }}

@@ -183,6 +183,7 @@ def delete_repository(name):
 def refresh_repository(name):
     repository = current_user.repositories.filter_by(name=name).first_or_404()
     repository.refresh()
+    repository.update_commit_info()
     repository.save()
     url = url_for('view_repository', name=repository.name)
     return jsonify(success=url)
@@ -195,6 +196,8 @@ def add_repository():
         if current_user.repositories.filter_by(location=location).scalar():
             return jsonify(error='Given repository already exists.')
         repository = GitOperations.create_repository(current_user, location)
+        repository.save()
+        repository.update_commit_info()
         url = url_for('view_repository', name=repository.name)
         return jsonify(success=url)
     except GitException as ge:
