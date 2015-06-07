@@ -56,7 +56,7 @@
       <li {% if tag.name == current_selection %}class="active"{% endif %}>
         <a href="{{ url_for('view_tag', slug=tag.slug) }}">
           {{ tag.name }}
-          <span class="label radius secondary">{{ tag.repositories.count() }}</span>
+          <span class="label radius secondary">{{ tag.repositories.all()|length }}</span>
         </a>
       </li>
       {% else %}

@@ -242,7 +242,8 @@ def load_repositories():
         for tag_name in tags.split(','):
             has_tag = current_user.tags.filter_by(name=tag_name)
             tag = has_tag.first() if has_tag.all() else Tag(current_user, tag_name).save()
-            repository.tags.append(tag)
+            if repository.tags.count(tag) == 0:
+                repository.tags.append(tag)
     return redirect('dashboard')
 
 @app.route('/repository/<repository_name>/tags/apply', methods=['POST'])
