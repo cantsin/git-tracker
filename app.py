@@ -240,6 +240,9 @@ def load_repositories():
             repository = has_repository.first()
         # apply tags if not already extant.
         for tag_name in tags.split(','):
+            tag_name = tag_name.strip()
+            if not tag_name:
+                continue
             has_tag = current_user.tags.filter_by(name=tag_name)
             tag = has_tag.first() if has_tag.all() else Tag(current_user, tag_name).save()
             if repository.tags.count(tag) == 0:
