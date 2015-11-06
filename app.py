@@ -39,6 +39,14 @@ def success(result=None):
 def failure(error):
     return jsonify({success: False, error: error})
 
+def jsoncheck(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except IndexError as e:
+            return failure('Could not find ' + e.args)
+    return wrapper
+
 @login_manager.user_loader
 def load_user(userid):
     return User.query.get(userid)
@@ -47,10 +55,11 @@ def load_user(userid):
 def page_not_found(error):
     return failure('')
 
+@jsoncheck
 @app.route('/login', methods=['POST'])
 def login():
-    email = request.form['email']
-    password = request.form['password']
+    email = request.json['email']
+    password = request.json['password']
     user = User.query.filter_by(login=email).scalar()
     if user and user.check_password(password):
         login_user(user)
@@ -71,13 +80,14 @@ def save_uploaded_file(user, request_file):
     request_file.save(path)
     return path
 
+@jsoncheck
 @app.route('/users/add', methods=['POST'])
 def add_user():
-    email = request.form['email']
+    email = request.json['email']
     if not '@' in email:
         return failure('Please provide a proper email.')
-    password1 = request.form['password']
-    password2 = request.form['password2']
+    password1 = request.json['password']
+    password2 = request.json['password2']
     if password1 != password2:
         return failure('Passwords do not match.')
     public_key = request.files['public-key']
@@ -111,19 +121,17 @@ def update_keys():
     except KeyError:
         return failure('Please fill out all fields.')
 
+@jsoncheck
 @app.route('/users/email/add', methods=['POST'])
 @login_required
 def add_user_email():
-    try:
-        email = request.form['email']
-        if not '@' in email:
-            return failure('Please provide a proper email.')
-        if current_user.emails.filter_by(email=email).scalar():
-            return failure('Current email already exists.')
-        current_user.add_emails(email)
-        return success()
-    except IndexError:
-        return failure('Please fill out all fields.')
+    email = request.json['email']
+    if not '@' in email:
+        return failure('Please provide a proper email.')
+    if current_user.emails.filter_by(email=email).scalar():
+        return failure('Current email already exists.')
+    current_user.add_emails(email)
+    return success()
 
 @app.route('/users/email/<useremail_id>/delete', methods=['GET'])
 @login_required
@@ -141,11 +149,10 @@ def view_repository(name):
     sha1 = repository.get_sha1_of_branch('master')
     tags = current_user.tags.order_by('name')
     result= {'repository': repository,
-             'current_selection': repository.name,
+             'name': repository.name,
              'git_identifier': identifier,
              'git_sha1': sha1,
-             'tags': tags,
-             'selection': 'repositories'}
+             'tags': tags}
     return success(result=result)
 
 @app.route('/repositories/<name>/activity/', methods=['GET'])
@@ -174,11 +181,12 @@ def refresh_repository(name):
     repository.save()
     return success()
 
+@jsoncheck
 @app.route('/repositories/add', methods=['POST'])
 @login_required
 def add_repository():
     try:
-        location = request.form['location']
+        location = request.json['location']
         if current_user.repositories.filter_by(location=location).scalar():
             return failure('Given repository already exists.')
         repository = GitOperations.create_repository(current_user, location)
@@ -187,8 +195,6 @@ def add_repository():
         return success()
     except GitException as ge:
         return failure(ge.args)
-    except IndexError:
-        return failure('Location is invalid.')
 
 @app.route('/repositories/dump', methods=['GET'])
 @login_required
@@ -236,7 +242,7 @@ def load_repositories():
 @login_required
 def apply_tags(repository_name):
     repository = current_user.repositories.filter_by(name=repository_name).first_or_404()
-    tag_names = [key for (key, value) in request.form.items()
+    tag_names = [key for (key, value) in request.json.items()
                  if key.startswith('apply-') and value == 'on']
     repository.clear_tags()
     for tag_name in tag_names:
@@ -252,13 +258,12 @@ def view_tag(slug):
     first_updated = DataOperations.get_first_updated(tag.repositories)
     last_updated = DataOperations.get_last_updated(tag.repositories)
     result = {'tag': tag,
-              'current_selection': tag.name,
+              'name': tag.name,
               'first_updated': first_updated,
-              'last_updated': last_updated,
-              'selection': 'tags'}
+              'last_updated': last_updated}
     return success(result=result)
 
-@app.route('/tags/<slug>/activity/', methods=['GET'])
+@app.route('/tags/<slug>/activity', methods=['GET'])
 @login_required
 def tag_activity(slug):
     tag = current_user.tags.filter_by(slug=slug).first_or_404()
@@ -276,21 +281,19 @@ def delete_tag(slug):
     tag.delete()
     return success()
 
+@jsoncheck
 @app.route('/tags/add', methods=['POST'])
 @login_required
 def add_tag():
-    try:
-        name = request.form['name'].strip()
-        if name == '':
-            return failure('Tag cannot be blank.')
-        if current_user.tags.filter_by(name=name).scalar():
-            return failure('Given tag name already exists.')
-        if current_user.tags.filter_by(slug=slugify(name)).scalar():
-            return failure('Given tag slug already exists.')
-        tag = Tag(current_user, name).save()
-        return success()
-    except IndexError:
-        return failure('Name field is invalid.')
+    name = request.json['name'].strip()
+    if name == '':
+        return failure('Tag cannot be blank.')
+    if current_user.tags.filter_by(name=name).scalar():
+        return failure('Given tag name already exists.')
+    if current_user.tags.filter_by(slug=slugify(name)).scalar():
+        return failure('Given tag slug already exists.')
+    tag = Tag(current_user, name).save()
+    return success()
 
 @app.route('/dashboard/activity')
 @login_required
@@ -308,8 +311,7 @@ def dashboard():
     first_updated = DataOperations.get_first_updated(current_user.repositories)
     last_updated = DataOperations.get_last_updated(current_user.repositories)
     result = {'first_updated': first_updated,
-              'last_updated': last_updated,
-              'selection': 'repositories'}
+              'last_updated': last_updated}
     return success(result=result)
 
 if __name__ == '__main__':
