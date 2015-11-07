@@ -15,36 +15,59 @@ from flask import Flask, request, jsonify, make_response
 from flask.ext.login import LoginManager, login_required, login_user, \
     logout_user, current_user
 from werkzeug import secure_filename
-from util import get_gravatar
+from werkzeug.exceptions import HTTPException, default_exceptions
+
+from util import get_gravatar, slugify
 from models import User, Tag
 from git import GitOperations, GitException
 from data import DataOperations
 from cron import scheduler
 
+from functools import wraps
 import io, csv
 import os
 
 UPLOAD_FOLDER = 'uploads'
 
-app = Flask('git-tracker')
+# prevent werkzeug from emitting HTML errors.
+def make_json_app(import_name, **kwargs):
+    def make_json_error(ex):
+        response = jsonify(success=False, error=str(ex))
+        response.status_code = (ex.code if isinstance(ex, HTTPException) else 500)
+        return response
+
+    app = Flask(import_name, **kwargs)
+
+    for code in default_exceptions.keys():
+        app.error_handler_spec[None][code] = make_json_error
+
+    return app
+
+app = make_json_app('git-tracker')
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 
 def success(result=None):
     if not result:
-        return jsonify({success: True})
-    return jsonify({success: True, result: result})
+        return jsonify(success=True)
+    return jsonify(success=True, result=result)
 
 def failure(error):
-    return jsonify({success: False, error: error})
+    return jsonify(success=False, error=error)
 
 def jsoncheck(func):
+    @wraps(func)
     def wrapper(*args, **kwargs):
         try:
-            return func(*args, **kwargs)
+            r = func(*args, **kwargs)
+            return r
+        except KeyError as e:
+            return failure(str(''.join(e.args)) + ' not found')
         except IndexError as e:
-            return failure('Could not find ' + e.args)
+            return failure('Error: ' + str(e.args))
+        except TypeError as e:
+            return failure('Error: ' + str(e.args))
     return wrapper
 
 @login_manager.user_loader
@@ -80,8 +103,8 @@ def save_uploaded_file(user, request_file):
     request_file.save(path)
     return path
 
-@jsoncheck
 @app.route('/users/add', methods=['POST'])
+@jsoncheck
 def add_user():
     email = request.json['email']
     if not '@' in email:
@@ -90,6 +113,7 @@ def add_user():
     password2 = request.json['password2']
     if password1 != password2:
         return failure('Passwords do not match.')
+    print('files:', request.files)
     public_key = request.files['public-key']
     if not public_key.filename:
         return failure('No public key provided.')
