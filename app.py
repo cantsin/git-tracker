@@ -14,6 +14,7 @@ pkgutil.get_loader = override_loader
 from flask import Flask, request, jsonify, make_response
 from flask.ext.login import LoginManager, login_required, login_user, \
     logout_user, current_user
+from flask.ext.cors import CORS
 from werkzeug import secure_filename
 from werkzeug.exceptions import HTTPException, default_exceptions
 
@@ -37,6 +38,7 @@ def make_json_app(import_name, **kwargs):
         return response
 
     app = Flask(import_name, **kwargs)
+    CORS(app)
 
     for code in default_exceptions.keys():
         app.error_handler_spec[None][code] = make_json_error
@@ -74,8 +76,8 @@ def jsoncheck(func):
 def load_user(userid):
     return User.query.get(userid)
 
-@jsoncheck
 @app.route('/login', methods=['POST'])
+@jsoncheck
 def login():
     email = request.json['email']
     password = request.json['password']
@@ -123,8 +125,8 @@ def update_keys():
     except KeyError:
         return failure('Please fill out all fields.')
 
-@jsoncheck
 @app.route('/users/email/add', methods=['POST'])
+@jsoncheck
 @login_required
 def add_user_email():
     email = request.json['email']
@@ -183,8 +185,8 @@ def refresh_repository(name):
     repository.save()
     return success()
 
-@jsoncheck
 @app.route('/repositories/add', methods=['POST'])
+@jsoncheck
 @login_required
 def add_repository():
     try:
@@ -283,8 +285,8 @@ def delete_tag(slug):
     tag.delete()
     return success()
 
-@jsoncheck
 @app.route('/tags/add', methods=['POST'])
+@jsoncheck
 @login_required
 def add_tag():
     name = request.json['name'].strip()
