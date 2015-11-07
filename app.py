@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.4
+#!/usr/bin/env python
 # pylint: disable=C0103,C0111,W0142
 
 # ugh. work around an internal bug with flask and python3.4
@@ -73,10 +73,6 @@ def jsoncheck(func):
 @login_manager.user_loader
 def load_user(userid):
     return User.query.get(userid)
-
-@app.errorhandler(404)
-def page_not_found(error):
-    return failure('')
 
 @jsoncheck
 @app.route('/login', methods=['POST'])

@@ -50,6 +50,11 @@ class GitTrackerTestCase(unittest.TestCase):
         result = self.app.post(where, data=data, content_type='application/json')
         return loads(result.data)
 
+    def test_404(self):
+        result = self.post('/invalid')
+        assert result['success'] == False
+        assert '404: Not Found' in result['error']
+
     def test_add_empty_user(self):
         result = self.post('/users/add')
         assert result['success'] == False
