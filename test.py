@@ -38,6 +38,7 @@ class GitTrackerTestCase(unittest.TestCase):
             app.config['DATABASE'] = location
             app.config['TESTING'] = True
             app.config['CSRF_ENABLED'] = False
+            app.secret_key = os.urandom(24)
             self.app = app.test_client()
 
     def tearDown(self):
@@ -68,6 +69,31 @@ class GitTrackerTestCase(unittest.TestCase):
     def test_add_user_success(self):
         user_data = dict(email='someone@some.org', password='test', password2='test')
         result = self.post('/users/add', **user_data)
+        assert result['success'] == True
+
+    def test_invalid_login(self):
+        user_data = dict(email='someone2@some.org', password='test', password2='test')
+        result = self.post('/users/add', **user_data)
+        assert result['success'] == True
+        user_data['password'] = ''
+        result = self.post('/login', **user_data)
+        assert 'Email and password do not match' in result['error']
+
+    def test_successful_login(self):
+        user_data = dict(email='someone3@some.org', password='test', password2='test')
+        result = self.post('/users/add', **user_data)
+        assert result['success'] == True
+        result = self.post('/login', **user_data)
+        assert result['success'] == True
+
+    def test_successful_logout(self):
+        user_data = dict(email='someone4@some.org', password='test', password2='test')
+        result = self.post('/users/add', **user_data)
+        assert result['success'] == True
+        result = self.post('/login', **user_data)
+        assert result['success'] == True
+        result = self.app.get('/logout')
+        result = loads(result.data)
         assert result['success'] == True
 
 if __name__ == '__main__':

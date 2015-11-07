@@ -10,8 +10,13 @@ from util import slugify
 from git import GitMixin
 
 app = Flask("git-tracker")
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 db = SQLAlchemy(app)
+
+def init_db(location=None):
+    app.config['DATABASE'] = location if location else 'sqlite:////tmp/test.db'
+    # create the tables if it doesn't already exist.
+    db.create_all()
+    db.session.commit()
 
 class SessionMixin(object):
     def save(self):
@@ -171,7 +176,3 @@ class Tag(SessionMixin, db.Model): #pylint: disable-msg=R0903
 
     def __repr__(self):
         return '<Tag %r>' % self.name
-
-# create the tables if it doesn't already exist.
-db.create_all()
-db.session.commit()
