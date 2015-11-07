@@ -17,7 +17,7 @@ from flask.ext.login import LoginManager, login_required, login_user, \
 from werkzeug import secure_filename
 from werkzeug.exceptions import HTTPException, default_exceptions
 
-from util import get_gravatar, slugify
+from util import get_gravatar, slugify, save_uploaded_file
 from models import User, Tag
 from git import GitOperations, GitException
 from data import DataOperations
@@ -95,14 +95,6 @@ def logout():
     logout_user()
     return success()
 
-# helper function.
-def save_uploaded_file(user, request_file):
-    prefix = os.path.join(app.config['UPLOAD_FOLDER'], str(user.id))
-    os.makedirs(prefix, exist_ok=True)
-    path = os.path.join(prefix, secure_filename(request_file.filename))
-    request_file.save(path)
-    return path
-
 @app.route('/users/add', methods=['POST'])
 @jsoncheck
 def add_user():
@@ -113,19 +105,9 @@ def add_user():
     password2 = request.json['password2']
     if password1 != password2:
         return failure('Passwords do not match.')
-    print('files:', request.files)
-    public_key = request.files['public-key']
-    if not public_key.filename:
-        return failure('No public key provided.')
-    private_key = request.files['private-key']
-    if not private_key.filename:
-        return failure('No private key provided.')
     new_user = User(email, password1)
     new_user.avatar_image = get_gravatar(email)
     new_user.save() # generate an id for this user
-    new_user.ssh_public_key_path = save_uploaded_file(new_user, public_key)
-    new_user.ssh_private_key_path = save_uploaded_file(new_user, private_key)
-    new_user.save()
     new_user.add_emails(email)
     return success()
 
@@ -135,11 +117,11 @@ def update_keys():
     try:
         public_key = request.files['public-key']
         if public_key.filename:
-            current_user.ssh_public_key_path = save_uploaded_file(current_user, public_key)
+            current_user.ssh_public_key_path = save_uploaded_file(current_user, public_key, UPLOAD_FOLDER)
             current_user.save()
         private_key = request.files['private-key']
         if private_key.filename:
-            current_user.ssh_private_key_path = save_uploaded_file(current_user, private_key)
+            current_user.ssh_private_key_path = save_uploaded_file(current_user, private_key, UPLOAD_FOLDER)
             current_user.save()
         return success()
     except KeyError:
@@ -239,7 +221,7 @@ def load_repositories():
     csv_file = request.files['bulk-upload']
     if not csv_file.filename:
         return failure('No file uploaded.')
-    csv_path = save_uploaded_file(current_user, csv_file)
+    csv_path = save_uploaded_file(current_user, csv_file, UPLOAD_FOLDER)
     fake_csv = csv.reader(open(csv_path, 'r+'))
     for line in fake_csv:
         [_, location, _, tags] = line

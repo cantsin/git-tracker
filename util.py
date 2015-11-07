@@ -8,6 +8,7 @@ import urllib.parse
 import hashlib
 import humanize
 import re
+import os
 
 _punct_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
 
@@ -26,3 +27,10 @@ def get_gravatar(email):
     url = base_url + hashlib.md5(email.lower().encode('utf8')).hexdigest() + "?"
     url += urllib.parse.urlencode({'d': 'identicon', 's': str(size)})
     return url
+
+def save_uploaded_file(user, request_file, where):
+    prefix = os.path.join(where, str(user.id))
+    os.makedirs(prefix, exist_ok=True)
+    path = os.path.join(prefix, secure_filename(request_file.filename))
+    request_file.save(path)
+    return path
