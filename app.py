@@ -19,7 +19,7 @@ from werkzeug import secure_filename
 from werkzeug.exceptions import HTTPException, default_exceptions
 
 from util import get_gravatar, slugify, save_uploaded_file
-from models import User, Tag
+from models import init_db, User, Tag
 from git import GitOperations, GitException
 from data import DataOperations
 from cron import scheduler
@@ -53,10 +53,10 @@ login_manager.init_app(app)
 def success(result=None):
     if not result:
         return jsonify(success=True)
-    return jsonify(success=True, result=result)
+    return jsonify(success=True, data=result)
 
 def failure(error):
-    return jsonify(success=False, error=error)
+    return jsonify(success=False, errors=[error])
 
 def jsoncheck(func):
     @wraps(func)
@@ -79,6 +79,8 @@ def load_user(userid):
 @app.route('/login', methods=['POST'])
 @jsoncheck
 def login():
+    request.get_json(force=True)
+    print('in login with: ' + str(request.json))
     email = request.json['email']
     password = request.json['password']
     user = User.query.filter_by(login=email).scalar()
@@ -93,9 +95,11 @@ def logout():
     logout_user()
     return success()
 
-@app.route('/users/add', methods=['POST'])
+@app.route('/users', methods=['POST'])
 @jsoncheck
 def add_user():
+    request.get_json(force=True)
+    print('in add_user with: ' + str(request.json))
     email = request.json['email']
     if not '@' in email:
         return failure('Please provide a proper email.')
@@ -125,7 +129,7 @@ def update_keys():
     except KeyError:
         return failure('Please fill out all fields.')
 
-@app.route('/users/email/add', methods=['POST'])
+@app.route('/emails/', methods=['POST'])
 @jsoncheck
 @login_required
 def add_user_email():
@@ -137,7 +141,7 @@ def add_user_email():
     current_user.add_emails(email)
     return success()
 
-@app.route('/users/email/<useremail_id>/delete', methods=['GET'])
+@app.route('/emails/<useremail_id>', methods=['DELETE'])
 @login_required
 def delete_user_email(useremail_id):
     ue = current_user.emails.filter_by(id=useremail_id).first_or_404()
@@ -145,47 +149,7 @@ def delete_user_email(useremail_id):
     url = url_for('dashboard')
     return success()
 
-@app.route('/repository/<name>')
-@login_required
-def view_repository(name):
-    repository = current_user.repositories.filter_by(name=name).first_or_404()
-    identifier = repository.get_shorthand_of_branch('master')
-    sha1 = repository.get_sha1_of_branch('master')
-    tags = current_user.tags.order_by('name')
-    result= {'repository': repository,
-             'name': repository.name,
-             'git_identifier': identifier,
-             'git_sha1': sha1,
-             'tags': tags}
-    return success(result=result)
-
-@app.route('/repositories/<name>/activity/', methods=['GET'])
-@login_required
-def repository_activity(name):
-    repository = current_user.repositories.filter_by(name=name).first_or_404()
-    start = int(request.args.get('start')) or repository.get_first_updated()
-    end = int(request.args.get('end')) or repository.get_last_updated()
-    result = repository.histogram(start, end)
-    return success(result=result)
-
-@app.route('/repositories/<name>/delete', methods=['GET'])
-@login_required
-def delete_repository(name):
-    repository = current_user.repositories.filter_by(name=name).first_or_404()
-    repository.clear_tags()
-    repository.delete()
-    return success()
-
-@app.route('/repositories/<name>/refresh', methods=['GET'])
-@login_required
-def refresh_repository(name):
-    repository = current_user.repositories.filter_by(name=name).first_or_404()
-    repository.refresh()
-    repository.update_commit_info()
-    repository.save()
-    return success()
-
-@app.route('/repositories/add', methods=['POST'])
+@app.route('/repositories/', methods=['POST'])
 @jsoncheck
 @login_required
 def add_repository():
@@ -199,6 +163,46 @@ def add_repository():
         return success()
     except GitException as ge:
         return failure(ge.args)
+
+@app.route('/repositories/<repository_id>', methods=['GET'])
+@login_required
+def view_repository(name):
+    repository = current_user.repositories.filter_by(id=repository_id).first_or_404()
+    identifier = repository.get_shorthand_of_branch('master')
+    sha1 = repository.get_sha1_of_branch('master')
+    tags = current_user.tags.order_by('name')
+    result= {'repository': repository,
+             'name': repository.name,
+             'git_identifier': identifier,
+             'git_sha1': sha1,
+             'tags': tags}
+    return success(result=result)
+
+@app.route('/repositories/<repository_id>', methods=['DELETE'])
+@login_required
+def delete_repository(name):
+    repository = current_user.repositories.filter_by(id=repository_id).first_or_404()
+    repository.clear_tags()
+    repository.delete()
+    return success()
+
+@app.route('/repositories/<repository_id>/activity/', methods=['GET'])
+@login_required
+def repository_activity(name):
+    repository = current_user.repositories.filter_by(id=repository_id).first_or_404()
+    start = int(request.args.get('start')) or repository.get_first_updated()
+    end = int(request.args.get('end')) or repository.get_last_updated()
+    result = repository.histogram(start, end)
+    return success(result=result)
+
+@app.route('/repositories/<repository_id>/refresh', methods=['GET'])
+@login_required
+def refresh_repository(name):
+    repository = current_user.repositories.filter_by(id=repository_id).first_or_404()
+    repository.refresh()
+    repository.update_commit_info()
+    repository.save()
+    return success()
 
 @app.route('/repositories/dump', methods=['GET'])
 @login_required
@@ -242,10 +246,10 @@ def load_repositories():
                 repository.tags.append(tag)
     return success()
 
-@app.route('/repository/<repository_name>/tags/apply', methods=['POST'])
+@app.route('/repositories/<repository_id>/apply', methods=['POST'])
 @login_required
 def apply_tags(repository_name):
-    repository = current_user.repositories.filter_by(name=repository_name).first_or_404()
+    repository = current_user.repositories.filter_by(id=repository_id).first_or_404()
     tag_names = [key for (key, value) in request.json.items()
                  if key.startswith('apply-') and value == 'on']
     repository.clear_tags()
@@ -255,37 +259,7 @@ def apply_tags(repository_name):
     repository.save()
     return success()
 
-@app.route('/tag/<slug>')
-@login_required
-def view_tag(slug):
-    tag = current_user.tags.filter_by(slug=slug).first_or_404()
-    first_updated = DataOperations.get_first_updated(tag.repositories)
-    last_updated = DataOperations.get_last_updated(tag.repositories)
-    result = {'tag': tag,
-              'name': tag.name,
-              'first_updated': first_updated,
-              'last_updated': last_updated}
-    return success(result=result)
-
-@app.route('/tags/<slug>/activity', methods=['GET'])
-@login_required
-def tag_activity(slug):
-    tag = current_user.tags.filter_by(slug=slug).first_or_404()
-    first_updated = DataOperations.get_first_updated(tag.repositories)
-    last_updated = DataOperations.get_last_updated(tag.repositories)
-    start = int(request.args.get('start')) or first_updated
-    end = int(request.args.get('end')) or last_updated
-    result = DataOperations.histogram(tag.repositories, start, end)
-    return success(result=result)
-
-@app.route('/tags/<slug>/delete', methods=['GET'])
-@login_required
-def delete_tag(slug):
-    tag = current_user.tags.filter_by(slug=slug).first_or_404()
-    tag.delete()
-    return success()
-
-@app.route('/tags/add', methods=['POST'])
+@app.route('/tags', methods=['POST'])
 @jsoncheck
 @login_required
 def add_tag():
@@ -299,14 +273,34 @@ def add_tag():
     tag = Tag(current_user, name).save()
     return success()
 
-@app.route('/dashboard/activity')
+@app.route('/tags/<tag_id>', methods=['DELETE'])
 @login_required
-def all_activity():
-    first_updated = DataOperations.get_first_updated(current_user.repositories)
-    last_updated = DataOperations.get_last_updated(current_user.repositories)
+def delete_tag(slug):
+    tag = current_user.tags.filter_by(id=tag_id).first_or_404()
+    tag.delete()
+    return success()
+
+@app.route('/tags/<tag_id>', methods=['GET'])
+@login_required
+def view_tag(slug):
+    tag = current_user.tags.filter_by(id=tag_id).first_or_404()
+    first_updated = DataOperations.get_first_updated(tag.repositories)
+    last_updated = DataOperations.get_last_updated(tag.repositories)
+    result = {'tag': tag,
+              'name': tag.name,
+              'first_updated': first_updated,
+              'last_updated': last_updated}
+    return success(result=result)
+
+@app.route('/tags/<tag_id>/activity', methods=['GET'])
+@login_required
+def tag_activity(slug):
+    tag = current_user.tags.filter_by(id=tag_id).first_or_404()
+    first_updated = DataOperations.get_first_updated(tag.repositories)
+    last_updated = DataOperations.get_last_updated(tag.repositories)
     start = int(request.args.get('start')) or first_updated
     end = int(request.args.get('end')) or last_updated
-    result = DataOperations.histogram(current_user.repositories, start, end)
+    result = DataOperations.histogram(tag.repositories, start, end)
     return success(result=result)
 
 @app.route('/dashboard')
@@ -316,6 +310,16 @@ def dashboard():
     last_updated = DataOperations.get_last_updated(current_user.repositories)
     result = {'first_updated': first_updated,
               'last_updated': last_updated}
+    return success(result=result)
+
+@app.route('/dashboard/activity')
+@login_required
+def all_activity():
+    first_updated = DataOperations.get_first_updated(current_user.repositories)
+    last_updated = DataOperations.get_last_updated(current_user.repositories)
+    start = int(request.args.get('start')) or first_updated
+    end = int(request.args.get('end')) or last_updated
+    result = DataOperations.histogram(current_user.repositories, start, end)
     return success(result=result)
 
 if __name__ == '__main__':
@@ -329,6 +333,7 @@ if __name__ == '__main__':
     app.debug = True
     app.config['version'] = "1.0"
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+    init_db()
     scheduler.start()
     port = 5000
     if len(sys.argv) > 1:
