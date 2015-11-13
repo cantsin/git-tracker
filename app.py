@@ -139,14 +139,14 @@ def add_user_email():
     current_user.add_emails(email)
     return success()
 
-@app.route('/emails/<useremail_id>', methods=['DELETE'])
+@app.route('/emails/<id>', methods=['DELETE'])
 @login_required
-def delete_user_email(useremail_id):
-    ue = current_user.emails.filter_by(id=useremail_id).first_or_404()
+def delete_user_email(id):
+    ue = current_user.emails.filter_by(id=id).first_or_404()
     ue.delete()
     return success()
 
-@app.route('/repositories/', methods=['POST'])
+@app.route('/repositories', methods=['POST'])
 @jsoncheck
 @login_required
 def add_repository():
@@ -159,12 +159,12 @@ def add_repository():
         repository.update_commit_info()
         return success()
     except GitException as ge:
-        return failure(ge.args)
+        return failure(ge.args[0][0])
 
-@app.route('/repositories/<repository_id>', methods=['GET'])
+@app.route('/repositories/<id>', methods=['GET'])
 @login_required
-def view_repository(name):
-    repository = current_user.repositories.filter_by(id=repository_id).first_or_404()
+def view_repository(id):
+    repository = current_user.repositories.filter_by(id=id).first_or_404()
     identifier = repository.get_shorthand_of_branch('master')
     sha1 = repository.get_sha1_of_branch('master')
     tags = current_user.tags.order_by('name')
@@ -175,27 +175,27 @@ def view_repository(name):
              'tags': tags}
     return success(result=result)
 
-@app.route('/repositories/<repository_id>', methods=['DELETE'])
+@app.route('/repositories/<id>', methods=['DELETE'])
 @login_required
-def delete_repository(name):
-    repository = current_user.repositories.filter_by(id=repository_id).first_or_404()
+def delete_repository(id):
+    repository = current_user.repositories.filter_by(id=id).first_or_404()
     repository.clear_tags()
     repository.delete()
     return success()
 
-@app.route('/repositories/<repository_id>/activity/', methods=['GET'])
+@app.route('/repositories/<id>/activity/', methods=['GET'])
 @login_required
-def repository_activity(name):
-    repository = current_user.repositories.filter_by(id=repository_id).first_or_404()
+def repository_activity(id):
+    repository = current_user.repositories.filter_by(id=id).first_or_404()
     start = int(request.args.get('start')) or repository.get_first_updated()
     end = int(request.args.get('end')) or repository.get_last_updated()
     result = repository.histogram(start, end)
     return success(result=result)
 
-@app.route('/repositories/<repository_id>/refresh', methods=['GET'])
+@app.route('/repositories/<id>/refresh', methods=['GET'])
 @login_required
-def refresh_repository(name):
-    repository = current_user.repositories.filter_by(id=repository_id).first_or_404()
+def refresh_repository(id):
+    repository = current_user.repositories.filter_by(id=id).first_or_404()
     repository.refresh()
     repository.update_commit_info()
     repository.save()
@@ -243,10 +243,10 @@ def load_repositories():
                 repository.tags.append(tag)
     return success()
 
-@app.route('/repositories/<repository_id>/apply', methods=['POST'])
+@app.route('/repositories/<id>/apply', methods=['POST'])
 @login_required
-def apply_tags(repository_name):
-    repository = current_user.repositories.filter_by(id=repository_id).first_or_404()
+def apply_tags(id):
+    repository = current_user.repositories.filter_by(id=id).first_or_404()
     tag_names = [key for (key, value) in request.json.items()
                  if key.startswith('apply-') and value == 'on']
     repository.clear_tags()
@@ -270,17 +270,17 @@ def add_tag():
     tag = Tag(current_user, name).save()
     return success()
 
-@app.route('/tags/<tag_id>', methods=['DELETE'])
+@app.route('/tags/<id>', methods=['DELETE'])
 @login_required
-def delete_tag(slug):
-    tag = current_user.tags.filter_by(id=tag_id).first_or_404()
+def delete_tag(id):
+    tag = current_user.tags.filter_by(id=id).first_or_404()
     tag.delete()
     return success()
 
-@app.route('/tags/<tag_id>', methods=['GET'])
+@app.route('/tags/<id>', methods=['GET'])
 @login_required
-def view_tag(slug):
-    tag = current_user.tags.filter_by(id=tag_id).first_or_404()
+def view_tag(id):
+    tag = current_user.tags.filter_by(id=id).first_or_404()
     first_updated = DataOperations.get_first_updated(tag.repositories)
     last_updated = DataOperations.get_last_updated(tag.repositories)
     result = {'tag': tag,
@@ -289,10 +289,10 @@ def view_tag(slug):
               'last_updated': last_updated}
     return success(result=result)
 
-@app.route('/tags/<tag_id>/activity', methods=['GET'])
+@app.route('/tags/<id>/activity', methods=['GET'])
 @login_required
-def tag_activity(slug):
-    tag = current_user.tags.filter_by(id=tag_id).first_or_404()
+def tag_activity(id):
+    tag = current_user.tags.filter_by(id=id).first_or_404()
     first_updated = DataOperations.get_first_updated(tag.repositories)
     last_updated = DataOperations.get_last_updated(tag.repositories)
     start = int(request.args.get('start')) or first_updated

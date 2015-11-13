@@ -5,11 +5,13 @@ from flask.json import loads
 from werkzeug import FileStorage
 from werkzeug.datastructures import MultiDict
 
-from models import init_db
+from models import init_db, Repository
+from git import GitOperations
 
 import os
 import unittest
 import tempfile
+import shutil
 from json import dumps
 from io import StringIO
 
@@ -29,9 +31,13 @@ class TestingFileStorage(FileStorage):
         else:
             self.saved = dst.name
 
-class UserTestCase(unittest.TestCase):
+class GitTrackerTestCase(unittest.TestCase):
+
+    # where we store our git repos.
+    git_repositories = 'test/repositories/'
 
     def setUp(self):
+        GitOperations.git_repositories = GitTrackerTestCase.git_repositories
         with app.app_context():
             self.db_fd, location = tempfile.mkstemp()
             init_db(location)
@@ -40,15 +46,36 @@ class UserTestCase(unittest.TestCase):
             app.config['CSRF_ENABLED'] = False
             app.secret_key = os.urandom(24)
             self.app = app.test_client()
+        try:
+            os.makedirs(GitTrackerTestCase.git_repositories)
+        except FileExistsError:
+            pass
+        self.initialize()
 
-    def tearDown(self):
-        os.close(self.db_fd)
-        os.unlink(app.config['DATABASE'])
+    # helper functions.
+    def initialize(self): pass
+
+    def get(self, where, **kwargs):
+        data = dumps(kwargs)
+        result = self.app.get(where, data=data, content_type='application/json')
+        return loads(result.get_data())
 
     def post(self, where, **kwargs):
         data = dumps(kwargs)
         result = self.app.post(where, data=data, content_type='application/json')
+        return loads(result.get_data())
+
+    def delete(self, where, **kwargs):
+        data = dumps(kwargs)
+        result = self.app.delete(where, data=data, content_type='application/json')
         return loads(result.data)
+
+    def tearDown(self):
+        os.close(self.db_fd)
+        os.unlink(app.config['DATABASE'])
+        shutil.rmtree(GitTrackerTestCase.git_repositories)
+
+class UserTestCase(GitTrackerTestCase):
 
     def test_404(self):
         result = self.post('/invalid')
@@ -101,17 +128,9 @@ class UserTestCase(unittest.TestCase):
         result = loads(result.data)
         assert result['success'] == True
 
-class EmailTestCase(unittest.TestCase):
+class EmailTestCase(GitTrackerTestCase):
 
-    def setUp(self):
-        with app.app_context():
-            self.db_fd, location = tempfile.mkstemp()
-            init_db(location)
-            app.config['DATABASE'] = location
-            app.config['TESTING'] = True
-            app.config['CSRF_ENABLED'] = False
-            app.secret_key = os.urandom(24)
-            self.app = app.test_client()
+    def initialize(self):
         # create random user and login
         user_data = dict(email='someone5@some.org', password='test', password2='test')
         result = self.post('/login', **user_data)
@@ -120,20 +139,6 @@ class EmailTestCase(unittest.TestCase):
             assert result['success'] == True
             result = self.post('/login', **user_data)
             assert result['success'] == True
-
-    def tearDown(self):
-        os.close(self.db_fd)
-        os.unlink(app.config['DATABASE'])
-
-    def post(self, where, **kwargs):
-        data = dumps(kwargs)
-        result = self.app.post(where, data=data, content_type='application/json')
-        return loads(result.data)
-
-    def delete(self, where, **kwargs):
-        data = dumps(kwargs)
-        result = self.app.delete(where, data=data, content_type='application/json')
-        return loads(result.data)
 
     def test_add_email(self):
         email_data = dict(email='newemail@foo.org')
@@ -157,6 +162,52 @@ class EmailTestCase(unittest.TestCase):
     def test_delete_email_invalid(self):
         result = self.delete('/emails/9999')
         assert '404' in result['error']
+
+class RepositoryTestCase(GitTrackerTestCase):
+
+    def initialize(self):
+        # create random user and login
+        user_data = dict(email='someone6@some.org', password='test', password2='test')
+        result = self.post('/login', **user_data)
+        if result['success'] != True:
+            result = self.post('/users', **user_data)
+            assert result['success'] == True
+            result = self.post('/login', **user_data)
+            assert result['success'] == True
+        Repository.query.delete()
+        # create repository
+        result = self.get('/repositories/1')
+        if result['success'] != True:
+            repo_data = dict(location='git://git@github.com/cantsin/git-tracker')
+            result = self.post('/repositories', **repo_data)
+            assert result['success'] == True
+
+    def test_add_repository(self):
+        repo_data = dict(location='git://git@github.com/cantsin/dotemacs')
+        result = self.post('/repositories', **repo_data)
+        assert result['success'] == True
+
+    def test_add_repository_invalid(self):
+        repo_data = dict(location='git://git@github.com/cantsin/_invalid')
+        result = self.post('/repositories', **repo_data)
+        assert 'Repository not found.' in result['errors'][0]
+
+    def test_add_repository_duplicate(self):
+        repo_data = dict(location='git://git@github.com/cantsin/git-tracker')
+        result = self.post('/repositories', **repo_data)
+        assert 'Given repository already exists.' in result['errors']
+
+    # def test_get_repository(self): pass
+
+    # def test_get_repository_invalid(self): pass
+
+    # def test_delete_repository(self): pass
+
+    # def test_delete_repository_invalid(self): pass
+
+    # def test_repository_activity(self): pass
+
+    # def test_repository_activity_invalid(self): pass
 
 if __name__ == '__main__':
     unittest.main()
