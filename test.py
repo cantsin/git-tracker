@@ -345,5 +345,35 @@ class TagTestCase(GitTrackerTestCase):
         result = self.get('/tags/9999')
         assert '404' in result['error']
 
+class DashboardTestCase(GitTrackerTestCase):
+
+    def initialize(self):
+        # create random user and login
+        user_data = dict(email='someone@some.org', password='test', password2='test')
+        result = self.post('/login', **user_data)
+        if result['success'] != True:
+            result = self.post('/users', **user_data)
+            assert result['success']
+            result = self.post('/login', **user_data)
+            assert result['success']
+            email_data = dict(email='jtranovich@gmail.com')
+            result = self.post('/emails', **email_data)
+            assert result['success']
+        # create repository (email must be a valid author of this repository)
+        result = self.get('/repositories/1')
+        if result['success'] != True:
+            repo_data = dict(location='git://git@github.com/cantsin/git-tracker')
+            result = self.post('/repositories', **repo_data)
+            assert result['success']
+
+    def test_dashboard(self):
+        result = self.get('/dashboard')
+        assert result['success']
+
+    def test_dashboard_params(self):
+        result = self.get('/dashboard', query={'start': 0, 'end': 9999})
+        assert result['success']
+        assert result['data']['histogram'] == []
+
 if __name__ == '__main__':
     unittest.main()

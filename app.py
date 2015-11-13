@@ -163,9 +163,9 @@ def view_repository(id):
     repository = current_user.repositories.filter_by(id=id).first_or_404()
     first_updated = repository.get_first_updated()
     last_updated = repository.get_last_updated()
-    start = request.args.get('start', first_updated)
-    end = request.args.get('end', last_updated)
-    histogram = repository.histogram(int(start), int(end))
+    start = int(request.args.get('start', first_updated))
+    end = int(request.args.get('end', last_updated))
+    histogram = repository.histogram(start, end)
     reference_count = request.args.get('reference_count', 7)
     references = [ref for ref in repository.get_latest_refs(count=reference_count)]
     commit_count = request.args.get('commit_count', 10)
@@ -301,9 +301,9 @@ def view_tag(id):
     tag = current_user.tags.filter_by(id=id).first_or_404()
     first_updated = DataOperations.get_first_updated(tag.repositories)
     last_updated = DataOperations.get_last_updated(tag.repositories)
-    start = request.args.get('start') or first_updated
-    end = request.args.get('end') or last_updated
-    histogram = DataOperations.histogram(tag.repositories, int(start), int(end))
+    start = int(request.args.get('start', first_updated))
+    end = int(request.args.get('end', last_updated))
+    histogram = DataOperations.histogram(tag.repositories, start, end)
     result = {'repositories': [repo.id for repo in tag.repositories],
               'repository_count': tag.repositories.count(),
               'slug': tag.slug,
@@ -318,9 +318,9 @@ def view_tag(id):
 def dashboard():
     first_updated = DataOperations.get_first_updated(current_user.repositories)
     last_updated = DataOperations.get_last_updated(current_user.repositories)
-    start = request.args.get('start') or first_updated
-    end = request.args.get('end') or last_updated
-    histogram = DataOperations.histogram(current_user.repositories, int(start), int(end))
+    start = int(request.args.get('start', first_updated))
+    end = int(request.args.get('end', last_updated))
+    histogram = DataOperations.histogram(current_user.repositories, start, end)
     result = {'first_updated': first_updated,
               'last_updated': last_updated,
               'histogram': histogram}
