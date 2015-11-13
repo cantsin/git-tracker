@@ -298,9 +298,9 @@ def tag_activity(id):
     tag = current_user.tags.filter_by(id=id).first_or_404()
     first_updated = DataOperations.get_first_updated(tag.repositories)
     last_updated = DataOperations.get_last_updated(tag.repositories)
-    start = int(request.args.get('start')) or first_updated
-    end = int(request.args.get('end')) or last_updated
-    result = DataOperations.histogram(tag.repositories, start, end)
+    start = request.args.get('start') or first_updated
+    end = request.args.get('end') or last_updated
+    result = DataOperations.histogram(tag.repositories, int(start), int(end))
     return success(result=result)
 
 @app.route('/dashboard')
@@ -317,12 +317,12 @@ def dashboard():
 def all_activity():
     first_updated = DataOperations.get_first_updated(current_user.repositories)
     last_updated = DataOperations.get_last_updated(current_user.repositories)
-    start = int(request.args.get('start')) or first_updated
-    end = int(request.args.get('end')) or last_updated
-    result = DataOperations.histogram(current_user.repositories, start, end)
+    start = request.args.get('start') or first_updated
+    end = request.args.get('end') or last_updated
+    result = DataOperations.histogram(current_user.repositories, int(start), int(end))
     return success(result=result)
 
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
     try:
         import config
         app.secret_key = config.secret_key

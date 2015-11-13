@@ -56,8 +56,9 @@ class GitTrackerTestCase(unittest.TestCase):
     def initialize(self): pass
 
     def get(self, where, **kwargs):
+        query = kwargs.pop('query', {})
         data = dumps(kwargs)
-        result = self.app.get(where, data=data, content_type='application/json')
+        result = self.app.get(where, data=data, query_string=query, content_type='application/json')
         return loads(result.get_data())
 
     def post(self, where, **kwargs):
@@ -174,8 +175,11 @@ class RepositoryTestCase(GitTrackerTestCase):
             assert result['success'] == True
             result = self.post('/login', **user_data)
             assert result['success'] == True
+            email_data = dict(email='jtranovich@gmail.com')
+            result = self.post('/emails', **email_data)
+            assert result['success'] == True
         Repository.query.delete()
-        # create repository
+        # create repository (email must be a valid author of this repository)
         result = self.get('/repositories/1')
         if result['success'] != True:
             repo_data = dict(location='git://git@github.com/cantsin/git-tracker')
@@ -216,9 +220,23 @@ class RepositoryTestCase(GitTrackerTestCase):
     def test_repository_activity(self):
         result = self.get('/repositories/1/activity')
         assert result['success']
+        assert result['data'] != []
+
+    def test_repository_activity_params(self):
+        result = self.get('/repositories/1/activity', query={'start': 0, 'end': 9999})
+        assert result['success']
+        assert not ('data' in result)
 
     def test_repository_activity_invalid(self):
         result = self.get('/repositories/9999/activity')
+        assert '404' in result['error']
+
+    def test_repository_refresh(self):
+        result = self.get('/repositories/1/refresh')
+        assert result['success']
+
+    def test_repository_refresh_invalid(self):
+        result = self.get('/repositories/9999/refresh')
         assert '404' in result['error']
 
 if __name__ == '__main__':
