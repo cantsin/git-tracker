@@ -80,7 +80,6 @@ def load_user(userid):
 @jsoncheck
 def login():
     request.get_json(force=True)
-    print('in login with: ' + str(request.json))
     email = request.json['email']
     password = request.json['password']
     user = User.query.filter_by(login=email).scalar()
@@ -99,7 +98,6 @@ def logout():
 @jsoncheck
 def add_user():
     request.get_json(force=True)
-    print('in add_user with: ' + str(request.json))
     email = request.json['email']
     if not '@' in email:
         return failure('Please provide a proper email.')
@@ -146,7 +144,6 @@ def add_user_email():
 def delete_user_email(useremail_id):
     ue = current_user.emails.filter_by(id=useremail_id).first_or_404()
     ue.delete()
-    url = url_for('dashboard')
     return success()
 
 @app.route('/repositories/', methods=['POST'])

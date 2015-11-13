@@ -29,7 +29,7 @@ class TestingFileStorage(FileStorage):
         else:
             self.saved = dst.name
 
-class GitTrackerTestCase(unittest.TestCase):
+class UserTestCase(unittest.TestCase):
 
     def setUp(self):
         with app.app_context():
@@ -60,7 +60,7 @@ class GitTrackerTestCase(unittest.TestCase):
         assert result['success'] == False
         assert 'email not found' in result['errors']
 
-    def test_add_user_no_ampersand(self):
+    def test_add_user_no_at(self):
         result = self.post('/users', email='someone')
         assert result['success'] == False
         assert 'Please provide a proper email.' in result['errors']
@@ -100,6 +100,63 @@ class GitTrackerTestCase(unittest.TestCase):
         result = self.app.get('/logout')
         result = loads(result.data)
         assert result['success'] == True
+
+class EmailTestCase(unittest.TestCase):
+
+    def setUp(self):
+        with app.app_context():
+            self.db_fd, location = tempfile.mkstemp()
+            init_db(location)
+            app.config['DATABASE'] = location
+            app.config['TESTING'] = True
+            app.config['CSRF_ENABLED'] = False
+            app.secret_key = os.urandom(24)
+            self.app = app.test_client()
+        # create random user and login
+        user_data = dict(email='someone5@some.org', password='test', password2='test')
+        result = self.post('/login', **user_data)
+        if result['success'] != True:
+            result = self.post('/users', **user_data)
+            assert result['success'] == True
+            result = self.post('/login', **user_data)
+            assert result['success'] == True
+
+    def tearDown(self):
+        os.close(self.db_fd)
+        os.unlink(app.config['DATABASE'])
+
+    def post(self, where, **kwargs):
+        data = dumps(kwargs)
+        result = self.app.post(where, data=data, content_type='application/json')
+        return loads(result.data)
+
+    def delete(self, where, **kwargs):
+        data = dumps(kwargs)
+        result = self.app.delete(where, data=data, content_type='application/json')
+        return loads(result.data)
+
+    def test_add_email(self):
+        email_data = dict(email='newemail@foo.org')
+        result = self.post('/emails/', **email_data)
+        assert result['success'] == True
+
+    def test_add_email_no_at(self):
+        email_data = dict(email='newemailfoo.org')
+        result = self.post('/emails/', **email_data)
+        assert 'Please provide a proper email.' in result['errors']
+
+    def test_add_email_duplicate(self):
+        email_data = dict(email='someone5@some.org')
+        result = self.post('/emails/', **email_data)
+        assert 'Current email already exists.' in result['errors']
+
+    def test_delete_email(self):
+        result = self.delete('/emails/1')
+        assert result['success'] == True
+
+    def test_delete_email_invalid(self):
+        result = self.delete('/emails/9999')
+        assert '404' in result['error']
 
 if __name__ == '__main__':
     unittest.main()
