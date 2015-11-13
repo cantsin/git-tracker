@@ -56,44 +56,44 @@ class GitTrackerTestCase(unittest.TestCase):
         assert '404: Not Found' in result['error']
 
     def test_add_empty_user(self):
-        result = self.post('/users/add')
+        result = self.post('/users')
         assert result['success'] == False
-        assert 'email not found' in result['error']
+        assert 'email not found' in result['errors']
 
     def test_add_user_no_ampersand(self):
-        result = self.post('/users/add', email='someone')
+        result = self.post('/users', email='someone')
         assert result['success'] == False
-        assert 'Please provide a proper email' in result['error']
+        assert 'Please provide a proper email.' in result['errors']
 
     def test_add_user_mismatched_passwords(self):
         user_data = dict(email='someone@some.org', password='test', password2='')
-        result = self.post('/users/add', **user_data)
+        result = self.post('/users', **user_data)
         assert result['success'] == False
-        assert 'Passwords do not match' in result['error']
+        assert 'Passwords do not match.' in result['errors']
 
     def test_add_user_success(self):
         user_data = dict(email='someone@some.org', password='test', password2='test')
-        result = self.post('/users/add', **user_data)
+        result = self.post('/users', **user_data)
         assert result['success'] == True
 
     def test_invalid_login(self):
         user_data = dict(email='someone2@some.org', password='test', password2='test')
-        result = self.post('/users/add', **user_data)
+        result = self.post('/users', **user_data)
         assert result['success'] == True
         user_data['password'] = ''
         result = self.post('/login', **user_data)
-        assert 'Email and password do not match' in result['error']
+        assert 'Email and password do not match.' in result['errors']
 
     def test_successful_login(self):
         user_data = dict(email='someone3@some.org', password='test', password2='test')
-        result = self.post('/users/add', **user_data)
+        result = self.post('/users', **user_data)
         assert result['success'] == True
         result = self.post('/login', **user_data)
         assert result['success'] == True
 
     def test_successful_logout(self):
         user_data = dict(email='someone4@some.org', password='test', password2='test')
-        result = self.post('/users/add', **user_data)
+        result = self.post('/users', **user_data)
         assert result['success'] == True
         result = self.post('/login', **user_data)
         assert result['success'] == True
