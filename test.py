@@ -76,6 +76,24 @@ class GitTrackerTestCase(unittest.TestCase):
         os.unlink(app.config['DATABASE'])
         shutil.rmtree(GitTrackerTestCase.git_repositories)
 
+class GitTestCase(GitTrackerTestCase):
+
+    repos = [
+        ('git://github.com/rails/rails.git', 'git', 'rails.git'),
+        ('git@github.com:cantsin/random-repo', 'git', 'random-repo.git'),
+        ('https://github.com/cantsin/test.git', 'git', 'test.git'),
+        ('ssh://git@github.com/cantsin/test-2.git', 'git', 'test-2.git'),
+        ('git@github.com:cantsin/test-3.git', 'git', 'test-3.git'),
+        ('git@bitbucket.org:accountname/reponame.git', 'git', 'reponame.git'),
+        ('ssh://git@bitbucket.org/account/reponame.git', 'git', 'reponame.git'),
+        ('https://foo@bitbucket.org/foo/reponame.git', 'foo', 'reponame.git'),
+        ('james@foo:random/testing.git', 'james', 'testing.git'),
+        ('git@random-server:random.git', 'git', 'random.git')]
+
+    def test_uri_parse(self):
+        for test_repo, test_user, test_name in GitTestCase.repos:
+            assert GitOperations.git_uri_parse(test_repo) == (test_user, test_name)
+
 class UserTestCase(GitTrackerTestCase):
 
     def test_404(self):
