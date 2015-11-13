@@ -165,13 +165,19 @@ def add_repository():
 @login_required
 def view_repository(id):
     repository = current_user.repositories.filter_by(id=id).first_or_404()
+    first_updated = repository.get_first_updated()
+    last_updated = repository.get_last_updated()
+    start = request.args.get('start') or first_updated
+    end = request.args.get('end') or last_updated
+    histogram= repository.histogram(int(start), int(end))
     identifier = repository.get_shorthand_of_branch('master')
     sha1 = repository.get_sha1_of_branch('master')
     tags = current_user.tags.order_by('name').all()
     result= {'kind': repository.kind,
              'name': repository.get_name(),
-             'start': repository.get_first_updated(),
-             'end': repository.get_last_updated(),
+             'first_updated': first_updated,
+             'last_updated': last_updated,
+             'histogram': histogram,
              'updated': repository.updated_at,
              'git_identifier': identifier,
              'git_sha1': sha1,
@@ -185,15 +191,6 @@ def delete_repository(id):
     repository.clear_tags()
     repository.delete()
     return success()
-
-@app.route('/repositories/<id>/activity', methods=['GET'])
-@login_required
-def repository_activity(id):
-    repository = current_user.repositories.filter_by(id=id).first_or_404()
-    start = request.args.get('start') or repository.get_first_updated()
-    end = request.args.get('end') or repository.get_last_updated()
-    result = repository.histogram(int(start), int(end))
-    return success(result=result)
 
 @app.route('/repositories/<id>/refresh', methods=['GET'])
 @login_required
@@ -286,23 +283,16 @@ def view_tag(id):
     tag = current_user.tags.filter_by(id=id).first_or_404()
     first_updated = DataOperations.get_first_updated(tag.repositories)
     last_updated = DataOperations.get_last_updated(tag.repositories)
+    start = request.args.get('start') or first_updated
+    end = request.args.get('end') or last_updated
+    histogram = DataOperations.histogram(tag.repositories, int(start), int(end))
     result = {'repositories': [repo.id for repo in tag.repositories],
               'repository_count': tag.repositories.count(),
               'slug': tag.slug,
               'name': tag.name,
               'first_updated': first_updated,
-              'last_updated': last_updated}
-    return success(result=result)
-
-@app.route('/tags/<id>/activity', methods=['GET'])
-@login_required
-def tag_activity(id):
-    tag = current_user.tags.filter_by(id=id).first_or_404()
-    first_updated = DataOperations.get_first_updated(tag.repositories)
-    last_updated = DataOperations.get_last_updated(tag.repositories)
-    start = request.args.get('start') or first_updated
-    end = request.args.get('end') or last_updated
-    result = DataOperations.histogram(tag.repositories, int(start), int(end))
+              'last_updated': last_updated,
+              'histogram': histogram}
     return success(result=result)
 
 @app.route('/dashboard')
@@ -310,18 +300,12 @@ def tag_activity(id):
 def dashboard():
     first_updated = DataOperations.get_first_updated(current_user.repositories)
     last_updated = DataOperations.get_last_updated(current_user.repositories)
-    result = {'first_updated': first_updated,
-              'last_updated': last_updated}
-    return success(result=result)
-
-@app.route('/dashboard/activity')
-@login_required
-def all_activity():
-    first_updated = DataOperations.get_first_updated(current_user.repositories)
-    last_updated = DataOperations.get_last_updated(current_user.repositories)
     start = request.args.get('start') or first_updated
     end = request.args.get('end') or last_updated
-    result = DataOperations.histogram(current_user.repositories, int(start), int(end))
+    histogram = DataOperations.histogram(current_user.repositories, int(start), int(end))
+    result = {'first_updated': first_updated,
+              'last_updated': last_updated,
+              'histogram': histogram}
     return success(result=result)
 
 if __name__ == '__main__': # pragma: no cover

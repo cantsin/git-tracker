@@ -242,10 +242,16 @@ class RepositoryTestCase(GitTrackerTestCase):
     def test_view_repository(self):
         result = self.get('/repositories/1')
         assert result['success']
+        assert result['data'] != []
 
     def test_view_repository_invalid(self):
         result = self.get('/repositories/9999')
         assert '404' in result['error']
+
+    def test_view_repository_params(self):
+        result = self.get('/repositories/1', query={'start': 0, 'end': 9999})
+        assert result['success']
+        assert result['data']['histogram'] == []
 
     def test_delete_repository(self):
         result = self.delete('/repositories/1')
@@ -253,20 +259,6 @@ class RepositoryTestCase(GitTrackerTestCase):
 
     def test_delete_repository_invalid(self):
         result = self.delete('/repositories/9999')
-        assert '404' in result['error']
-
-    def test_repository_activity(self):
-        result = self.get('/repositories/1/activity')
-        assert result['success']
-        assert result['data'] != []
-
-    def test_repository_activity_params(self):
-        result = self.get('/repositories/1/activity', query={'start': 0, 'end': 9999})
-        assert result['success']
-        assert not ('data' in result)
-
-    def test_repository_activity_invalid(self):
-        result = self.get('/repositories/9999/activity')
         assert '404' in result['error']
 
     def test_repository_refresh(self):
@@ -326,14 +318,6 @@ class TagTestCase(GitTrackerTestCase):
         assert '404' in result['error']
 
     def test_view_tag(self):
-        result = self.get('/tags/1')
-        assert result['success']
-
-    def test_view_tag_invalid(self):
-        result = self.get('/tags/9999')
-        assert '404' in result['error']
-
-    def test_tag_activity(self):
         # create a repository.
         repo_data = dict(location='git://git@github.com/cantsin/git-tracker')
         result = self.post('/repositories', **repo_data)
@@ -348,17 +332,17 @@ class TagTestCase(GitTrackerTestCase):
         repo.tags.append(tag)
         repo.save()
         # test activity results.
-        result = self.get('/tags/1/activity')
+        result = self.get('/tags/1')
         assert result['success']
         assert result['data'] != []
 
-    def test_tag_activity_params(self):
-        result = self.get('/tags/1/activity', query={'start': 0, 'end': 9999})
+    def test_view_tag_params(self):
+        result = self.get('/tags/1', query={'start': 0, 'end': 9999})
         assert result['success']
-        assert not ('data' in result)
+        assert result['data']['histogram'] == []
 
-    def test_tag_activity_invalid(self):
-        result = self.get('/tags/9999/activity')
+    def test_view_tag_invalid(self):
+        result = self.get('/tags/9999')
         assert '404' in result['error']
 
 if __name__ == '__main__':
