@@ -5,7 +5,7 @@ from flask.json import loads
 from werkzeug import FileStorage
 from werkzeug.datastructures import MultiDict
 
-from models import init_db, Repository
+from models import init_db, Repository, Tag, UserEmail
 from git import GitOperations
 
 import os
@@ -120,12 +120,12 @@ class UserTestCase(GitTrackerTestCase):
     def test_add_user_success(self):
         user_data = dict(email='someone@some.org', password='test', password2='test')
         result = self.post('/users', **user_data)
-        assert result['success'] == True
+        assert result['success']
 
     def test_invalid_login(self):
         user_data = dict(email='someone2@some.org', password='test', password2='test')
         result = self.post('/users', **user_data)
-        assert result['success'] == True
+        assert result['success']
         user_data['password'] = ''
         result = self.post('/login', **user_data)
         assert 'Email and password do not match.' in result['errors']
@@ -133,19 +133,19 @@ class UserTestCase(GitTrackerTestCase):
     def test_successful_login(self):
         user_data = dict(email='someone3@some.org', password='test', password2='test')
         result = self.post('/users', **user_data)
-        assert result['success'] == True
+        assert result['success']
         result = self.post('/login', **user_data)
-        assert result['success'] == True
+        assert result['success']
 
     def test_successful_logout(self):
         user_data = dict(email='someone4@some.org', password='test', password2='test')
         result = self.post('/users', **user_data)
-        assert result['success'] == True
+        assert result['success']
         result = self.post('/login', **user_data)
-        assert result['success'] == True
+        assert result['success']
         result = self.app.get('/logout')
         result = loads(result.data)
-        assert result['success'] == True
+        assert result['success']
 
 class EmailTestCase(GitTrackerTestCase):
 
@@ -155,14 +155,14 @@ class EmailTestCase(GitTrackerTestCase):
         result = self.post('/login', **user_data)
         if result['success'] != True:
             result = self.post('/users', **user_data)
-            assert result['success'] == True
+            assert result['success']
             result = self.post('/login', **user_data)
-            assert result['success'] == True
+            assert result['success']
 
     def test_add_email(self):
         email_data = dict(email='newemail@foo.org')
         result = self.post('/emails', **email_data)
-        assert result['success'] == True
+        assert result['success']
 
     def test_add_email_no_at(self):
         email_data = dict(email='newemailfoo.org')
@@ -176,7 +176,7 @@ class EmailTestCase(GitTrackerTestCase):
 
     def test_delete_email(self):
         result = self.delete('/emails/1')
-        assert result['success'] == True
+        assert result['success']
 
     def test_delete_email_invalid(self):
         result = self.delete('/emails/9999')
@@ -190,24 +190,24 @@ class RepositoryTestCase(GitTrackerTestCase):
         result = self.post('/login', **user_data)
         if result['success'] != True:
             result = self.post('/users', **user_data)
-            assert result['success'] == True
+            assert result['success']
             result = self.post('/login', **user_data)
-            assert result['success'] == True
+            assert result['success']
             email_data = dict(email='jtranovich@gmail.com')
             result = self.post('/emails', **email_data)
-            assert result['success'] == True
+            assert result['success']
         Repository.query.delete()
         # create repository (email must be a valid author of this repository)
         result = self.get('/repositories/1')
         if result['success'] != True:
             repo_data = dict(location='git://git@github.com/cantsin/git-tracker')
             result = self.post('/repositories', **repo_data)
-            assert result['success'] == True
+            assert result['success']
 
     def test_add_repository(self):
         repo_data = dict(location='git://git@github.com/cantsin/dotemacs')
         result = self.post('/repositories', **repo_data)
-        assert result['success'] == True
+        assert result['success']
 
     def test_add_repository_invalid(self):
         repo_data = dict(location='git://git@github.com/cantsin/_invalid')
@@ -255,6 +255,89 @@ class RepositoryTestCase(GitTrackerTestCase):
 
     def test_repository_refresh_invalid(self):
         result = self.get('/repositories/9999/refresh')
+        assert '404' in result['error']
+
+class TagTestCase(GitTrackerTestCase):
+
+    def initialize(self):
+        # create random user and login
+        user_data = dict(email='someone7@some.org', password='test', password2='test')
+        result = self.post('/login', **user_data)
+        if result['success'] != True:
+            result = self.post('/users', **user_data)
+            assert result['success']
+            result = self.post('/login', **user_data)
+            assert result['success']
+        Repository.query.delete()
+        UserEmail.query.delete()
+        Tag.query.delete()
+        # create tag
+        tag_data = dict(name='Some tag')
+        result = self.post('/tags', **tag_data)
+        assert result['success']
+
+    def test_add_tag(self):
+        tag_data = dict(name='Some new tag')
+        result = self.post('/tags', **tag_data)
+        assert result['success']
+
+    def test_add_blank_tag(self):
+        tag_data = dict(name='')
+        result = self.post('/tags', **tag_data)
+        assert 'Tag cannot be blank.' in result['errors']
+
+    def test_add_duplicate_tag(self):
+        tag_data = dict(name='Some tag')
+        result = self.post('/tags', **tag_data)
+        assert 'Given tag name already exists.' in result['errors']
+
+    def test_add_duplicate_slug(self):
+        tag_data = dict(name='some tag')
+        result = self.post('/tags', **tag_data)
+        assert 'Given tag slug already exists.' in result['errors']
+
+    def test_delete_tag(self):
+        result = self.delete('/tags/1')
+        assert result['success']
+
+    def test_delete_tag_invalid(self):
+        result = self.delete('/tags/9999')
+        assert '404' in result['error']
+
+    def test_view_tag(self):
+        result = self.get('/tags/1')
+        assert result['success']
+
+    def test_view_tag_invalid(self):
+        result = self.get('/tags/9999')
+        assert '404' in result['error']
+
+    def test_tag_activity(self):
+        # create a repository.
+        repo_data = dict(location='git://git@github.com/cantsin/git-tracker')
+        result = self.post('/repositories', **repo_data)
+        assert result['success']
+        # add associated email.
+        email_data = dict(email='jtranovich@gmail.com')
+        result = self.post('/emails', **email_data)
+        assert result['success']
+        # add this tag.
+        tag = Tag.query.first()
+        repo = Repository.query.first()
+        repo.tags.append(tag)
+        repo.save()
+        # test activity results.
+        result = self.get('/tags/1/activity')
+        assert result['success']
+        assert result['data'] != []
+
+    def test_tag_activity_params(self):
+        result = self.get('/tags/1/activity', query={'start': 0, 'end': 9999})
+        assert result['success']
+        assert not ('data' in result)
+
+    def test_tag_activity_invalid(self):
+        result = self.get('/tags/9999/activity')
         assert '404' in result['error']
 
 if __name__ == '__main__':

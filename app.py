@@ -286,7 +286,9 @@ def view_tag(id):
     tag = current_user.tags.filter_by(id=id).first_or_404()
     first_updated = DataOperations.get_first_updated(tag.repositories)
     last_updated = DataOperations.get_last_updated(tag.repositories)
-    result = {'tag': tag,
+    result = {'repositories': [repo.id for repo in tag.repositories],
+              'repository_count': tag.repositories.count(),
+              'slug': tag.slug,
               'name': tag.name,
               'first_updated': first_updated,
               'last_updated': last_updated}
