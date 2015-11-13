@@ -7,7 +7,7 @@ old_loader = pkgutil.get_loader
 def override_loader(*args, **kwargs):
     try:
         return old_loader(*args, **kwargs)
-    except AttributeError:
+    except AttributeError: # pragma: no cover
         return None
 pkgutil.get_loader = override_loader
 
@@ -66,10 +66,6 @@ def jsoncheck(func):
             return r
         except KeyError as e:
             return failure(str(''.join(e.args)) + ' not found')
-        except IndexError as e:
-            return failure('Error: ' + str(e.args))
-        except TypeError as e:
-            return failure('Error: ' + str(e.args))
     return wrapper
 
 @login_manager.user_loader
@@ -167,9 +163,25 @@ def view_repository(id):
     repository = current_user.repositories.filter_by(id=id).first_or_404()
     first_updated = repository.get_first_updated()
     last_updated = repository.get_last_updated()
-    start = request.args.get('start') or first_updated
-    end = request.args.get('end') or last_updated
-    histogram= repository.histogram(int(start), int(end))
+    start = request.args.get('start', first_updated)
+    end = request.args.get('end', last_updated)
+    histogram = repository.histogram(int(start), int(end))
+    reference_count = request.args.get('reference_count', 7)
+    references = [ref for ref in repository.get_latest_refs(count=reference_count)]
+    commit_count = request.args.get('commit_count', 10)
+    commits = []
+    for commit in repository.get_commits(count=commit_count):
+        changed_files, additions, deletions = repository.get_numstat(commit)
+        commits.append(dict(commit_time=commit.commit_time,
+                            author_name=commit.author.name,
+                            message=commit.message,
+                            changed_files=changed_files,
+                            additions=additions,
+                            deletions=deletions))
+    commit_count = repository.get_commit_count()
+    author_count = repository.get_author_count()
+    file_count = repository.get_file_count()
+    line_count = repository.get_line_count()
     identifier = repository.get_shorthand_of_branch('master')
     sha1 = repository.get_sha1_of_branch('master')
     tags = current_user.tags.order_by('name').all()
@@ -181,6 +193,12 @@ def view_repository(id):
              'updated': repository.updated_at,
              'git_identifier': identifier,
              'git_sha1': sha1,
+             'references': references,
+             'commits': commits,
+             'commit_count': commit_count,
+             'author_count': author_count,
+             'file_count': file_count,
+             'line_count': line_count,
              'tags': tags}
     return success(result=result)
 
@@ -198,6 +216,19 @@ def refresh_repository(id):
     repository = current_user.repositories.filter_by(id=id).first_or_404()
     repository.refresh()
     repository.update_commit_info()
+    repository.save()
+    return success()
+
+@app.route('/repositories/<id>/apply', methods=['POST'])
+@login_required
+def apply_tags(id):
+    repository = current_user.repositories.filter_by(id=id).first_or_404()
+    tag_names = [key for (key, value) in request.json.items()
+                 if key.startswith('apply-') and value == 'on']
+    repository.clear_tags()
+    for tag_name in tag_names:
+        tag = current_user.tags.filter_by(slug=tag_name[6:]).first_or_404()
+        repository.tags.append(tag)
     repository.save()
     return success()
 
@@ -241,19 +272,6 @@ def load_repositories():
             tag = has_tag.first() if has_tag.all() else Tag(current_user, tag_name).save()
             if repository.tags.count(tag) == 0:
                 repository.tags.append(tag)
-    return success()
-
-@app.route('/repositories/<id>/apply', methods=['POST'])
-@login_required
-def apply_tags(id):
-    repository = current_user.repositories.filter_by(id=id).first_or_404()
-    tag_names = [key for (key, value) in request.json.items()
-                 if key.startswith('apply-') and value == 'on']
-    repository.clear_tags()
-    for tag_name in tag_names:
-        tag = current_user.tags.filter_by(slug=tag_name[6:]).first_or_404()
-        repository.tags.append(tag)
-    repository.save()
     return success()
 
 @app.route('/tags', methods=['POST'])

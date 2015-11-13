@@ -48,7 +48,7 @@ class GitTrackerTestCase(unittest.TestCase):
             self.app = app.test_client()
         try:
             os.makedirs(GitTrackerTestCase.git_repositories)
-        except FileExistsError:
+        except FileExistsError: # pragma: no cover
             pass
         # clear database.
         Repository.query.delete()
