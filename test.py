@@ -142,17 +142,17 @@ class EmailTestCase(GitTrackerTestCase):
 
     def test_add_email(self):
         email_data = dict(email='newemail@foo.org')
-        result = self.post('/emails/', **email_data)
+        result = self.post('/emails', **email_data)
         assert result['success'] == True
 
     def test_add_email_no_at(self):
         email_data = dict(email='newemailfoo.org')
-        result = self.post('/emails/', **email_data)
+        result = self.post('/emails', **email_data)
         assert 'Please provide a proper email.' in result['errors']
 
     def test_add_email_duplicate(self):
         email_data = dict(email='someone5@some.org')
-        result = self.post('/emails/', **email_data)
+        result = self.post('/emails', **email_data)
         assert 'Current email already exists.' in result['errors']
 
     def test_delete_email(self):
@@ -197,17 +197,29 @@ class RepositoryTestCase(GitTrackerTestCase):
         result = self.post('/repositories', **repo_data)
         assert 'Given repository already exists.' in result['errors']
 
-    # def test_get_repository(self): pass
+    def test_view_repository(self):
+        result = self.get('/repositories/1')
+        assert result['success']
 
-    # def test_get_repository_invalid(self): pass
+    def test_view_repository_invalid(self):
+        result = self.get('/repositories/9999')
+        assert '404' in result['error']
 
-    # def test_delete_repository(self): pass
+    def test_delete_repository(self):
+        result = self.delete('/repositories/1')
+        assert result['success']
 
-    # def test_delete_repository_invalid(self): pass
+    def test_delete_repository_invalid(self):
+        result = self.delete('/repositories/9999')
+        assert '404' in result['error']
 
-    # def test_repository_activity(self): pass
+    def test_repository_activity(self):
+        result = self.get('/repositories/1/activity')
+        assert result['success']
 
-    # def test_repository_activity_invalid(self): pass
+    def test_repository_activity_invalid(self):
+        result = self.get('/repositories/9999/activity')
+        assert '404' in result['error']
 
 if __name__ == '__main__':
     unittest.main()

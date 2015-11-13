@@ -127,7 +127,7 @@ def update_keys():
     except KeyError:
         return failure('Please fill out all fields.')
 
-@app.route('/emails/', methods=['POST'])
+@app.route('/emails', methods=['POST'])
 @jsoncheck
 @login_required
 def add_user_email():
@@ -167,9 +167,12 @@ def view_repository(id):
     repository = current_user.repositories.filter_by(id=id).first_or_404()
     identifier = repository.get_shorthand_of_branch('master')
     sha1 = repository.get_sha1_of_branch('master')
-    tags = current_user.tags.order_by('name')
-    result= {'repository': repository,
-             'name': repository.name,
+    tags = current_user.tags.order_by('name').all()
+    result= {'kind': repository.kind,
+             'name': repository.get_name(),
+             'start': repository.get_first_updated(),
+             'end': repository.get_last_updated(),
+             'updated': repository.updated_at,
              'git_identifier': identifier,
              'git_sha1': sha1,
              'tags': tags}
@@ -183,13 +186,13 @@ def delete_repository(id):
     repository.delete()
     return success()
 
-@app.route('/repositories/<id>/activity/', methods=['GET'])
+@app.route('/repositories/<id>/activity', methods=['GET'])
 @login_required
 def repository_activity(id):
     repository = current_user.repositories.filter_by(id=id).first_or_404()
-    start = int(request.args.get('start')) or repository.get_first_updated()
-    end = int(request.args.get('end')) or repository.get_last_updated()
-    result = repository.histogram(start, end)
+    start = request.args.get('start') or repository.get_first_updated()
+    end = request.args.get('end') or repository.get_last_updated()
+    result = repository.histogram(int(start), int(end))
     return success(result=result)
 
 @app.route('/repositories/<id>/refresh', methods=['GET'])
