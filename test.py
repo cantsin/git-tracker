@@ -5,7 +5,7 @@ from flask.json import loads
 from werkzeug import FileStorage
 from werkzeug.datastructures import MultiDict
 
-from models import init_db, Repository, Tag, UserEmail
+from models import init_db, User, Repository, Tag, UserEmail
 from git import GitOperations
 
 import os
@@ -50,6 +50,11 @@ class GitTrackerTestCase(unittest.TestCase):
             os.makedirs(GitTrackerTestCase.git_repositories)
         except FileExistsError:
             pass
+        # clear database.
+        Repository.query.delete()
+        User.query.delete()
+        UserEmail.query.delete()
+        Tag.query.delete()
         self.initialize()
 
     # helper functions.
@@ -101,6 +106,13 @@ class UserTestCase(GitTrackerTestCase):
         assert result['success'] == False
         assert '404: Not Found' in result['error']
 
+    def test_user_repr(self):
+        user_data = dict(email='someone@some.org', password='test', password2='test')
+        result = self.post('/users', **user_data)
+        assert result['success']
+        e = UserEmail.query.first()
+        assert 'someone@some.org' in repr(e)
+
     def test_add_empty_user(self):
         result = self.post('/users')
         assert result['success'] == False
@@ -123,7 +135,7 @@ class UserTestCase(GitTrackerTestCase):
         assert result['success']
 
     def test_invalid_login(self):
-        user_data = dict(email='someone2@some.org', password='test', password2='test')
+        user_data = dict(email='someone@some.org', password='test', password2='test')
         result = self.post('/users', **user_data)
         assert result['success']
         user_data['password'] = ''
@@ -131,14 +143,14 @@ class UserTestCase(GitTrackerTestCase):
         assert 'Email and password do not match.' in result['errors']
 
     def test_successful_login(self):
-        user_data = dict(email='someone3@some.org', password='test', password2='test')
+        user_data = dict(email='someone@some.org', password='test', password2='test')
         result = self.post('/users', **user_data)
         assert result['success']
         result = self.post('/login', **user_data)
         assert result['success']
 
     def test_successful_logout(self):
-        user_data = dict(email='someone4@some.org', password='test', password2='test')
+        user_data = dict(email='someone@some.org', password='test', password2='test')
         result = self.post('/users', **user_data)
         assert result['success']
         result = self.post('/login', **user_data)
@@ -151,13 +163,18 @@ class EmailTestCase(GitTrackerTestCase):
 
     def initialize(self):
         # create random user and login
-        user_data = dict(email='someone5@some.org', password='test', password2='test')
+        user_data = dict(email='someone@some.org', password='test', password2='test')
         result = self.post('/login', **user_data)
         if result['success'] != True:
             result = self.post('/users', **user_data)
             assert result['success']
             result = self.post('/login', **user_data)
             assert result['success']
+
+    def test_email_repr(self):
+        u = User.query.first()
+        e = u.emails.first()
+        assert 'someone' in repr(e)
 
     def test_add_email(self):
         email_data = dict(email='newemail@foo.org')
@@ -170,7 +187,7 @@ class EmailTestCase(GitTrackerTestCase):
         assert 'Please provide a proper email.' in result['errors']
 
     def test_add_email_duplicate(self):
-        email_data = dict(email='someone5@some.org')
+        email_data = dict(email='someone@some.org')
         result = self.post('/emails', **email_data)
         assert 'Current email already exists.' in result['errors']
 
@@ -186,7 +203,7 @@ class RepositoryTestCase(GitTrackerTestCase):
 
     def initialize(self):
         # create random user and login
-        user_data = dict(email='someone6@some.org', password='test', password2='test')
+        user_data = dict(email='someone@some.org', password='test', password2='test')
         result = self.post('/login', **user_data)
         if result['success'] != True:
             result = self.post('/users', **user_data)
@@ -196,13 +213,16 @@ class RepositoryTestCase(GitTrackerTestCase):
             email_data = dict(email='jtranovich@gmail.com')
             result = self.post('/emails', **email_data)
             assert result['success']
-        Repository.query.delete()
         # create repository (email must be a valid author of this repository)
         result = self.get('/repositories/1')
         if result['success'] != True:
             repo_data = dict(location='git://git@github.com/cantsin/git-tracker')
             result = self.post('/repositories', **repo_data)
             assert result['success']
+
+    def test_repository_repr(self):
+        r = Repository.query.first()
+        assert 'git-tracker' in repr(r)
 
     def test_add_repository(self):
         repo_data = dict(location='git://git@github.com/cantsin/dotemacs')
@@ -261,20 +281,21 @@ class TagTestCase(GitTrackerTestCase):
 
     def initialize(self):
         # create random user and login
-        user_data = dict(email='someone7@some.org', password='test', password2='test')
+        user_data = dict(email='someone@some.org', password='test', password2='test')
         result = self.post('/login', **user_data)
         if result['success'] != True:
             result = self.post('/users', **user_data)
             assert result['success']
             result = self.post('/login', **user_data)
             assert result['success']
-        Repository.query.delete()
-        UserEmail.query.delete()
-        Tag.query.delete()
         # create tag
         tag_data = dict(name='Some tag')
         result = self.post('/tags', **tag_data)
         assert result['success']
+
+    def test_tag_repr(self):
+        t = Tag.query.first()
+        assert 'Some tag' in repr(t)
 
     def test_add_tag(self):
         tag_data = dict(name='Some new tag')
