@@ -66,6 +66,11 @@ class GitTrackerTestCase(unittest.TestCase):
         result = self.app.get(where, data=data, query_string=query, content_type='application/json')
         return loads(result.get_data())
 
+    def put(self, where, **kwargs):
+        data = dumps(kwargs)
+        result = self.app.put(where, data=data, content_type='application/json')
+        return loads(result.get_data())
+
     def post(self, where, **kwargs):
         data = dumps(kwargs)
         result = self.app.post(where, data=data, content_type='application/json')
@@ -249,7 +254,8 @@ class RepositoryTestCase(GitTrackerTestCase):
         assert '404' in result['error']
 
     def test_view_repository_params(self):
-        result = self.get('/repositories/1', query={'start': 0, 'end': 9999})
+        query = {'start': 0, 'end': 9999, 'reference_count': 7, 'commit_count': 10}
+        result = self.get('/repositories/1', query=query)
         assert result['success']
         assert result['data']['histogram'] == []
 
@@ -261,12 +267,33 @@ class RepositoryTestCase(GitTrackerTestCase):
         result = self.delete('/repositories/9999')
         assert '404' in result['error']
 
-    def test_repository_refresh(self):
-        result = self.get('/repositories/1/refresh')
+    def test_repository_add_tags(self):
+        # create two tags.
+        tag_data = dict(name='tag #1')
+        result = self.post('/tags', **tag_data)
+        assert result['success']
+        tag_data = dict(name='tag #2')
+        result = self.post('/tags', **tag_data)
+        assert result['success']
+        tag_ids = [tag.id for tag in Tag.query.all()]
+        result = self.put('/repositories/1', **dict(ids=tag_ids))
         assert result['success']
 
-    def test_repository_refresh_invalid(self):
-        result = self.get('/repositories/9999/refresh')
+    def test_repository_add_tags_mixed_invalid(self):
+        # create two tags.
+        tag_data = dict(name='tag #1')
+        result = self.post('/tags', **tag_data)
+        assert result['success']
+        tag_data = dict(name='tag #2')
+        result = self.post('/tags', **tag_data)
+        assert result['success']
+        tag_ids = [tag.id for tag in Tag.query.all()]
+        tag_ids.extend([9999])
+        result = self.put('/repositories/1', **dict(ids=tag_ids))
+        assert '404' in result['error']
+
+    def test_repository_add_tags_invalid(self):
+        result = self.put('/repositories/9999')
         assert '404' in result['error']
 
 class TagTestCase(GitTrackerTestCase):
@@ -345,7 +372,7 @@ class TagTestCase(GitTrackerTestCase):
         result = self.get('/tags/9999')
         assert '404' in result['error']
 
-class DashboardTestCase(GitTrackerTestCase):
+class ActivityTestCase(GitTrackerTestCase):
 
     def initialize(self):
         # create random user and login
@@ -366,14 +393,43 @@ class DashboardTestCase(GitTrackerTestCase):
             result = self.post('/repositories', **repo_data)
             assert result['success']
 
-    def test_dashboard(self):
-        result = self.get('/dashboard')
+    def test_activity(self):
+        result = self.get('/activity')
         assert result['success']
 
-    def test_dashboard_params(self):
-        result = self.get('/dashboard', query={'start': 0, 'end': 9999})
+    def test_activity_params(self):
+        result = self.get('/activity', query={'start': 0, 'end': 9999})
         assert result['success']
         assert result['data']['histogram'] == []
+
+class ActionTestCase(GitTrackerTestCase):
+
+    def initialize(self):
+        # create random user and login
+        user_data = dict(email='someone@some.org', password='test', password2='test')
+        result = self.post('/login', **user_data)
+        if result['success'] != True:
+            result = self.post('/users', **user_data)
+            assert result['success']
+            result = self.post('/login', **user_data)
+            assert result['success']
+            email_data = dict(email='jtranovich@gmail.com')
+            result = self.post('/emails', **email_data)
+            assert result['success']
+        # create repository (email must be a valid author of this repository)
+        result = self.get('/repositories/1')
+        if result['success'] != True:
+            repo_data = dict(location='git://git@github.com/cantsin/git-tracker')
+            result = self.post('/repositories', **repo_data)
+            assert result['success']
+
+    def test_action_refresh(self):
+        result = self.get('/actions/refresh/1')
+        assert result['success']
+
+    def test_action_refresh_invalid(self):
+        result = self.get('/actions/refresh/9999')
+        assert '404' in result['error']
 
 if __name__ == '__main__':
     unittest.main()

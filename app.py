@@ -107,7 +107,7 @@ def add_user():
     new_user.add_emails(email)
     return success()
 
-@app.route('/users/keys', methods=['POST'])
+@app.route('/keys', methods=['POST'])
 @login_required
 def update_keys():
     try:
@@ -166,9 +166,11 @@ def view_repository(id):
     start = int(request.args.get('start', first_updated))
     end = int(request.args.get('end', last_updated))
     histogram = repository.histogram(start, end)
-    reference_count = request.args.get('reference_count', 7)
+    reference_count = request.args.get('reference_count')
+    reference_count = int(reference_count) if reference_count else None
     references = [ref for ref in repository.get_latest_refs(count=reference_count)]
-    commit_count = request.args.get('commit_count', 10)
+    commit_count = request.args.get('commit_count')
+    commit_count = int(commit_count) if commit_count else None
     commits = []
     for commit in repository.get_commits(count=commit_count):
         changed_files, additions, deletions = repository.get_numstat(commit)
@@ -202,6 +204,19 @@ def view_repository(id):
              'tags': tags}
     return success(result=result)
 
+@app.route('/repositories/<id>', methods=['PUT'])
+@jsoncheck
+@login_required
+def apply_tags(id):
+    repository = current_user.repositories.filter_by(id=id).first_or_404()
+    tag_ids = request.json['ids']
+    repository.clear_tags()
+    for tag_id in tag_ids:
+        tag = current_user.tags.filter_by(id=tag_id).first_or_404()
+        repository.tags.append(tag)
+    repository.save()
+    return success()
+
 @app.route('/repositories/<id>', methods=['DELETE'])
 @login_required
 def delete_repository(id):
@@ -210,7 +225,60 @@ def delete_repository(id):
     repository.delete()
     return success()
 
-@app.route('/repositories/<id>/refresh', methods=['GET'])
+@app.route('/tags', methods=['POST'])
+@jsoncheck
+@login_required
+def add_tag():
+    name = request.json['name'].strip()
+    if name == '':
+        return failure('Tag cannot be blank.')
+    if current_user.tags.filter_by(name=name).scalar():
+        return failure('Given tag name already exists.')
+    if current_user.tags.filter_by(slug=slugify(name)).scalar():
+        return failure('Given tag slug already exists.')
+    tag = Tag(current_user, name).save()
+    return success()
+
+@app.route('/tags/<id>', methods=['GET'])
+@login_required
+def view_tag(id):
+    tag = current_user.tags.filter_by(id=id).first_or_404()
+    first_updated = DataOperations.get_first_updated(tag.repositories)
+    last_updated = DataOperations.get_last_updated(tag.repositories)
+    start = int(request.args.get('start', first_updated))
+    end = int(request.args.get('end', last_updated))
+    histogram = DataOperations.histogram(tag.repositories, start, end)
+    result = {'repositories': [repo.id for repo in tag.repositories],
+              'repository_count': tag.repositories.count(),
+              'slug': tag.slug,
+              'name': tag.name,
+              'id': tag.id,
+              'first_updated': first_updated,
+              'last_updated': last_updated,
+              'histogram': histogram}
+    return success(result=result)
+
+@app.route('/tags/<id>', methods=['DELETE'])
+@login_required
+def delete_tag(id):
+    tag = current_user.tags.filter_by(id=id).first_or_404()
+    tag.delete()
+    return success()
+
+@app.route('/activity', methods=['GET'])
+@login_required
+def activity():
+    first_updated = DataOperations.get_first_updated(current_user.repositories)
+    last_updated = DataOperations.get_last_updated(current_user.repositories)
+    start = int(request.args.get('start', first_updated))
+    end = int(request.args.get('end', last_updated))
+    histogram = DataOperations.histogram(current_user.repositories, start, end)
+    result = {'first_updated': first_updated,
+              'last_updated': last_updated,
+              'histogram': histogram}
+    return success(result=result)
+
+@app.route('/actions/refresh/<id>', methods=['GET'])
 @login_required
 def refresh_repository(id):
     repository = current_user.repositories.filter_by(id=id).first_or_404()
@@ -219,20 +287,7 @@ def refresh_repository(id):
     repository.save()
     return success()
 
-@app.route('/repositories/<id>/apply', methods=['POST'])
-@login_required
-def apply_tags(id):
-    repository = current_user.repositories.filter_by(id=id).first_or_404()
-    tag_names = [key for (key, value) in request.json.items()
-                 if key.startswith('apply-') and value == 'on']
-    repository.clear_tags()
-    for tag_name in tag_names:
-        tag = current_user.tags.filter_by(slug=tag_name[6:]).first_or_404()
-        repository.tags.append(tag)
-    repository.save()
-    return success()
-
-@app.route('/repositories/dump', methods=['GET'])
+@app.route('/actions/dump', methods=['GET'])
 @login_required
 def dump_repositories():
     si = io.StringIO()
@@ -245,7 +300,7 @@ def dump_repositories():
     response.headers["Content-Type"] = "text/csv"
     return response
 
-@app.route('/repositories/load', methods=['POST'])
+@app.route('/actions/load', methods=['POST'])
 @login_required
 def load_repositories():
     csv_file = request.files['bulk-upload']
@@ -273,58 +328,6 @@ def load_repositories():
             if repository.tags.count(tag) == 0:
                 repository.tags.append(tag)
     return success()
-
-@app.route('/tags', methods=['POST'])
-@jsoncheck
-@login_required
-def add_tag():
-    name = request.json['name'].strip()
-    if name == '':
-        return failure('Tag cannot be blank.')
-    if current_user.tags.filter_by(name=name).scalar():
-        return failure('Given tag name already exists.')
-    if current_user.tags.filter_by(slug=slugify(name)).scalar():
-        return failure('Given tag slug already exists.')
-    tag = Tag(current_user, name).save()
-    return success()
-
-@app.route('/tags/<id>', methods=['DELETE'])
-@login_required
-def delete_tag(id):
-    tag = current_user.tags.filter_by(id=id).first_or_404()
-    tag.delete()
-    return success()
-
-@app.route('/tags/<id>', methods=['GET'])
-@login_required
-def view_tag(id):
-    tag = current_user.tags.filter_by(id=id).first_or_404()
-    first_updated = DataOperations.get_first_updated(tag.repositories)
-    last_updated = DataOperations.get_last_updated(tag.repositories)
-    start = int(request.args.get('start', first_updated))
-    end = int(request.args.get('end', last_updated))
-    histogram = DataOperations.histogram(tag.repositories, start, end)
-    result = {'repositories': [repo.id for repo in tag.repositories],
-              'repository_count': tag.repositories.count(),
-              'slug': tag.slug,
-              'name': tag.name,
-              'first_updated': first_updated,
-              'last_updated': last_updated,
-              'histogram': histogram}
-    return success(result=result)
-
-@app.route('/dashboard')
-@login_required
-def dashboard():
-    first_updated = DataOperations.get_first_updated(current_user.repositories)
-    last_updated = DataOperations.get_last_updated(current_user.repositories)
-    start = int(request.args.get('start', first_updated))
-    end = int(request.args.get('end', last_updated))
-    histogram = DataOperations.histogram(current_user.repositories, start, end)
-    result = {'first_updated': first_updated,
-              'last_updated': last_updated,
-              'histogram': histogram}
-    return success(result=result)
 
 if __name__ == '__main__': # pragma: no cover
     try:
