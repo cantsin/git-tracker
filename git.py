@@ -33,8 +33,8 @@ class GitOperations(object):
             # did not work. try again.
             results = stripped.split(':')
             repository_name = results[-1]
-        if not '.git' in repository_name:
-            repository_name += '.git'
+        # if not '.git' in repository_name:
+        #     repository_name += '.git'
         # obtain the git user (default is 'git')
         git_username = 'git'
         if '@' in results[0]:

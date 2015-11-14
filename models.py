@@ -120,12 +120,11 @@ class Repository(SessionMixin, GitMixin, db.Model): #pylint: disable-msg=R0904
         self.git_user = git_user
         self.name = name
         self.location = location
+        self.kind = Repository.LOCAL
         if 'github' in location:
             self.kind = Repository.GITHUB
-        elif 'bitbucket' in location:
+        if 'bitbucket' in location:
             self.kind = Repository.BITBUCKET
-        else:
-            self.kind = Repository.LOCAL
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
 
