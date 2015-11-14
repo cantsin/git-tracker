@@ -15,7 +15,6 @@ from flask import Flask, request, jsonify, make_response
 from flask.ext.login import LoginManager, login_required, login_user, \
     logout_user, current_user
 from flask.ext.cors import CORS
-from werkzeug import secure_filename
 from werkzeug.exceptions import HTTPException, default_exceptions
 
 from util import get_gravatar, slugify, save_uploaded_file
@@ -107,7 +106,7 @@ def add_user():
     new_user.add_emails(email)
     return success()
 
-@app.route('/keys', methods=['POST'])
+@app.route('/users', methods=['PUT'])
 @login_required
 def update_keys():
     try:

@@ -3,6 +3,7 @@
 from unicodedata import normalize
 from datetime import datetime
 from flask import request, url_for
+from werkzeug import secure_filename
 
 import urllib.parse
 import hashlib

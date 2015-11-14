@@ -8,28 +8,13 @@ from werkzeug.datastructures import MultiDict
 from models import init_db, User, Repository, Tag, UserEmail
 from git import GitOperations
 
+import io
 import os
 import unittest
 import tempfile
 import shutil
 from json import dumps
 from io import StringIO
-
-class TestingFileStorage(FileStorage):
-    def __init__(self, stream=None, filename=None, name=None,
-                 content_type='application/octet-stream', content_length=-1,
-                 headers=None):
-        FileStorage.__init__(
-            self, stream, filename, name=name,
-            content_type=content_type, content_length=content_length,
-            headers=None)
-        self.saved = None
-
-    def save(self, dst, buffer_size=16384):
-        if isinstance(dst, basestring):
-            self.saved = dst
-        else:
-            self.saved = dst.name
 
 class GitTrackerTestCase(unittest.TestCase):
 
@@ -46,6 +31,10 @@ class GitTrackerTestCase(unittest.TestCase):
             app.config['CSRF_ENABLED'] = False
             app.secret_key = os.urandom(24)
             self.app = app.test_client()
+        try:
+            shutil.rmtree(GitTrackerTestCase.git_repositories)
+        except FileNotFoundError:
+            pass
         try:
             os.makedirs(GitTrackerTestCase.git_repositories)
         except FileExistsError: # pragma: no cover
@@ -64,6 +53,10 @@ class GitTrackerTestCase(unittest.TestCase):
         query = kwargs.pop('query', {})
         data = dumps(kwargs)
         result = self.app.get(where, data=data, query_string=query, content_type='application/json')
+        return loads(result.get_data())
+
+    def put_files(self, where, files):
+        result = self.app.put(where, data=files)
         return loads(result.get_data())
 
     def put(self, where, **kwargs):
@@ -160,9 +153,31 @@ class UserTestCase(GitTrackerTestCase):
         assert result['success']
         result = self.post('/login', **user_data)
         assert result['success']
-        result = self.app.get('/logout')
-        result = loads(result.data)
+        result = self.get('/logout')
         assert result['success']
+
+    def test_upload_keys(self):
+        user_data = dict(email='someone@some.org', password='test', password2='test')
+        result = self.post('/users', **user_data)
+        assert result['success']
+        result = self.post('/login', **user_data)
+        assert result['success']
+        files = {'public-key': (io.BytesIO(b'public'), 'key.pub'),
+                 'private-key': (io.BytesIO(b'private'), 'key'), }
+        result = self.put_files('/users', files)
+        user = User.query.first()
+        assert user.public_key_name() == 'key.pub'
+        assert user.private_key_name() == 'key'
+        assert result['success']
+
+    def test_upload_keys_invalid(self):
+        user_data = dict(email='someone@some.org', password='test', password2='test')
+        result = self.post('/users', **user_data)
+        assert result['success']
+        result = self.post('/login', **user_data)
+        assert result['success']
+        result = self.put('/users')
+        assert 'Please fill out all fields.' in result['errors']
 
 class EmailTestCase(GitTrackerTestCase):
 
@@ -230,7 +245,7 @@ class RepositoryTestCase(GitTrackerTestCase):
         assert 'git-tracker' in repr(r)
 
     def test_add_repository(self):
-        repo_data = dict(location='git://git@github.com/cantsin/dotemacs')
+        repo_data = dict(location='https://bitbucket.org/cantsin/empty-repo')
         result = self.post('/repositories', **repo_data)
         assert result['success']
 
@@ -430,6 +445,11 @@ class ActionTestCase(GitTrackerTestCase):
     def test_action_refresh_invalid(self):
         result = self.get('/actions/refresh/9999')
         assert '404' in result['error']
+
+    def test_action_dump(self):
+        result = self.app.get('/actions/dump')
+        assert result.headers[0] == ('Content-Type', 'text/csv')
+        assert b'git-tracker' in result.get_data()
 
 if __name__ == '__main__':
     unittest.main()
