@@ -11,13 +11,12 @@ from pygit2 import Tag, Commit, Repository, Keypair, GitError, \
 import re
 import os
 
+from tracker import app
+
 class GitException(Exception):
     pass
 
 class GitOperations(object):
-
-    # where we store our git repos.
-    git_repositories = 'repositories/'
 
     @staticmethod
     def git_uri_parse(git_repo):
@@ -50,13 +49,13 @@ class GitOperations(object):
 
     @staticmethod
     def get_repository_location(user, git_name):
-        return os.path.join(GitOperations.git_repositories,
+        return os.path.join(app.config['REPOSITORY_FOLDER'],
                             str(user.id),
                             git_name)
 
     @staticmethod
     def create_repository(user, git_repo):
-        from models import Repository as LocalRepository
+        from .models import Repository as LocalRepository
         try:
             git_user, git_name = GitOperations.git_uri_parse(git_repo)
             creds = GitOperations.get_credentials(git_user, user)

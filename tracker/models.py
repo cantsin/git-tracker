@@ -8,7 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from .util import slugify
 from .git import GitMixin
-from src import app
+from tracker import app
 
 db = SQLAlchemy(app)
 

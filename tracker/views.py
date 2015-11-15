@@ -8,7 +8,7 @@ from .util import get_gravatar, slugify, save_uploaded_file
 from .models import User, Tag
 from .git import GitOperations, GitException
 from .data import DataOperations
-from src import app
+from tracker import app
 
 from functools import wraps
 import io, csv

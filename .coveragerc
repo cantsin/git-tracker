@@ -1,7 +1,7 @@
 [run]
-include = app.py
-       data.py
-       git.py
-       models.py
+include = tracker/views.py
+       tracker/data.py
+       tracker/git.py
+       tracker/models.py
+       tracker/util.py
        test.py
-       util.py

@@ -2,21 +2,24 @@
 
 from flask import Flask
 
-from src import app
-from src.cron import scheduler
-from src.models import init_db
+from tracker import app
+from tracker.cron import scheduler
+from tracker.models import init_db
+
+import os
+import sys
 
 if __name__ == '__main__':
     try:
         import config
         app.secret_key = config.secret_key
     except ImportError:
-        import os
         app.secret_key = os.urandom(24)
-    import sys
+    base_dir = os.path.dirname(os.path.realpath(__file__))
     app.debug = True
-    app.config['version'] = '1.0'
-    app.config['UPLOAD_FOLDER'] = 'uploads/'
+    app.config['version'] = '2.0'
+    app.config['UPLOAD_FOLDER'] = os.path.join(base_dir, 'uploads/')
+    app.config['REPOSITORY_FOLDER'] = os.path.join(base_dir, 'repositories/')
     app.config['DATABASE'] = 'sqlite:////tmp/test.db'
     init_db()
     scheduler.start()

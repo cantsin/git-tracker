@@ -1,12 +1,11 @@
-from app import app
-
 from flask import Request
 from flask.json import loads
 from werkzeug import FileStorage
 from werkzeug.datastructures import MultiDict
 
-from .models import init_db, User, Repository, Tag, UserEmail
-from .git import GitOperations
+from tracker import app
+from tracker.models import db, init_db, User, Repository, Tag, UserEmail
+from tracker.git import GitOperations
 
 import io
 import os
@@ -18,33 +17,32 @@ from io import StringIO
 
 class GitTrackerTestCase(unittest.TestCase):
 
-    # where we store our git repos.
-    git_repositories = 'test/repositories/'
-
     def setUp(self):
-        GitOperations.git_repositories = GitTrackerTestCase.git_repositories
         with app.app_context():
             self.db_fd, location = tempfile.mkstemp()
-            app.config['DATABASE'] = location
+            app.secret_key = os.urandom(24)
             app.config['TESTING'] = True
             app.config['CSRF_ENABLED'] = False
             app.config['UPLOAD_FOLDER'] = 'test/uploads/'
-            app.secret_key = os.urandom(24)
+            app.config['REPOSITORY_FOLDER'] = 'test/repositories/'
+            app.config['DATABASE'] = location
             init_db()
             self.app = app.test_client()
         try:
-            shutil.rmtree(GitTrackerTestCase.git_repositories)
+            shutil.rmtree('test/')
         except FileNotFoundError:
             pass
-        try:
-            os.makedirs(GitTrackerTestCase.git_repositories)
-        except FileExistsError: # pragma: no cover
-            pass
+        for config_name in ['UPLOAD_FOLDER', 'REPOSITORY_FOLDER']:
+            try:
+                os.makedirs(app.config[config_name])
+            except FileExistsError: # pragma: no cover
+                pass
         # clear database.
         Repository.query.delete()
         User.query.delete()
         UserEmail.query.delete()
         Tag.query.delete()
+        db.session.commit()
         self.initialize()
 
     # helper functions.
@@ -82,7 +80,10 @@ class GitTrackerTestCase(unittest.TestCase):
     def tearDown(self):
         os.close(self.db_fd)
         os.unlink(app.config['DATABASE'])
-        shutil.rmtree(GitTrackerTestCase.git_repositories)
+        try:
+            shutil.rmtree('test/')
+        except FileNotFoundError: # pragma: no cover
+            pass
 
 class GitTestCase(GitTrackerTestCase):
 

@@ -38,4 +38,4 @@ def load_user(userid):
     return User.query.get(userid)
 
 from .models import User
-import src.views
+import tracker.views
