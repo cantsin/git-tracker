@@ -268,20 +268,18 @@ def add_tag():
 @app.route('/tags/<id>', methods=['GET'])
 @login_required
 def view_tag(id):
+    start = request.args.get('start', None)
+    end = request.args.get('end', None)
     tag = current_user.tags.filter_by(id=id).first_or_404()
-    first_updated = DataOperations.get_first_updated(tag.repositories)
-    last_updated = DataOperations.get_last_updated(tag.repositories)
-    start = int(request.args.get('start', first_updated))
-    end = int(request.args.get('end', last_updated))
-    histogram = DataOperations.histogram(tag.repositories, start, end)
+    ops = DataOperations(tag.repositories, start=start, end=end)
     result = {'repositories': [repo.id for repo in tag.repositories],
               'repository_count': tag.repositories.count(),
               'slug': tag.slug,
               'name': tag.name,
               'id': tag.id,
-              'first_updated': first_updated,
-              'last_updated': last_updated,
-              'histogram': histogram}
+              'first_updated': ops.first_updated,
+              'last_updated': ops.last_updated,
+              'histogram': ops.histogram}
     return success(result=result)
 
 @app.route('/tags/<id>', methods=['DELETE'])
@@ -294,14 +292,12 @@ def delete_tag(id):
 @app.route('/activity', methods=['GET'])
 @login_required
 def activity():
-    first_updated = DataOperations.get_first_updated(current_user.repositories)
-    last_updated = DataOperations.get_last_updated(current_user.repositories)
-    start = int(request.args.get('start', first_updated))
-    end = int(request.args.get('end', last_updated))
-    histogram = DataOperations.histogram(current_user.repositories, start, end)
-    result = {'first_updated': first_updated,
-              'last_updated': last_updated,
-              'histogram': histogram}
+    start = request.args.get('start', None)
+    end = request.args.get('end', None)
+    ops = DataOperations(current_user.repositories, start=start, end=end)
+    result = {'first_updated': ops.first_updated,
+              'last_updated': ops.last_updated,
+              'histogram': ops.histogram}
     return success(result=result)
 
 @app.route('/actions/refresh/<id>', methods=['GET'])

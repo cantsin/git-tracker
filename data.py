@@ -6,22 +6,22 @@ from sys import maxsize
 
 class DataOperations(object):
 
-    @staticmethod
-    def get_first_updated(repositories):
-        return min([repository.get_first_updated()
-                    for repository in repositories],
-                   default=maxsize)
+    def __init__(self, repositories, start=None, end=None):
+        if start:
+            self.first_updated = int(start)
+        else:
+            values = [repository.get_first_updated() for repository in repositories]
+            self.first_updated = min(values, default=maxsize)
 
-    @staticmethod
-    def get_last_updated(repositories):
-        return max([repository.get_last_updated()
-                    for repository in repositories],
-                   default=0)
+        if end:
+            self.last_updated = int(end)
+        else:
+            values = [repository.get_last_updated() for repository in repositories]
+            self.last_updated = max(values, default=0)
 
-    @staticmethod
-    def histogram(repositories, start, end):
+        # calculate histogram.
         commits = []
         for repository in repositories:
-            commits.extend(list(repository.commits_between(start, end)))
+            commits.extend(list(repository.commits_between(self.first_updated, self.last_updated)))
         commits.sort(key=attrgetter('commit_time'))
-        return GitMixin.group_by(commits)
+        self.histogram = GitMixin.group_by(commits)
