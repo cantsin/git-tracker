@@ -29,6 +29,8 @@ class GitOperations(object):
         # obtain the repository name.
         results = stripped.split('/')
         repository_name = results[-1]
+        if not '.git' in repository_name:
+            repository_name += '.git'
         if ':' in repository_name:
             # did not work. try again.
             results = stripped.split(':')

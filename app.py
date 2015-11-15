@@ -147,7 +147,8 @@ def delete_user_email(id):
 def add_repository():
     try:
         location = request.json['location']
-        if current_user.repositories.filter_by(location=location).scalar():
+        _, name = GitOperations.git_uri_parse(location)
+        if current_user.repositories.filter_by(name=name).scalar():
             return failure('Given repository already exists.')
         repository = GitOperations.create_repository(current_user, location)
         repository.save()
@@ -187,7 +188,7 @@ def view_repository(id):
     sha1 = repository.get_sha1_of_branch('master')
     tags = current_user.tags.order_by('name').all()
     result= {'kind': repository.kind,
-             'name': repository.get_name(),
+             'name': repository.name,
              'first_updated': first_updated,
              'last_updated': last_updated,
              'histogram': histogram,
@@ -293,7 +294,7 @@ def dump_repositories():
     fake_csv = csv.writer(si)
     for repository in current_user.repositories.all():
         tags = ','.join([tag.name for tag in repository.tags])
-        fake_csv.writerow([repository.get_name(), repository.location, repository.kind, tags])
+        fake_csv.writerow([repository.name, repository.location, repository.kind, tags])
     response = make_response(si.getvalue())
     response.headers["Content-Disposition"] = "attachment; filename=repositories.csv"
     response.headers["Content-Type"] = "text/csv"
