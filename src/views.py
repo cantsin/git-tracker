@@ -1,53 +1,17 @@
 #!/usr/bin/env python
 # pylint: disable=C0103,C0111,W0142
 
-# ugh. work around an internal bug with flask and python3.4
-import pkgutil
-old_loader = pkgutil.get_loader
-def override_loader(*args, **kwargs):
-    try:
-        return old_loader(*args, **kwargs)
-    except AttributeError: # pragma: no cover
-        return None
-pkgutil.get_loader = override_loader
-
 from flask import Flask, request, jsonify, make_response
-from flask.ext.login import LoginManager, login_required, login_user, \
-    logout_user, current_user
-from flask.ext.cors import CORS
-from werkzeug.exceptions import HTTPException, default_exceptions
+from flask.ext.login import login_required, login_user, logout_user, current_user
 
-from util import get_gravatar, slugify, save_uploaded_file
-from models import init_db, User, Tag
-from git import GitOperations, GitException
-from data import DataOperations
-from cron import scheduler
+from .util import get_gravatar, slugify, save_uploaded_file
+from .models import User, Tag
+from .git import GitOperations, GitException
+from .data import DataOperations
+from src import app
 
 from functools import wraps
 import io, csv
-import os
-
-UPLOAD_FOLDER = 'uploads'
-
-# prevent werkzeug from emitting HTML errors.
-def make_json_app(import_name, **kwargs):
-    def make_json_error(ex):
-        response = jsonify(success=False, error=str(ex))
-        response.status_code = (ex.code if isinstance(ex, HTTPException) else 500)
-        return response
-
-    app = Flask(import_name, **kwargs)
-    CORS(app)
-
-    for code in default_exceptions.keys():
-        app.error_handler_spec[None][code] = make_json_error
-
-    return app
-
-app = make_json_app('git-tracker')
-
-login_manager = LoginManager()
-login_manager.init_app(app)
 
 def success(result=None):
     if not result:
@@ -66,10 +30,6 @@ def jsoncheck(func):
         except KeyError as e:
             return failure(str(''.join(e.args)) + ' not found')
     return wrapper
-
-@login_manager.user_loader
-def load_user(userid):
-    return User.query.get(userid)
 
 @app.route('/login', methods=['POST'])
 @jsoncheck
@@ -110,13 +70,14 @@ def add_user():
 @login_required
 def update_keys():
     try:
+        upload = app.config['UPLOAD_FOLDER']
         public_key = request.files['public-key']
         if public_key.filename:
-            current_user.ssh_public_key_path = save_uploaded_file(current_user, public_key, UPLOAD_FOLDER)
+            current_user.ssh_public_key_path = save_uploaded_file(current_user, public_key, upload)
             current_user.save()
         private_key = request.files['private-key']
         if private_key.filename:
-            current_user.ssh_private_key_path = save_uploaded_file(current_user, private_key, UPLOAD_FOLDER)
+            current_user.ssh_private_key_path = save_uploaded_file(current_user, private_key, upload)
             current_user.save()
         return success()
     except KeyError:
@@ -318,8 +279,8 @@ def dump_repositories():
         tags = ','.join([tag.name for tag in repository.tags])
         fake_csv.writerow([repository.name, repository.location, repository.kind, tags])
     response = make_response(si.getvalue())
-    response.headers["Content-Disposition"] = "attachment; filename=repositories.csv"
-    response.headers["Content-Type"] = "text/csv"
+    response.headers['Content-Disposition'] = 'attachment; filename=repositories.csv'
+    response.headers['Content-Type'] = 'text/csv'
     return response
 
 @app.route('/actions/load', methods=['POST'])
@@ -330,7 +291,7 @@ def load_repositories():
     csv_file = request.files['bulk-upload']
     if not csv_file.filename:
         return failure('No file uploaded.')
-    csv_path = save_uploaded_file(current_user, csv_file, UPLOAD_FOLDER)
+    csv_path = save_uploaded_file(current_user, csv_file, app.config['UPLOAD_FOLDER'])
     with open(csv_path, 'r+') as f:
         for line in csv.reader(f):
             if not (isinstance(line, list) and len(line) == 4):
@@ -354,22 +315,3 @@ def load_repositories():
                 if repository.tags.count(tag) == 0:
                     repository.tags.append(tag)
     return success()
-
-if __name__ == '__main__': # pragma: no cover
-    try:
-        import config
-        app.secret_key = config.secret_key
-    except ImportError:
-        import os
-        app.secret_key = os.urandom(24)
-    import sys
-    app.debug = True
-    app.config['version'] = "1.0"
-    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-    app.config['DATABASE'] = 'sqlite:////tmp/test.db'
-    init_db()
-    scheduler.start()
-    port = 5000
-    if len(sys.argv) > 1:
-        port = int(sys.argv[1])
-    app.run(host='0.0.0.0', port=port)

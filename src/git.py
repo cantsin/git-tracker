@@ -21,7 +21,7 @@ class GitOperations(object):
 
     @staticmethod
     def git_uri_parse(git_repo):
-        """Parse out git user/repository name from the git uri."""
+        '''Parse out git user/repository name from the git uri.'''
         # strip the protocol if applicable
         stripped = git_repo
         if '://' in git_repo:

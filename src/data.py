@@ -1,8 +1,9 @@
 # pylint: disable=C0103,C0111
 
 from operator import attrgetter
-from git import GitMixin
 from sys import maxsize
+
+from .git import GitMixin
 
 class DataOperations(object):
 

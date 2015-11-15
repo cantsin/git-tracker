@@ -5,8 +5,8 @@ from flask.json import loads
 from werkzeug import FileStorage
 from werkzeug.datastructures import MultiDict
 
-from models import init_db, User, Repository, Tag, UserEmail
-from git import GitOperations
+from .models import init_db, User, Repository, Tag, UserEmail
+from .git import GitOperations
 
 import io
 import os
@@ -504,7 +504,7 @@ class ActionTestCase(GitTrackerTestCase):
     def test_action_load_invalid(self):
         files = {'bulk-upload': (io.BytesIO(b'invalid'), '')}
         result = self.post_files('/actions/load', files)
-        assert "No file uploaded." in result['errors']
+        assert 'No file uploaded.' in result['errors']
 
     def test_action_load_invalid2(self):
         files = {'test': (io.BytesIO(b'invalid'), 'invalid')}

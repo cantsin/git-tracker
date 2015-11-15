@@ -6,10 +6,10 @@ from flask.ext.login import UserMixin
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from util import slugify
-from git import GitMixin
+from .util import slugify
+from .git import GitMixin
+from src import app
 
-app = Flask("git-tracker")
 db = SQLAlchemy(app)
 
 def init_db():
@@ -72,7 +72,7 @@ class UserEmail(SessionMixin, db.Model): #pylint: disable-msg=R0903
     email = db.Column(db.String(255), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User', backref=db.backref('emails',
-                                                      cascade="all,delete",
+                                                      cascade='all,delete',
                                                       lazy='dynamic'))
     created_at = db.Column(db.DateTime(), nullable=False)
     updated_at = db.Column(db.DateTime(), nullable=False)
@@ -91,19 +91,19 @@ tags = db.Table('tags',
                 db.Column('repository_id', db.Integer, db.ForeignKey('repository.id')))
 
 class Repository(SessionMixin, GitMixin, db.Model): #pylint: disable-msg=R0904
-    LOCAL = "local"
-    GITHUB = "github"
-    BITBUCKET = "bitbucket"
+    LOCAL = 'local'
+    GITHUB = 'github'
+    BITBUCKET = 'bitbucket'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User',
                            backref=db.backref('repositories',
-                                              cascade="all,delete",
+                                              cascade='all,delete',
                                               lazy='dynamic'))
     tags = db.relationship('Tag',
                            secondary=tags,
                            backref=db.backref('repositories',
-                                              cascade="all,delete",
+                                              cascade='all,delete',
                                               lazy='dynamic'))
     git_user = db.Column(db.String(255), nullable=False)
     name = db.Column(db.String(255), nullable=False)
@@ -151,7 +151,7 @@ class Tag(SessionMixin, db.Model): #pylint: disable-msg=R0903
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User',
                            backref=db.backref('tags',
-                                              cascade="all,delete",
+                                              cascade='all,delete',
                                               lazy='dynamic'))
     name = db.Column(db.String(255), nullable=False)
     slug = db.Column(db.String(255), nullable=False)
