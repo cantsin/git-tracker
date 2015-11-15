@@ -33,8 +33,6 @@ class GitOperations(object):
             # did not work. try again.
             results = stripped.split(':')
             repository_name = results[-1]
-        # if not '.git' in repository_name:
-        #     repository_name += '.git'
         # obtain the git user (default is 'git')
         git_username = 'git'
         if '@' in results[0]:
@@ -66,7 +64,7 @@ class GitOperations(object):
             return repo
         except GitError as e:
             raise GitException(e.args)
-        except ValueError as e:
+        except ValueError as e: # pragma: no cover
             raise GitException(e.args)
 
 class GitMixin(object):
@@ -97,7 +95,7 @@ class GitMixin(object):
             return ref.get_object().commit_time
         if isinstance(ref, Commit):
             return ref.commit_time
-        raise GitException('invalid reference: commit time could not be found.')
+        raise GitException('invalid reference: commit time could not be found.') # pragma: no cover
 
     def get_latest_refs(self, count=None):
         info = self.filter_references(GitMixin.tag_or_remote_regex)

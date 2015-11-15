@@ -29,6 +29,7 @@ class GitTrackerTestCase(unittest.TestCase):
             app.config['DATABASE'] = location
             app.config['TESTING'] = True
             app.config['CSRF_ENABLED'] = False
+            app.config['UPLOAD_FOLDER'] = 'test/uploads/'
             app.secret_key = os.urandom(24)
             self.app = app.test_client()
         try:
@@ -55,18 +56,22 @@ class GitTrackerTestCase(unittest.TestCase):
         result = self.app.get(where, data=data, query_string=query, content_type='application/json')
         return loads(result.get_data())
 
-    def put_files(self, where, files):
-        result = self.app.put(where, data=files)
-        return loads(result.get_data())
-
     def put(self, where, **kwargs):
         data = dumps(kwargs)
         result = self.app.put(where, data=data, content_type='application/json')
         return loads(result.get_data())
 
+    def put_files(self, where, files):
+        result = self.app.put(where, data=files)
+        return loads(result.get_data())
+
     def post(self, where, **kwargs):
         data = dumps(kwargs)
         result = self.app.post(where, data=data, content_type='application/json')
+        return loads(result.get_data())
+
+    def post_files(self, where, files):
+        result = self.app.post(where, data=files)
         return loads(result.get_data())
 
     def delete(self, where, **kwargs):
@@ -165,10 +170,10 @@ class UserTestCase(GitTrackerTestCase):
         files = {'public-key': (io.BytesIO(b'public'), 'key.pub'),
                  'private-key': (io.BytesIO(b'private'), 'key'), }
         result = self.put_files('/users', files)
+        assert result['success']
         user = User.query.first()
         assert user.public_key_name() == 'key.pub'
         assert user.private_key_name() == 'key'
-        assert result['success']
 
     def test_upload_keys_invalid(self):
         user_data = dict(email='someone@some.org', password='test', password2='test')
@@ -236,7 +241,7 @@ class RepositoryTestCase(GitTrackerTestCase):
         # create repository (email must be a valid author of this repository)
         result = self.get('/repositories/1')
         if result['success'] != True:
-            repo_data = dict(location='git://git@github.com/cantsin/git-tracker')
+            repo_data = dict(location='git://git@github.com/cantsin/git-tracker.git')
             result = self.post('/repositories', **repo_data)
             assert result['success']
 
@@ -450,6 +455,46 @@ class ActionTestCase(GitTrackerTestCase):
         result = self.app.get('/actions/dump')
         assert result.headers[0] == ('Content-Type', 'text/csv')
         assert b'git-tracker' in result.get_data()
+
+    def test_action_load(self):
+        csv_data = b'git-tracker,git://git@github.com/cantsin/git-tracker,github,'
+        files = {'bulk-upload': (io.BytesIO(csv_data), 'test.csv') }
+        result = self.post_files('/actions/load', files)
+        assert result['success']
+
+    def test_action_load_with_tags(self):
+        u = User.query.first()
+        Tag(u, 'metrics').save()
+        Tag(u, 'analytics').save()
+        csv_data = b'git-tracker,git://git@github.com/cantsin/git-tracker,github,"metrics,analytics"'
+        files = {'bulk-upload': (io.BytesIO(csv_data), 'test.csv') }
+        result = self.post_files('/actions/load', files)
+        assert result['success']
+
+    def test_action_load_repos_with_tags(self):
+        u = User.query.first()
+        Tag(u, 'metrics').save()
+        Tag(u, 'analytics').save()
+        csv_data = b'git-tracker,git://git@github.com/cantsin/git-tracker,github,"metrics,analytics"\n' + \
+                   b'empty,https://bitbucket.org/cantsin/empty-repo,bitbucket,'
+        files = {'bulk-upload': (io.BytesIO(csv_data), 'test.csv') }
+        result = self.post_files('/actions/load', files)
+        assert result['success']
+
+    def test_action_load_wrong_csv(self):
+        files = {'bulk-upload': (io.BytesIO(b'what,the,hey'), 'test.csv') }
+        result = self.post_files('/actions/load', files)
+        assert 'Invalid format.' in result['errors']
+
+    def test_action_load_invalid(self):
+        files = {'bulk-upload': (io.BytesIO(b'invalid'), '')}
+        result = self.post_files('/actions/load', files)
+        assert "No file uploaded." in result['errors']
+
+    def test_action_load_invalid2(self):
+        files = {'test': (io.BytesIO(b'invalid'), 'invalid')}
+        result = self.post_files('/actions/load', files)
+        assert "'bulk-upload' parameter not found." in result['errors']
 
 if __name__ == '__main__':
     unittest.main()

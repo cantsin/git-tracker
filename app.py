@@ -302,30 +302,34 @@ def dump_repositories():
 @app.route('/actions/load', methods=['POST'])
 @login_required
 def load_repositories():
+    if 'bulk-upload' not in request.files:
+        return failure("'bulk-upload' parameter not found.")
     csv_file = request.files['bulk-upload']
     if not csv_file.filename:
         return failure('No file uploaded.')
     csv_path = save_uploaded_file(current_user, csv_file, UPLOAD_FOLDER)
-    fake_csv = csv.reader(open(csv_path, 'r+'))
-    for line in fake_csv:
-        [_, location, _, tags] = line
-        # create the repository if not already extant.
-        has_repository = current_user.repositories.filter_by(location=location)
-        if not has_repository.all():
-            repository = GitOperations.create_repository(current_user, location)
-            repository.save()
-            repository.update_commit_info()
-        else:
-            repository = has_repository.first()
-        # apply tags if not already extant.
-        for tag_name in tags.split(','):
-            tag_name = tag_name.strip()
-            if not tag_name:
-                continue
-            has_tag = current_user.tags.filter_by(name=tag_name)
-            tag = has_tag.first() if has_tag.all() else Tag(current_user, tag_name).save()
-            if repository.tags.count(tag) == 0:
-                repository.tags.append(tag)
+    with open(csv_path, 'r+') as f:
+        for line in csv.reader(f):
+            if not (isinstance(line, list) and len(line) == 4):
+                return failure('Invalid format.')
+            [_, location, _, tags] = line
+            # create the repository if not already extant.
+            has_repository = current_user.repositories.filter_by(location=location)
+            if not has_repository.all():
+                repository = GitOperations.create_repository(current_user, location)
+                repository.save()
+                repository.update_commit_info()
+            else:
+                repository = has_repository.first()
+            # apply tags if not already extant.
+            for tag_name in tags.split(','):
+                tag_name = tag_name.strip()
+                if not tag_name:
+                    continue
+                has_tag = current_user.tags.filter_by(name=tag_name)
+                tag = has_tag.first() if has_tag.all() else Tag(current_user, tag_name).save()
+                if repository.tags.count(tag) == 0:
+                    repository.tags.append(tag)
     return success()
 
 if __name__ == '__main__': # pragma: no cover
