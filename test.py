@@ -196,6 +196,11 @@ class EmailTestCase(GitTrackerTestCase):
             result = self.post('/login', **user_data)
             assert result['success']
 
+    def test_get_emails(self):
+        result = self.get('/emails')
+        assert result['success']
+        assert len(result['data']) == 1
+
     def test_email_repr(self):
         u = User.query.first()
         e = u.emails.first()
@@ -244,6 +249,11 @@ class RepositoryTestCase(GitTrackerTestCase):
             repo_data = dict(location='git://git@github.com/cantsin/git-tracker.git')
             result = self.post('/repositories', **repo_data)
             assert result['success']
+
+    def test_get_repositories(self):
+        result = self.get('/repositories')
+        assert result['success']
+        assert len(result['data']) == 1
 
     def test_repository_repr(self):
         r = Repository.query.first()
@@ -331,6 +341,11 @@ class TagTestCase(GitTrackerTestCase):
         tag_data = dict(name='Some tag')
         result = self.post('/tags', **tag_data)
         assert result['success']
+
+    def test_get_tags(self):
+        result = self.get('/tags')
+        assert result['success']
+        assert len(result['data']) == 1
 
     def test_tag_repr(self):
         t = Tag.query.first()

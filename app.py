@@ -122,6 +122,14 @@ def update_keys():
     except KeyError:
         return failure('Please fill out all fields.')
 
+@app.route('/emails', methods=['GET'])
+@login_required
+def get_emails():
+    data = [dict(id=e.id,
+                 email=e.email)
+            for e in current_user.emails.all()]
+    return success(result=data)
+
 @app.route('/emails', methods=['POST'])
 @jsoncheck
 @login_required
@@ -140,6 +148,15 @@ def delete_user_email(id):
     ue = current_user.emails.filter_by(id=id).first_or_404()
     ue.delete()
     return success()
+
+@app.route('/repositories', methods=['GET'])
+@login_required
+def get_repositories():
+    data = [dict(id=r.id,
+                 name=r.name,
+                 kind=r.kind)
+            for r in current_user.repositories.all()]
+    return success(result=data)
 
 @app.route('/repositories', methods=['POST'])
 @jsoncheck
@@ -224,6 +241,15 @@ def delete_repository(id):
     repository.clear_tags()
     repository.delete()
     return success()
+
+@app.route('/tags', methods=['GET'])
+@login_required
+def get_tags():
+    data = [dict(id=t.id,
+                 name=t.name,
+                 slug=t.slug)
+            for t in current_user.tags.all()]
+    return success(result=data)
 
 @app.route('/tags', methods=['POST'])
 @jsoncheck
