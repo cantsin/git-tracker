@@ -12,8 +12,7 @@ from git import GitMixin
 app = Flask("git-tracker")
 db = SQLAlchemy(app)
 
-def init_db(location=None):
-    app.config['DATABASE'] = location if location else 'sqlite:////tmp/test.db'
+def init_db():
     # create the tables if it doesn't already exist.
     db.create_all()
     db.session.commit()

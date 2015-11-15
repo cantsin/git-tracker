@@ -25,12 +25,12 @@ class GitTrackerTestCase(unittest.TestCase):
         GitOperations.git_repositories = GitTrackerTestCase.git_repositories
         with app.app_context():
             self.db_fd, location = tempfile.mkstemp()
-            init_db(location)
             app.config['DATABASE'] = location
             app.config['TESTING'] = True
             app.config['CSRF_ENABLED'] = False
             app.config['UPLOAD_FOLDER'] = 'test/uploads/'
             app.secret_key = os.urandom(24)
+            init_db()
             self.app = app.test_client()
         try:
             shutil.rmtree(GitTrackerTestCase.git_repositories)

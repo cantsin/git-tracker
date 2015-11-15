@@ -366,6 +366,7 @@ if __name__ == '__main__': # pragma: no cover
     app.debug = True
     app.config['version'] = "1.0"
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+    app.config['DATABASE'] = 'sqlite:////tmp/test.db'
     init_db()
     scheduler.start()
     port = 5000
