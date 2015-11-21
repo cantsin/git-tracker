@@ -16,6 +16,7 @@ def init_db():
     # create the tables if it doesn't already exist.
     db.create_all()
     db.session.commit()
+    print('Database initialized.')
 
 class SessionMixin(object):
     def save(self):

@@ -20,7 +20,7 @@ if __name__ == '__main__':
     app.config['version'] = '2.0'
     app.config['UPLOAD_FOLDER'] = os.path.join(base_dir, 'uploads/')
     app.config['REPOSITORY_FOLDER'] = os.path.join(base_dir, 'repositories/')
-    app.config['DATABASE'] = 'sqlite:////tmp/test.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
     init_db()
     scheduler.start()
     port = 5000
