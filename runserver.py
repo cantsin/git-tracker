@@ -22,6 +22,7 @@ if __name__ == '__main__':
     app.config['REPOSITORY_FOLDER'] = os.path.join(base_dir, 'repositories/')
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
     init_db()
+    print('Database initialized.')
     scheduler.start()
     port = 5000
     if len(sys.argv) > 1:

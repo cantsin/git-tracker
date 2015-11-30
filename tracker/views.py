@@ -18,8 +18,10 @@ def success(result=None):
         return jsonify(success=True)
     return jsonify(success=True, data=result)
 
-def failure(error):
-    return jsonify(success=False, errors=[error])
+def failure(error, code=None):
+    response = jsonify(success=False, errors=[error])
+    response.status_code = code or 422
+    return response
 
 def jsoncheck(func):
     @wraps(func)
@@ -28,7 +30,7 @@ def jsoncheck(func):
             r = func(*args, **kwargs)
             return r
         except KeyError as e:
-            return failure(str(''.join(e.args)) + ' not found')
+            return failure(str(''.join(e.args)) + ' not found', code=400)
     return wrapper
 
 @app.route('/login', methods=['POST'])
